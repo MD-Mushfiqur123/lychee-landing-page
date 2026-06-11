@@ -147,4 +147,138 @@ func TestValidateJSONSchema(t *testing.T) {
 			t.Errorf("unexpected error: %v", err)
 		}
 	})
+
+	t.Run("reference resolutions ($ref)", func(t *testing.T) {
+		schema := json.RawMessage(`{
+			"type": "object",
+			"properties": {
+				"billing_address": {"$ref": "#/$defs/address"},
+				"shipping_address": {"$ref": "#/$defs/address"}
+			},
+			"$defs": {
+				"address": {
+					"type": "object",
+					"properties": {
+						"city": {"type": "string"},
+						"zip": {"type": "integer"}
+					},
+					"required": ["city"]
+				}
+			}
+		}`)
+
+		// Valid matching ref
+		err := ValidateJSONSchema(`{"billing_address": {"city": "New York", "zip": 10001}}`, schema)
+		if err != nil {
+			t.Errorf("expected reference validation to pass, got %v", err)
+		}
+
+		// Invalid reference sub-property type
+		err = ValidateJSONSchema(`{"billing_address": {"city": "New York", "zip": "not-a-zip"}}`, schema)
+		if err == nil {
+			t.Errorf("expected zip type mismatch to fail")
+		} else if !strings.Contains(err.Error(), "expected integer") {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("logical operators (allOf, anyOf, oneOf)", func(t *testing.T) {
+		schemaAllOf := json.RawMessage(`{
+			"allOf": [
+				{"type": "object", "properties": {"first": {"type": "string"}}},
+				{"type": "object", "properties": {"second": {"type": "integer"}}}
+			]
+		}`)
+
+		// Valid allOf
+		err := ValidateJSONSchema(`{"first": "hello", "second": 42}`, schemaAllOf)
+		if err != nil {
+			t.Errorf("expected allOf to pass, got %v", err)
+		}
+
+		// Invalid allOf (one of the schemas fails)
+		err = ValidateJSONSchema(`{"first": 123, "second": 42}`, schemaAllOf)
+		if err == nil {
+			t.Errorf("expected allOf mismatch to fail")
+		}
+
+		schemaAnyOf := json.RawMessage(`{
+			"anyOf": [
+				{"type": "string"},
+				{"type": "integer"}
+			]
+		}`)
+
+		// Valid anyOf
+		err = ValidateJSONSchema(`100`, schemaAnyOf)
+		if err != nil {
+			t.Errorf("expected anyOf integer to pass, got %v", err)
+		}
+
+		// Invalid anyOf
+		err = ValidateJSONSchema(`true`, schemaAnyOf)
+		if err == nil {
+			t.Errorf("expected anyOf mismatch to fail")
+		}
+
+		schemaOneOf := json.RawMessage(`{
+			"oneOf": [
+				{"type": "integer", "minimum": 10},
+				{"type": "integer", "maximum": 20}
+			]
+		}`)
+
+		// Matches exactly one (value 5: matches maximum 20, but not minimum 10)
+		err = ValidateJSONSchema(`5`, schemaOneOf)
+		if err != nil {
+			t.Errorf("expected oneOf with single match to pass, got %v", err)
+		}
+
+		// Matches both (value 15: matches both minimum 10 and maximum 20) -> should fail oneOf
+		err = ValidateJSONSchema(`15`, schemaOneOf)
+		if err == nil {
+			t.Errorf("expected oneOf with double matches to fail")
+		}
+	})
+
+	t.Run("strict validation constraints", func(t *testing.T) {
+		schema := json.RawMessage(`{
+			"type": "object",
+			"properties": {
+				"code": {"type": "string", "minLength": 3, "maxLength": 5, "pattern": "^[A-Z]+$"},
+				"val": {"type": "number", "minimum": 10.5, "maximum": 20.5}
+			},
+			"additionalProperties": false
+		}`)
+
+		// Valid input
+		err := ValidateJSONSchema(`{"code": "ABC", "val": 15.2}`, schema)
+		if err != nil {
+			t.Errorf("expected valid constraints to pass, got %v", err)
+		}
+
+		// minLength fail
+		err = ValidateJSONSchema(`{"code": "AB", "val": 15.2}`, schema)
+		if err == nil {
+			t.Errorf("expected minLength fail to error")
+		}
+
+		// pattern regex fail
+		err = ValidateJSONSchema(`{"code": "abc", "val": 15.2}`, schema)
+		if err == nil {
+			t.Errorf("expected pattern match fail to error")
+		}
+
+		// maximum fail
+		err = ValidateJSONSchema(`{"code": "ABC", "val": 25.0}`, schema)
+		if err == nil {
+			t.Errorf("expected maximum bounds check to error")
+		}
+
+		// additionalProperties fail
+		err = ValidateJSONSchema(`{"code": "ABC", "val": 15.2, "extra": true}`, schema)
+		if err == nil {
+			t.Errorf("expected additionalProperties constraint to error")
+		}
+	})
 }
