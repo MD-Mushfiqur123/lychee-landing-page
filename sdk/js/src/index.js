@@ -241,7 +241,6 @@ class Lychee {
     return this._post('/api/show', { model });
   }
 
-  /** Check if the Lychee server is running. */
   async isRunning() {
     try {
       await this._get('/');
@@ -252,4 +251,4 @@ class Lychee {
   }
 }
 
-module.exports = { Lychee, LycheeError };
+export { Lychee, LycheeError };

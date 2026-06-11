@@ -1,47 +1,93 @@
-export interface ModelDetails {
-  parent_model?: string;
-  format?: string;
-  family?: string;
-  families?: string[];
-  parameter_size?: string;
-  quantization_level?: string;
+export interface Message {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
 }
 
-export interface ModelResponse {
-  name: string;
-  modified_at?: string;
-  size?: number;
-  digest?: string;
-  details?: ModelDetails;
+export interface ComposeCondition {
+  contains?: string;
+  not_contains?: string;
+  min_length?: number;
+  max_length?: number;
+  always?: boolean;
+}
+
+export interface ComposeStep {
+  model: string;
+  prompt: string;
+  options?: Record<string, any>;
+  timeout_sec?: number;
+  fallback_model?: string;
+  parallel?: ComposeStep[];
+  condition?: ComposeCondition;
+  skip_on_error?: boolean;
+}
+
+export interface ComposeRequest {
+  input: string;
+  steps: ComposeStep[];
+  stream?: boolean;
+}
+
+export class LycheeError extends Error {
+  statusCode?: number;
+  constructor(message: string, statusCode?: number);
 }
 
 export class Lychee {
-  constructor(config?: { host?: string });
-  host: string;
-  generate(options: any): Promise<any>;
-  chat(options: any): Promise<any>;
-  list(): Promise<{ models: ModelResponse[] }>;
-  show(options: { model: string }): Promise<any>;
-  create(options: any): Promise<any>;
-  delete(model: string): Promise<any>;
-  pull(options: any): Promise<any>;
-  push(options: any): Promise<any>;
-  embed(options: any): Promise<any>;
-  ps(): Promise<any>;
+  constructor(baseUrl?: string);
+  baseUrl: string;
+
+  chat(
+    model: string,
+    message: string,
+    options?: {
+      system?: string;
+      history?: Message[];
+      stream?: boolean;
+      inferenceOptions?: Record<string, any>;
+    }
+  ): Promise<any> | AsyncGenerator<any, void, unknown>;
+
+  generate(
+    model: string,
+    prompt: string,
+    options?: {
+      stream?: boolean;
+      inferenceOptions?: Record<string, any>;
+    }
+  ): Promise<any> | AsyncGenerator<any, void, unknown>;
+
+  compose(params: ComposeRequest): Promise<any> | AsyncGenerator<any, void, unknown>;
+
+  messages(
+    model: string,
+    messages: Message[],
+    options?: {
+      maxTokens?: number;
+      system?: string;
+      stream?: boolean;
+    }
+  ): Promise<any> | AsyncGenerator<any, void, unknown>;
+
+  chatCompletions(
+    model: string,
+    messages: any[],
+    options?: {
+      stream?: boolean;
+      [key: string]: any;
+    }
+  ): Promise<any> | AsyncGenerator<any, void, unknown>;
+
+  listModels(): Promise<any[]>;
+
+  pull(
+    model: string,
+    options?: {
+      stream?: boolean;
+    }
+  ): Promise<any> | AsyncGenerator<any, void, unknown>;
+
+  show(model: string): Promise<any>;
+
+  isRunning(): Promise<boolean>;
 }
-
-declare const defaultClient: {
-  Lychee: typeof Lychee;
-  generate: (options: any) => Promise<any>;
-  chat: (options: any) => Promise<any>;
-  list: () => Promise<{ models: ModelResponse[] }>;
-  show: (options: { model: string }) => Promise<any>;
-  create: (options: any) => Promise<any>;
-  delete: (model: string) => Promise<any>;
-  pull: (options: any) => Promise<any>;
-  push: (options: any) => Promise<any>;
-  embed: (options: any) => Promise<any>;
-  ps: () => Promise<any>;
-};
-
-export default defaultClient;
