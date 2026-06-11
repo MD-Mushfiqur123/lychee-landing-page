@@ -5,11 +5,17 @@
 Lychee is a state-of-the-art local LLM runtime, designed to be the ultimate drop-in upgrade for your AI development workflow. While keeping full compatibility with the existing open-model ecosystem, Lychee extends local inference with enterprise-grade capabilities.
 
 <p align="center">
-  <a href="https://github.com/lychee/lychee">
-    <img src="https://img.shields.io/github/license/lychee/lychee?style=flat-square&color=A51C30" alt="License"/>
+  <a href="https://github.com/MD-Mushfiqur123/lychee">
+    <img src="https://img.shields.io/github/license/MD-Mushfiqur123/lychee?style=flat-square&color=A51C30" alt="License"/>
   </a>
-  <a href="https://github.com/lychee/lychee/pkgs/container/lychee">
-    <img src="https://img.shields.io/badge/docker-ghcr.io-blue?style=flat-square" alt="GHCR Docker Image"/>
+  <a href="https://github.com/MD-Mushfiqur123/lychee/stargazers">
+    <img src="https://img.shields.io/github/stars/MD-Mushfiqur123/lychee?style=flat-square&color=yellow" alt="GitHub Stars"/>
+  </a>
+  <a href="https://github.com/MD-Mushfiqur123/lychee/releases">
+    <img src="https://img.shields.io/github/v/release/MD-Mushfiqur123/lychee?style=flat-square&color=green&label=release" alt="Latest Release"/>
+  </a>
+  <a href="https://github.com/MD-Mushfiqur123/lychee/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT License"/>
   </a>
 </p>
 
@@ -57,7 +63,7 @@ Lychee acts as a local proxy that translates industry-standard APIs into optimiz
 
 ### Build from Source
 ```bash
-git clone https://github.com/lychee/lychee.git
+git clone https://github.com/MD-Mushfiqur123/lychee.git
 cd lychee
 go build -o lychee .
 sudo mv lychee /usr/local/bin/
@@ -67,11 +73,11 @@ sudo mv lychee /usr/local/bin/
 The installation scripts below retrieve pre-built binaries. Note: These require a published release.
 * **macOS & Linux:**
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/lychee/lychee/main/scripts/install.sh | sh
+  curl -fsSL https://raw.githubusercontent.com/MD-Mushfiqur123/lychee/main/scripts/install.sh | sh
   ```
 * **Windows (PowerShell):**
   ```powershell
-  irm https://raw.githubusercontent.com/lychee/lychee/main/scripts/install.ps1 | iex
+  irm https://raw.githubusercontent.com/MD-Mushfiqur123/lychee/main/scripts/install.ps1 | iex
   ```
 
 ### Docker (Coming Soon)
