@@ -2,6 +2,7 @@ package server
 
 import (
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -13,7 +14,8 @@ import (
 func (s *Server) registerDashboardRoutes(r *gin.Engine) {
 	subFS, err := fs.Sub(webui.FS, "dist")
 	if err != nil {
-		panic(err)
+		slog.Error("failed to initialize embedded web dashboard assets", "error", err)
+		return
 	}
 
 	fileServer := http.FileServer(http.FS(subFS))
