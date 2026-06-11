@@ -288,6 +288,94 @@ class Lychee:
     # Convenience helpers
     # ──────────────────────────────────────────────────────────────────────────
 
+    def _delete(self, path: str) -> Any:
+        url = f"{self.base_url}{path}"
+        req = request.Request(url, method="DELETE")
+        try:
+            resp = request.urlopen(req)
+            raw = resp.read().decode("utf-8")
+            if not raw:
+                return {}
+            return json.loads(raw)
+        except urllib_error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace")
+            raise LycheeError(f"HTTP {e.code}: {body}") from e
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Structured Output API
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def structured(
+        self,
+        model: str,
+        prompt: str,
+        schema: dict | list | str | None,
+        *,
+        max_retries: int = 3,
+        options: dict[str, Any] | None = None,
+    ) -> dict:
+        """
+        Generate schema-conforming JSON with auto-retry on validation failure.
+        """
+        payload: dict[str, Any] = {
+            "model": model,
+            "prompt": prompt,
+            "schema": schema,
+            "max_retries": max_retries,
+        }
+        if options:
+            payload["options"] = options
+        return self._post("/api/structured", payload)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Conversation Memory API
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def list_conversations(self) -> list[dict]:
+        """List summaries of all stored conversations."""
+        return self._get("/api/conversations")
+
+    def get_conversation(self, conversation_id: str) -> dict:
+        """Retrieve a specific conversation history."""
+        return self._get(f"/api/conversations/{conversation_id}")
+
+    def delete_conversation(self, conversation_id: str) -> dict:
+        """Delete a conversation history."""
+        return self._delete(f"/api/conversations/{conversation_id}")
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Model Router API
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def create_route(
+        self,
+        name: str,
+        endpoints: list[dict[str, str]],
+        strategy: str = "round_robin",
+    ) -> dict:
+        """
+        Define or update a virtual model route.
+        
+        Args:
+            name: The virtual model name.
+            endpoints: A list of dicts with 'host' and optional 'model'.
+            strategy: 'round_robin', 'random', or 'least_loaded'.
+        """
+        payload: dict[str, Any] = {
+            "name": name,
+            "endpoints": endpoints,
+            "strategy": strategy,
+        }
+        return self._post("/api/routes", payload)
+
+    def list_routes(self) -> list[dict]:
+        """List all registered virtual model routes."""
+        return self._get("/api/routes")
+
+    def delete_route(self, name: str) -> dict:
+        """Delete a virtual model route."""
+        return self._delete(f"/api/routes/{name}")
+
     def is_running(self) -> bool:
         """Check if the Lychee server is running."""
         try:
@@ -298,3 +386,4 @@ class Lychee:
 
     def __repr__(self) -> str:
         return f"Lychee(base_url={self.base_url!r})"
+

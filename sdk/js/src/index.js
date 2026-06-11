@@ -241,6 +241,69 @@ class Lychee {
     return this._post('/api/show', { model });
   }
 
+  async _delete(path) {
+    const url = `${this.baseUrl}${path}`;
+    const response = await fetch(url, { method: 'DELETE' });
+    if (!response.ok) {
+      throw new LycheeError(`HTTP ${response.status}`, response.status);
+    }
+    const raw = await response.text();
+    if (!raw) return {};
+    return JSON.parse(raw);
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Structured Output API
+  // ────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Generate schema-conforming JSON with auto-retry on validation failure.
+   */
+  async structured(model, prompt, schema, { maxRetries = 3, options } = {}) {
+    const payload = { model, prompt, schema, max_retries: maxRetries };
+    if (options) payload.options = options;
+    return this._post('/api/structured', payload);
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Conversation Memory API
+  // ────────────────────────────────────────────────────────────────────────────
+
+  /** List summaries of all saved conversations. */
+  async listConversations() {
+    return this._get('/api/conversations');
+  }
+
+  /** Retrieve conversation history. */
+  async getConversation(id) {
+    return this._get(`/api/conversations/${id}`);
+  }
+
+  /** Delete a conversation. */
+  async deleteConversation(id) {
+    return this._delete(`/api/conversations/${id}`);
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
+  // Model Router API
+  // ────────────────────────────────────────────────────────────────────────────
+
+  /** Define or update a virtual model route. */
+  async createRoute(name, endpoints, strategy = 'round_robin') {
+    const payload = { name, endpoints, strategy };
+    return this._post('/api/routes', payload);
+  }
+
+  /** List all registered virtual routes. */
+  async listRoutes() {
+    return this._get('/api/routes');
+  }
+
+  /** Delete a virtual model route. */
+  async deleteRoute(name) {
+    return this._delete(`/api/routes/${name}`);
+  }
+
   async isRunning() {
     try {
       await this._get('/');

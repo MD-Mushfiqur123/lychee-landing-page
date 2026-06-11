@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -106,6 +107,8 @@ type Server struct {
 	defaultNumCtx int
 	requestLogger *inferenceRequestLogger
 	modelCaches   *modelCaches
+	memoryStore   *MemoryStore
+	modelRouter   *ModelRouter
 }
 
 func init() {
@@ -419,6 +422,14 @@ func (s *Server) GenerateRoutes(rc *lychee.Registry) (http.Handler, error) {
 	r.POST("/api/embed", s.EmbedHandler)
 	r.POST("/api/embeddings", s.EmbeddingsHandler)
 	r.POST("/api/compose", s.ComposeHandler)
+	r.POST("/api/structured", s.StructuredHandler)
+	r.GET("/api/conversations", s.ListConversationsHandler)
+	r.GET("/api/conversations/:id", s.GetConversationHandler)
+	r.POST("/api/conversations", s.CreateConversationHandler)
+	r.DELETE("/api/conversations/:id", s.DeleteConversationHandler)
+	r.POST("/api/routes", s.CreateRouteHandler)
+	r.GET("/api/routes", s.ListRoutesHandler)
+	r.DELETE("/api/routes/:name", s.DeleteRouteHandler)
 
 	// OpenAI compatibility endpoints
 	s.registerOpenAIRoutes(r)
@@ -496,9 +507,16 @@ func Serve(ln net.Listener) error {
 		}
 	}
 
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
 	s := &Server{
 		addr:        ln.Addr(),
 		modelCaches: newModelCaches(),
+		memoryStore: NewMemoryStore(filepath.Join(home, ".lychee", "conversations")),
+		modelRouter: NewModelRouter(filepath.Join(home, ".lychee", "routes.json")),
 	}
 	if err := s.initRequestLogging(); err != nil {
 		return err

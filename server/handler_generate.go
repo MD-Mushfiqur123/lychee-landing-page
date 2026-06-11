@@ -50,6 +50,58 @@ func (s *Server) GenerateHandler(c *gin.Context) {
 		return
 	}
 
+	var releaseRoute func() = func() {}
+	if s.modelRouter != nil {
+		endpoint, release, err := s.modelRouter.Resolve(req.Model)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if endpoint != nil {
+			releaseRoute = release
+			req.Model = endpoint.Model
+			if endpoint.Host != "" {
+				defer releaseRoute()
+				remoteURL, err := url.Parse(endpoint.Host)
+				if err != nil {
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				contentType := "application/x-ndjson"
+				if req.Stream != nil && !*req.Stream {
+					contentType = "application/json; charset=utf-8"
+				}
+				c.Header("Content-Type", contentType)
+
+				fn := func(resp api.GenerateResponse) error {
+					data, err := json.Marshal(resp)
+					if err != nil {
+						return err
+					}
+					if _, err = c.Writer.Write(append(data, '\n')); err != nil {
+						return err
+					}
+					c.Writer.Flush()
+					return nil
+				}
+
+				client := api.NewClient(remoteURL, http.DefaultClient)
+				err = client.Generate(c, &req, fn)
+				if err != nil {
+					var apiError api.StatusError
+					if errors.As(err, &apiError) {
+						c.JSON(apiError.StatusCode, apiError)
+						return
+					}
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				return
+			}
+		}
+	}
+	defer releaseRoute()
+
 	modelRef, err := parseAndValidateModelRef(req.Model)
 	if err != nil {
 		writeModelRefParseError(c, err, http.StatusNotFound, fmt.Sprintf("model '%s' not found", req.Model))

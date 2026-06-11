@@ -28,6 +28,12 @@ tags:
     description: OpenAI API compatibility layer
   - name: models
     description: Model management
+  - name: structured
+    description: Structured Output API with auto-retry
+  - name: conversations
+    description: Conversation memory store CRUD operations
+  - name: routes
+    description: Virtual model router load balancing configurations
 
 paths:
   /api/compose:
@@ -180,6 +186,162 @@ paths:
       responses:
         '200':
           description: List of models
+
+  /api/structured:
+    post:
+      tags: [structured]
+      summary: Generate schema-conforming JSON with auto-retry
+      operationId: generateStructured
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, prompt]
+              properties:
+                model:
+                  type: string
+                prompt:
+                  type: string
+                schema:
+                  type: object
+                max_retries:
+                  type: integer
+                  default: 3
+                options:
+                  type: object
+      responses:
+        '200':
+          description: Structured generation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  output:
+                    type: string
+                  valid:
+                    type: boolean
+                  attempts:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: string
+
+  /api/conversations:
+    get:
+      tags: [conversations]
+      summary: List summaries of all saved conversations
+      operationId: listConversations
+      responses:
+        '200':
+          description: List of conversation summaries
+    post:
+      tags: [conversations]
+      summary: Create a new conversation
+      operationId: createConversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, messages]
+              properties:
+                model:
+                  type: string
+                messages:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '201':
+          description: Conversation created
+
+  /api/conversations/{id}:
+    get:
+      tags: [conversations]
+      summary: Retrieve conversation details and message history
+      operationId: getConversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full conversation details
+    delete:
+      tags: [conversations]
+      summary: Delete a conversation
+      operationId: deleteConversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation deleted
+
+  /api/routes:
+    get:
+      tags: [routes]
+      summary: List all registered virtual routes
+      operationId: listRoutes
+      responses:
+        '200':
+          description: List of routes
+    post:
+      tags: [routes]
+      summary: Create or update a virtual model route
+      operationId: createRoute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, endpoints]
+              properties:
+                name:
+                  type: string
+                endpoints:
+                  type: array
+                  items:
+                    type: object
+                    required: [host]
+                    properties:
+                      host:
+                        type: string
+                      model:
+                        type: string
+                strategy:
+                  type: string
+                  enum: [round_robin, random, least_loaded]
+                  default: round_robin
+      responses:
+        '200':
+          description: Route created or updated
+
+  /api/routes/{name}:
+    delete:
+      tags: [routes]
+      summary: Delete a virtual model route
+      operationId: deleteRoute
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Route deleted
 
 components:
   schemas:

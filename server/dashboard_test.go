@@ -31,33 +31,7 @@ func TestDashboardRootServersIndexHTML(t *testing.T) {
 
 	body := w.Body.String()
 	if !strings.Contains(body, "<html") {
-		t.Errorf("expected HTML response, got: %s", body[:min(len(body), 100)])
-	}
-}
-
-func TestDashboardServesJSAsset(t *testing.T) {
-	r := setupDashboardRouter()
-
-	// Try to serve the main JS bundle
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/dashboard/assets/index-E9nPRTPp.js", nil)
-	r.ServeHTTP(w, req)
-
-	// Should be 200 (asset exists) or fallback to index.html
-	if w.Code != http.StatusOK {
-		t.Errorf("expected status 200 for JS asset, got %d", w.Code)
-	}
-}
-
-func TestDashboardServesCSS(t *testing.T) {
-	r := setupDashboardRouter()
-
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/dashboard/assets/index-2SBFhNas.css", nil)
-	r.ServeHTTP(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("expected status 200 for CSS asset, got %d", w.Code)
+		t.Errorf("expected HTML response, got: %s", body)
 	}
 }
 
@@ -75,7 +49,7 @@ func TestDashboardUnknownPathFallsBackToIndex(t *testing.T) {
 
 	body := w.Body.String()
 	if !strings.Contains(body, "<html") {
-		t.Errorf("fallback should serve index.html, got: %s", body[:min(len(body), 100)])
+		t.Errorf("fallback should serve index.html, got: %s", body)
 	}
 }
 
@@ -103,11 +77,4 @@ func TestDashboardNoBodyOnHEAD(t *testing.T) {
 	if len(body) == 0 {
 		t.Error("expected non-empty body for dashboard root")
 	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

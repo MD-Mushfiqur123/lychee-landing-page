@@ -89,5 +89,27 @@ export class Lychee {
 
   show(model: string): Promise<any>;
 
+  structured(
+    model: string,
+    prompt: string,
+    schema: any,
+    options?: {
+      maxRetries?: number;
+      options?: Record<string, any>;
+    }
+  ): Promise<any>;
+
+  listConversations(): Promise<any[]>;
+  getConversation(id: string): Promise<any>;
+  deleteConversation(id: string): Promise<any>;
+
+  createRoute(
+    name: string,
+    endpoints: Array<{ host: string; model?: string }>,
+    strategy?: 'round_robin' | 'random' | 'least_loaded'
+  ): Promise<any>;
+  listRoutes(): Promise<any[]>;
+  deleteRoute(name: string): Promise<any>;
+
   isRunning(): Promise<boolean>;
 }

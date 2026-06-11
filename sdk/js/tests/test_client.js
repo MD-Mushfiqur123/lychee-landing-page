@@ -129,6 +129,97 @@ test('Lychee Client methods success flows', async (t) => {
   const showRes = await client.show('gemma3');
   assert.strictEqual(showRes.details.parameter_size, '9B');
 
+  // Test Structured
+  globalThis.fetch = async (url, options) => {
+    assert.strictEqual(url, 'http://localhost:11434/api/structured');
+    const body = JSON.parse(options.body);
+    assert.strictEqual(body.model, 'gemma3');
+    assert.strictEqual(body.max_retries, 3);
+    return {
+      ok: true,
+      json: async () => ({ output: '{"name":"Alice"}', valid: true, attempts: 1 })
+    };
+  };
+  const structRes = await client.structured('gemma3', 'extract name', { type: 'object' });
+  assert.strictEqual(structRes.valid, true);
+  assert.strictEqual(structRes.attempts, 1);
+
+  // Test List Conversations
+  globalThis.fetch = async (url, options = {}) => {
+    assert.strictEqual(url, 'http://localhost:11434/api/conversations');
+    assert.strictEqual(options.method ?? 'GET', 'GET');
+    return {
+      ok: true,
+      json: async () => ([{ id: 'conv-1', title: 'Chat 1' }])
+    };
+  };
+  const convList = await client.listConversations();
+  assert.strictEqual(convList.length, 1);
+  assert.strictEqual(convList[0].id, 'conv-1');
+
+  // Test Get Conversation
+  globalThis.fetch = async (url, options = {}) => {
+    assert.strictEqual(url, 'http://localhost:11434/api/conversations/conv-1');
+    assert.strictEqual(options.method ?? 'GET', 'GET');
+    return {
+      ok: true,
+      json: async () => ({ id: 'conv-1', messages: [] })
+    };
+  };
+  const convGet = await client.getConversation('conv-1');
+  assert.strictEqual(convGet.id, 'conv-1');
+
+  // Test Delete Conversation
+  globalThis.fetch = async (url, options = {}) => {
+    assert.strictEqual(url, 'http://localhost:11434/api/conversations/conv-1');
+    assert.strictEqual(options.method, 'DELETE');
+    return {
+      ok: true,
+      text: async () => JSON.stringify({ status: 'deleted' })
+    };
+  };
+  const convDel = await client.deleteConversation('conv-1');
+  assert.strictEqual(convDel.status, 'deleted');
+
+  // Test Create Route
+  globalThis.fetch = async (url, options = {}) => {
+    assert.strictEqual(url, 'http://localhost:11434/api/routes');
+    assert.strictEqual(options.method, 'POST');
+    const body = JSON.parse(options.body);
+    assert.strictEqual(body.name, 'fast');
+    return {
+      ok: true,
+      json: async () => ({ name: 'fast', strategy: 'round_robin' })
+    };
+  };
+  const routeCreate = await client.createRoute('fast', [{ host: 'http://localhost:11434' }]);
+  assert.strictEqual(routeCreate.name, 'fast');
+
+  // Test List Routes
+  globalThis.fetch = async (url, options = {}) => {
+    assert.strictEqual(url, 'http://localhost:11434/api/routes');
+    assert.strictEqual(options.method ?? 'GET', 'GET');
+    return {
+      ok: true,
+      json: async () => ([{ name: 'fast', strategy: 'round_robin' }])
+    };
+  };
+  const routeList = await client.listRoutes();
+  assert.strictEqual(routeList.length, 1);
+  assert.strictEqual(routeList[0].name, 'fast');
+
+  // Test Delete Route
+  globalThis.fetch = async (url, options = {}) => {
+    assert.strictEqual(url, 'http://localhost:11434/api/routes/fast');
+    assert.strictEqual(options.method, 'DELETE');
+    return {
+      ok: true,
+      text: async () => JSON.stringify({ status: 'deleted' })
+    };
+  };
+  const routeDel = await client.deleteRoute('fast');
+  assert.strictEqual(routeDel.status, 'deleted');
+
   // Test Is Running
   globalThis.fetch = async (url, options) => {
     assert.strictEqual(url, 'http://localhost:11434/');

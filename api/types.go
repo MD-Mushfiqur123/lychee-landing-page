@@ -178,6 +178,9 @@ type ChatRequest struct {
 	// for supported models.
 	Think *ThinkValue `json:"think,omitempty"`
 
+	// ConversationID, if set, automatically saves this chat to the memory store.
+	ConversationID string `json:"conversation_id,omitempty"`
+
 	// Truncate is a boolean that, when set to true, truncates the chat history messages
 	// if the rendered prompt exceeds the context length limit.
 	Truncate *bool `json:"truncate,omitempty"`

@@ -26,7 +26,7 @@ import (
 	"github.com/lychee/lychee/types/model"
 )
 
-func writeChatResponse(c *gin.Context, req api.ChatRequest, ch chan any) {
+func writeChatResponseInternal(c *gin.Context, req api.ChatRequest, ch chan any) {
 	if req.Stream != nil && !*req.Stream {
 		var resp api.ChatResponse
 		var toolCalls []api.ToolCall
@@ -86,6 +86,36 @@ func writeChatResponse(c *gin.Context, req api.ChatRequest, ch chan any) {
 	streamResponse(c, ch)
 }
 
+func (s *Server) writeChatResponse(c *gin.Context, req api.ChatRequest, ch chan any) {
+	if req.ConversationID == "" || s.memoryStore == nil {
+		writeChatResponseInternal(c, req, ch)
+		return
+	}
+
+	chOut := make(chan any)
+	go func() {
+		defer close(chOut)
+		var assistantResponse strings.Builder
+		var assistantThinking strings.Builder
+		for msg := range ch {
+			chOut <- msg
+			switch t := msg.(type) {
+			case api.ChatResponse:
+				assistantResponse.WriteString(t.Message.Content)
+				assistantThinking.WriteString(t.Message.Thinking)
+			}
+		}
+		assistantMsg := api.Message{
+			Role:     "assistant",
+			Content:  assistantResponse.String(),
+			Thinking: assistantThinking.String(),
+		}
+		_ = s.memoryStore.AppendMessage(req.ConversationID, assistantMsg)
+	}()
+
+	writeChatResponseInternal(c, req, chOut)
+}
+
 func validateChatRequest(req *api.ChatRequest) error {
 	if req.TopLogprobs < 0 || req.TopLogprobs > 20 {
 		return errors.New("top_logprobs must be between 0 and 20")
@@ -109,6 +139,95 @@ func (s *Server) ChatHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	if req.ConversationID != "" && s.memoryStore != nil {
+		if len(req.Messages) == 0 {
+			conv, err := s.memoryStore.Load(req.ConversationID)
+			if err == nil && conv != nil {
+				req.Messages = conv.Messages
+			}
+		} else {
+			conv, err := s.memoryStore.Load(req.ConversationID)
+			if err != nil || conv == nil {
+				conv = &Conversation{
+					ID:        req.ConversationID,
+					Model:     req.Model,
+					Messages:  req.Messages,
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				}
+			} else {
+				conv.Messages = req.Messages
+				conv.UpdatedAt = time.Now()
+			}
+			_ = s.memoryStore.Save(conv)
+		}
+	}
+
+	var releaseRoute func() = func() {}
+	if s.modelRouter != nil {
+		endpoint, release, err := s.modelRouter.Resolve(req.Model)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if endpoint != nil {
+			releaseRoute = release
+			req.Model = endpoint.Model
+			if endpoint.Host != "" {
+				defer releaseRoute()
+				remoteURL, err := url.Parse(endpoint.Host)
+				if err != nil {
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+				contentType := "application/x-ndjson"
+				if req.Stream != nil && !*req.Stream {
+					contentType = "application/json; charset=utf-8"
+				}
+				c.Header("Content-Type", contentType)
+
+				var assistantResponse strings.Builder
+				var assistantThinking strings.Builder
+				fn := func(resp api.ChatResponse) error {
+					assistantResponse.WriteString(resp.Message.Content)
+					assistantThinking.WriteString(resp.Message.Thinking)
+					data, err := json.Marshal(resp)
+					if err != nil {
+						return err
+					}
+					if _, err = c.Writer.Write(append(data, '\n')); err != nil {
+						return err
+					}
+					c.Writer.Flush()
+					return nil
+				}
+
+				client := api.NewClient(remoteURL, http.DefaultClient)
+				err = client.Chat(c, &req, fn)
+				if err != nil {
+					var apiError api.StatusError
+					if errors.As(err, &apiError) {
+						c.JSON(apiError.StatusCode, apiError)
+						return
+					}
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+
+				if req.ConversationID != "" && s.memoryStore != nil && (assistantResponse.Len() > 0 || assistantThinking.Len() > 0) {
+					assistantMsg := api.Message{
+						Role:     "assistant",
+						Content:  assistantResponse.String(),
+						Thinking: assistantThinking.String(),
+					}
+					_ = s.memoryStore.AppendMessage(req.ConversationID, assistantMsg)
+				}
+				return
+			}
+		}
+	}
+	defer releaseRoute()
 
 	modelRef, err := parseAndValidateModelRef(req.Model)
 	if err != nil {
@@ -588,7 +707,7 @@ func (s *Server) ChatHandler(c *gin.Context) {
 		}
 	}()
 
-	writeChatResponse(c, req, ch)
+	s.writeChatResponse(c, req, ch)
 }
 
 func (s *Server) handleNativeChat(c *gin.Context, req api.ChatRequest, m *Model, r llm.LlamaServer, opts *api.Options, msgs []api.Message, checkpointStart, checkpointLoaded time.Time) {
@@ -681,7 +800,7 @@ func (s *Server) handleNativeChat(c *gin.Context, req api.ChatRequest, m *Model,
 		}
 	}()
 
-	writeChatResponse(c, req, ch)
+	s.writeChatResponse(c, req, ch)
 }
 
 func truncateNativeChatMessages(ctx context.Context, m *Model, r llm.LlamaServer, opts *api.Options, req llm.ChatRequest, truncate bool) ([]api.Message, error) {

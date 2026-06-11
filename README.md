@@ -1,8 +1,10 @@
 # 🍒 Lychee
 
-### Universal Local Inference, Prompts Caching, and Stateful Agent Sandbox
+### The Orchestration Layer for Local LLMs — Built on Ollama
 
-Lychee is a state-of-the-art local LLM runtime, designed to be the ultimate drop-in upgrade for your AI development workflow. While keeping full compatibility with the existing open-model ecosystem, Lychee extends local inference with enterprise-grade capabilities.
+Lychee extends [Ollama](https://github.com/ollama/ollama) with features the upstream doesn't have:
+multi-model pipelines, structured output with auto-retry, persistent conversation memory,
+and multi-instance load balancing. Everything Ollama does, Lychee does too — plus more.
 
 <p align="center">
   <a href="https://github.com/MD-Mushfiqur123/lychee">
@@ -21,24 +23,29 @@ Lychee is a state-of-the-art local LLM runtime, designed to be the ultimate drop
 
 ---
 
-## ⚡ The 5 Moats: Why Lychee?
+## ⚡ What Lychee Adds (Original Features)
 
-Lychee goes far beyond standard model running by providing features that typically require heavy cloud orchestration, all running locally on your hardware:
+Lychee extends Ollama with advanced orchestration and developer utilities:
 
-1. **Universal API Gateway**
-   Lychee is the only local model runner that natively speaks multiple API protocols. Run your existing codebases unmodified, whether they are built for **OpenAI (Completions)**, **Anthropic (Messages)**, or the **OpenAI Responses API**.
-   
-2. **Native Agent Mode**
-   An embedded stateful agent execution framework (`x/agent/`) built directly into the CLI and API. Run agents with sandbox approval gates for file access, web search, and terminal command execution.
+1. **Model Composer**
+   Chain multiple local models together sequentially into multi-step pipelines. Pass outputs from one step as inputs to the next, using DAG-based conditional logic and routing.
+2. **Structured Output with Auto-Retry**
+   Go beyond basic JSON modes. Lychee validates output against a schema and automatically retries with error-correction prompting if the model produces invalid JSON.
+3. **Conversation Memory Store**
+   Persist chats locally (using SQLite and JSON). Save, list, resume, and delete conversations across sessions with simple API calls.
+4. **Model Router with Load Balancing**
+   Define virtual model names that route requests across multiple local or remote Ollama/Lychee instances using round-robin, random, or least-loaded strategies.
+5. **Official Python & JS SDKs**
+   Modern SDKs featuring first-class support for Model Composer, Structured Output, Memory, and Router configurations.
 
-3. **Prompt Caching & KV Sharing**
-   Drastically reduce Time to First Token (TTFT) by automatically caching prompt prefixes. Built on top of the upstream Ollama scheduler, Lychee leverages message prefix-hash matching to optimize cache reuse during multi-turn chats.
+## 🤝 Inherited from Ollama (Full Credit)
 
-4. **Model Composer**
-   Chain multiple local models together sequentially. Run complex pipelines where the output of one model feeds directly into the prompt template (`{{input}}` / `{{step[n].output}}`) of subsequent models—perfect for local classification, translation, or structured processing chains.
-
-5. **Embedded Web Dashboard**
-   Lychee comes with a built-in, fully-featured React-based SPA console served directly from the server at `/dashboard/`. Interact with models, manage configurations, view system resource utilization, and test API endpoints—all out-of-the-box.
+The core engine and main capabilities are built directly on top of the excellent work by the Ollama team:
+- **Core Inference Engine**: Powered by `llama.cpp` and Apple's MLX for high-performance GPU/CPU inference.
+- **Universal API Layer**: OpenAI and Anthropic endpoint compatibility.
+- **Stateful Agent Mode**: Embedded agent runtime with local tool execution and approval gates.
+- **Model Registry & Management**: Seamlessly pull, run, and customize models.
+- **Prompt Caching & KV Sharing**: Automated prefix hashing and KV cache management.
 
 ---
 

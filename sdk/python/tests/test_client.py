@@ -183,5 +183,82 @@ class TestLycheeErrors(unittest.TestCase):
             self.client.chat("nonexistent-model", "Hi")
 
 
+class TestLycheeStructured(unittest.TestCase):
+    def setUp(self):
+        self.client = Lychee()
+
+    @patch("urllib.request.urlopen")
+    def test_structured(self, mock_urlopen):
+        mock_urlopen.return_value = make_response({
+            "output": '{"name": "Alice"}',
+            "valid": True,
+            "attempts": 1,
+        })
+        schema = {"type": "object", "properties": {"name": {"type": "string"}}}
+        result = self.client.structured("gemma3", "extract name", schema)
+        self.assertTrue(result["valid"])
+        self.assertEqual(result["attempts"], 1)
+
+
+class TestLycheeConversations(unittest.TestCase):
+    def setUp(self):
+        self.client = Lychee()
+
+    @patch("urllib.request.urlopen")
+    def test_list_conversations(self, mock_urlopen):
+        mock_urlopen.return_value = make_response([
+            {"id": "conv-1", "model": "gemma3", "title": "Chat 1"}
+        ])
+        res = self.client.list_conversations()
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["id"], "conv-1")
+
+    @patch("urllib.request.urlopen")
+    def test_get_conversation(self, mock_urlopen):
+        mock_urlopen.return_value = make_response({
+            "id": "conv-1",
+            "model": "gemma3",
+            "messages": []
+        })
+        res = self.client.get_conversation("conv-1")
+        self.assertEqual(res["id"], "conv-1")
+
+    @patch("urllib.request.urlopen")
+    def test_delete_conversation(self, mock_urlopen):
+        mock_urlopen.return_value = make_response({"status": "deleted"})
+        res = self.client.delete_conversation("conv-1")
+        self.assertEqual(res["status"], "deleted")
+
+
+class TestLycheeRouter(unittest.TestCase):
+    def setUp(self):
+        self.client = Lychee()
+
+    @patch("urllib.request.urlopen")
+    def test_create_route(self, mock_urlopen):
+        mock_urlopen.return_value = make_response({
+            "name": "fast",
+            "endpoints": [{"host": "http://localhost:11434"}],
+            "strategy": "round_robin"
+        })
+        res = self.client.create_route("fast", [{"host": "http://localhost:11434"}])
+        self.assertEqual(res["name"], "fast")
+
+    @patch("urllib.request.urlopen")
+    def test_list_routes(self, mock_urlopen):
+        mock_urlopen.return_value = make_response([
+            {"name": "fast", "strategy": "round_robin"}
+        ])
+        res = self.client.list_routes()
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0]["name"], "fast")
+
+    @patch("urllib.request.urlopen")
+    def test_delete_route(self, mock_urlopen):
+        mock_urlopen.return_value = make_response({"status": "deleted"})
+        res = self.client.delete_route("fast")
+        self.assertEqual(res["status"], "deleted")
+
+
 if __name__ == "__main__":
     unittest.main()
