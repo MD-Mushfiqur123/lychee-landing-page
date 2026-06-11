@@ -1,6 +1,6 @@
 #!/bin/sh
-# This script installs Ollama on Linux and macOS.
-# It detects the current operating system architecture and installs the appropriate version of Ollama.
+# This script installs Lychee on Linux and macOS.
+# It detects the current operating system architecture and installs the appropriate version of Lychee.
 
 # Wrap script in main function so that a truncated partial download doesn't end
 # up executing half a script.
@@ -39,11 +39,15 @@ case "$ARCH" in
     *) error "Unsupported architecture: $ARCH" ;;
 esac
 
-VER_PARAM="${OLLAMA_VERSION:+?version=$OLLAMA_VERSION}"
-
-###########################################
-# macOS
-###########################################
+if [ -n "${LYCHEE_VERSION:-}" ]; then
+    DOWNLOAD_URL="https://github.com/lychee/lychee/releases/download/v${LYCHEE_VERSION}/Lychee-darwin.zip"
+    BASE_URL="https://github.com/lychee/lychee/releases/download/v${LYCHEE_VERSION}"
+    VER_PARAM=""
+else
+    DOWNLOAD_URL="https://github.com/lychee/lychee/releases/latest/download/Lychee-darwin.zip"
+    BASE_URL="https://github.com/lychee/lychee/releases/latest/download"
+    VER_PARAM=""
+fi
 
 if [ "$OS" = "Darwin" ]; then
     NEEDS=$(require curl unzip)
@@ -55,40 +59,38 @@ if [ "$OS" = "Darwin" ]; then
         exit 1
     fi
 
-    DOWNLOAD_URL="https://ollama.com/download/Ollama-darwin.zip${VER_PARAM}"
-
-    if pgrep -x Ollama >/dev/null 2>&1; then
-        status "Stopping running Ollama instance..."
-        pkill -x Ollama 2>/dev/null || true
+    if pgrep -x Lychee >/dev/null 2>&1; then
+        status "Stopping running Lychee instance..."
+        pkill -x Lychee 2>/dev/null || true
         sleep 2
     fi
 
-    if [ -d "/Applications/Ollama.app" ]; then
-        status "Removing existing Ollama installation..."
-        rm -rf "/Applications/Ollama.app"
+    if [ -d "/Applications/Lychee.app" ]; then
+        status "Removing existing Lychee installation..."
+        rm -rf "/Applications/Lychee.app"
     fi
 
-    status "Downloading Ollama for macOS..."
+    status "Downloading Lychee for macOS..."
     curl --fail --show-error --location --progress-bar \
-        -o "$TEMP_DIR/Ollama-darwin.zip" "$DOWNLOAD_URL"
+        -o "$TEMP_DIR/Lychee-darwin.zip" "$DOWNLOAD_URL"
 
-    status "Installing Ollama to /Applications..."
-    unzip -q "$TEMP_DIR/Ollama-darwin.zip" -d "$TEMP_DIR"
-    mv "$TEMP_DIR/Ollama.app" "/Applications/"
+    status "Installing Lychee to /Applications..."
+    unzip -q "$TEMP_DIR/Lychee-darwin.zip" -d "$TEMP_DIR"
+    mv "$TEMP_DIR/Lychee.app" "/Applications/"
 
-    if [ ! -L "/usr/local/bin/ollama" ] || [ "$(readlink "/usr/local/bin/ollama")" != "/Applications/Ollama.app/Contents/Resources/ollama" ]; then
-        status "Adding 'ollama' command to PATH (may require password)..."
+    if [ ! -L "/usr/local/bin/lychee" ] || [ "$(readlink "/usr/local/bin/lychee")" != "/Applications/Lychee.app/Contents/Resources/lychee" ]; then
+        status "Adding 'lychee' command to PATH (may require password)..."
         mkdir -p "/usr/local/bin" 2>/dev/null || sudo mkdir -p "/usr/local/bin"
-        ln -sf "/Applications/Ollama.app/Contents/Resources/ollama" "/usr/local/bin/ollama" 2>/dev/null || \
-            sudo ln -sf "/Applications/Ollama.app/Contents/Resources/ollama" "/usr/local/bin/ollama"
+        ln -sf "/Applications/Lychee.app/Contents/Resources/lychee" "/usr/local/bin/lychee" 2>/dev/null || \
+            sudo ln -sf "/Applications/Lychee.app/Contents/Resources/lychee" "/usr/local/bin/lychee"
     fi
 
-    if [ -z "${OLLAMA_NO_START:-}" ]; then
-        status "Starting Ollama..."
-        open -a Ollama --args hidden
+    if [ -z "${LYCHEE_NO_START:-}" ]; then
+        status "Starting Lychee..."
+        open -a Lychee --args hidden
     fi
 
-    status "Install complete. You can now run 'ollama'."
+    status "Install complete. You can now run 'lychee'."
     exit 0
 fi
 
@@ -159,68 +161,68 @@ download_and_extract() {
 for BINDIR in /usr/local/bin /usr/bin /bin; do
     echo $PATH | grep -q $BINDIR && break || continue
 done
-OLLAMA_INSTALL_DIR=$(dirname ${BINDIR})
+LYCHEE_INSTALL_DIR=$(dirname ${BINDIR})
 
-if [ -d "$OLLAMA_INSTALL_DIR/lib/ollama" ] ; then
-    status "Cleaning up old version at $OLLAMA_INSTALL_DIR/lib/ollama"
-    $SUDO rm -rf "$OLLAMA_INSTALL_DIR/lib/ollama"
+if [ -d "$LYCHEE_INSTALL_DIR/lib/lychee" ] ; then
+    status "Cleaning up old version at $LYCHEE_INSTALL_DIR/lib/lychee"
+    $SUDO rm -rf "$LYCHEE_INSTALL_DIR/lib/lychee"
 fi
-status "Installing ollama to $OLLAMA_INSTALL_DIR"
+status "Installing lychee to $LYCHEE_INSTALL_DIR"
 $SUDO install -o0 -g0 -m755 -d $BINDIR
-$SUDO install -o0 -g0 -m755 -d "$OLLAMA_INSTALL_DIR/lib/ollama"
-download_and_extract "https://ollama.com/download" "$OLLAMA_INSTALL_DIR" "ollama-linux-${ARCH}"
+$SUDO install -o0 -g0 -m755 -d "$LYCHEE_INSTALL_DIR/lib/lychee"
+download_and_extract "$BASE_URL" "$LYCHEE_INSTALL_DIR" "lychee-linux-${ARCH}"
 
-if [ "$OLLAMA_INSTALL_DIR/bin/ollama" != "$BINDIR/ollama" ] ; then
-    status "Making ollama accessible in the PATH in $BINDIR"
-    $SUDO ln -sf "$OLLAMA_INSTALL_DIR/ollama" "$BINDIR/ollama"
+if [ "$LYCHEE_INSTALL_DIR/bin/lychee" != "$BINDIR/lychee" ] ; then
+    status "Making lychee accessible in the PATH in $BINDIR"
+    $SUDO ln -sf "$LYCHEE_INSTALL_DIR/lychee" "$BINDIR/lychee"
 fi
 
 # Check for NVIDIA JetPack systems with additional downloads
 if [ -f /etc/nv_tegra_release ] ; then
     if grep R36 /etc/nv_tegra_release > /dev/null ; then
-        download_and_extract "https://ollama.com/download" "$OLLAMA_INSTALL_DIR" "ollama-linux-${ARCH}-jetpack6"
+        download_and_extract "$BASE_URL" "$LYCHEE_INSTALL_DIR" "lychee-linux-${ARCH}-jetpack6"
     elif grep R35 /etc/nv_tegra_release > /dev/null ; then
-        download_and_extract "https://ollama.com/download" "$OLLAMA_INSTALL_DIR" "ollama-linux-${ARCH}-jetpack5"
+        download_and_extract "$BASE_URL" "$LYCHEE_INSTALL_DIR" "lychee-linux-${ARCH}-jetpack5"
     else
         warning "Unsupported JetPack version detected.  GPU may not be supported"
     fi
 fi
 
 install_success() {
-    status 'The Ollama API is now available at 127.0.0.1:11434.'
-    status 'Install complete. Run "ollama" from the command line.'
+    status 'The Lychee API is now available at 127.0.0.1:11434.'
+    status 'Install complete. Run "lychee" from the command line.'
 }
 trap install_success EXIT
 
 # Everything from this point onwards is optional.
 
 configure_systemd() {
-    if ! id ollama >/dev/null 2>&1; then
-        status "Creating ollama user..."
-        $SUDO useradd -r -s /bin/false -U -m -d /usr/share/ollama ollama
+    if ! id lychee >/dev/null 2>&1; then
+        status "Creating lychee user..."
+        $SUDO useradd -r -s /bin/false -U -m -d /usr/share/lychee lychee
     fi
     if getent group render >/dev/null 2>&1; then
-        status "Adding ollama user to render group..."
-        $SUDO usermod -a -G render ollama
+        status "Adding lychee user to render group..."
+        $SUDO usermod -a -G render lychee
     fi
     if getent group video >/dev/null 2>&1; then
-        status "Adding ollama user to video group..."
-        $SUDO usermod -a -G video ollama
+        status "Adding lychee user to video group..."
+        $SUDO usermod -a -G video lychee
     fi
 
-    status "Adding current user to ollama group..."
-    $SUDO usermod -a -G ollama $(whoami)
+    status "Adding current user to lychee group..."
+    $SUDO usermod -a -G lychee $(whoami)
 
-    status "Creating ollama systemd service..."
-    cat <<EOF | $SUDO tee /etc/systemd/system/ollama.service >/dev/null
+    status "Creating lychee systemd service..."
+    cat <<EOF | $SUDO tee /etc/systemd/system/lychee.service >/dev/null
 [Unit]
-Description=Ollama Service
+Description=Lychee Service
 After=network-online.target
 
 [Service]
-ExecStart=$BINDIR/ollama serve
-User=ollama
-Group=ollama
+ExecStart=$BINDIR/lychee serve
+User=lychee
+Group=lychee
 Restart=always
 RestartSec=3
 Environment="PATH=$PATH"
@@ -231,11 +233,11 @@ EOF
     SYSTEMCTL_RUNNING="$(systemctl is-system-running || true)"
     case $SYSTEMCTL_RUNNING in
         running|degraded)
-            status "Enabling and starting ollama service..."
+            status "Enabling and starting lychee service..."
             $SUDO systemctl daemon-reload
-            $SUDO systemctl enable ollama
+            $SUDO systemctl enable lychee
 
-            start_service() { $SUDO systemctl restart ollama; }
+            start_service() { $SUDO systemctl restart lychee; }
             trap start_service EXIT
             ;;
         *)
@@ -298,12 +300,12 @@ fi
 
 if ! check_gpu lspci nvidia && ! check_gpu lshw nvidia && ! check_gpu lspci amdgpu && ! check_gpu lshw amdgpu; then
     install_success
-    warning "No NVIDIA/AMD GPU detected. Ollama will run in CPU-only mode."
+    warning "No NVIDIA/AMD GPU detected. Lychee will run in CPU-only mode."
     exit 0
 fi
 
 if check_gpu lspci amdgpu || check_gpu lshw amdgpu; then
-    download_and_extract "https://ollama.com/download" "$OLLAMA_INSTALL_DIR" "ollama-linux-${ARCH}-rocm"
+    download_and_extract "$BASE_URL" "$LYCHEE_INSTALL_DIR" "lychee-linux-${ARCH}-rocm"
 
     install_success
     status "AMD GPU ready."

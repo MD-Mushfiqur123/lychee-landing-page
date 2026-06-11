@@ -13,11 +13,11 @@ import (
 	"path/filepath"
 	"runtime/pprof"
 
-	"github.com/ollama/ollama/x/imagegen"
-	"github.com/ollama/ollama/x/imagegen/mlx"
-	"github.com/ollama/ollama/x/imagegen/models/flux2"
-	"github.com/ollama/ollama/x/imagegen/models/zimage"
-	"github.com/ollama/ollama/x/imagegen/safetensors"
+	"github.com/lychee/lychee/x/imagegen"
+	"github.com/lychee/lychee/x/imagegen/mlx"
+	"github.com/lychee/lychee/x/imagegen/models/flux2"
+	"github.com/lychee/lychee/x/imagegen/models/zimage"
+	"github.com/lychee/lychee/x/imagegen/safetensors"
 )
 
 // stringSlice is a flag type that accumulates multiple values

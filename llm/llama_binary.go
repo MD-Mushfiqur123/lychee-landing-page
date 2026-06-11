@@ -8,11 +8,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/ollama/ollama/ml"
+	"github.com/lychee/lychee/ml"
 )
 
 type llamaCppBinarySearch struct {
-	libOllamaPath string
+	libLycheePath string
 	executable    string
 	workingDir    string
 	goos          string
@@ -29,7 +29,7 @@ func defaultLlamaCppBinarySearch() llamaCppBinarySearch {
 
 	workingDir, _ := os.Getwd()
 	return llamaCppBinarySearch{
-		libOllamaPath: ml.LibOllamaPath,
+		libLycheePath: ml.LibLycheePath,
 		executable:    executable,
 		workingDir:    workingDir,
 		goos:          runtime.GOOS,
@@ -82,7 +82,7 @@ func llamaCppBinaryCandidates(name string, search llamaCppBinarySearch) []string
 		}
 	}
 
-	add(search.libOllamaPath)
+	add(search.libLycheePath)
 
 	addPackagedLayoutDirs := func(base string) {
 		if base == "" {
@@ -90,23 +90,23 @@ func llamaCppBinaryCandidates(name string, search llamaCppBinarySearch) []string
 		}
 		switch goos {
 		case "darwin":
-			// macOS tarballs and apps colocate llama.cpp helpers with ollama.
+			// macOS tarballs and apps colocate llama.cpp helpers with lychee.
 			add(base)
-			// Per-architecture local dist output keeps helpers under lib/ollama.
-			add(filepath.Join(base, "lib", "ollama"))
-			// Standard CMake installs put ollama in bin/ and helpers in ../lib/ollama/.
-			add(filepath.Join(base, "..", "lib", "ollama"))
+			// Per-architecture local dist output keeps helpers under lib/lychee.
+			add(filepath.Join(base, "lib", "lychee"))
+			// Standard CMake installs put lychee in bin/ and helpers in ../lib/lychee/.
+			add(filepath.Join(base, "..", "lib", "lychee"))
 		case "linux":
-			// Linux packages install ollama in bin/ and helpers in ../lib/ollama/.
-			add(filepath.Join(base, "..", "lib", "ollama"))
+			// Linux packages install lychee in bin/ and helpers in ../lib/lychee/.
+			add(filepath.Join(base, "..", "lib", "lychee"))
 		case "windows":
-			// Windows packages keep ollama.exe at top level with lib/ as a peer.
-			add(filepath.Join(base, "lib", "ollama"))
-			// Standard CMake installs put ollama.exe in bin/ and helpers in ../lib/ollama/.
-			add(filepath.Join(base, "..", "lib", "ollama"))
+			// Windows packages keep lychee.exe at top level with lib/ as a peer.
+			add(filepath.Join(base, "lib", "lychee"))
+			// Standard CMake installs put lychee.exe in bin/ and helpers in ../lib/lychee/.
+			add(filepath.Join(base, "..", "lib", "lychee"))
 		default:
-			add(filepath.Join(base, "lib", "ollama"))
-			add(filepath.Join(base, "..", "lib", "ollama"))
+			add(filepath.Join(base, "lib", "lychee"))
+			add(filepath.Join(base, "..", "lib", "lychee"))
 		}
 	}
 
@@ -114,10 +114,10 @@ func llamaCppBinaryCandidates(name string, search llamaCppBinarySearch) []string
 		if base == "" {
 			return
 		}
-		add(filepath.Join(base, "build", "lib", "ollama"))
-		add(filepath.Join(base, "dist", goos+"-"+goarch, "lib", "ollama"))
+		add(filepath.Join(base, "build", "lib", "lychee"))
+		add(filepath.Join(base, "dist", goos+"-"+goarch, "lib", "lychee"))
 		if goos+"_"+goarch != goos+"-"+goarch {
-			add(filepath.Join(base, "dist", goos+"_"+goarch, "lib", "ollama"))
+			add(filepath.Join(base, "dist", goos+"_"+goarch, "lib", "lychee"))
 		}
 		if goos == "darwin" {
 			add(filepath.Join(base, "dist", "darwin"))

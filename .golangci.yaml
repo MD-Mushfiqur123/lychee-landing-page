@@ -5,6 +5,7 @@ linters:
     - bidichk
     - bodyclose
     - containedctx
+    - errcheck
     - gocheckcompilerdirectives
     - intrange
     - makezero
@@ -17,7 +18,6 @@ linters:
     - wastedassign
     - whitespace
   disable:
-    - errcheck
     - usestdlibvars
   settings:
     govet:

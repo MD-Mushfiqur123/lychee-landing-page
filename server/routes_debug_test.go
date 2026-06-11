@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/llm"
-	"github.com/ollama/ollama/ml"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/llm"
+	"github.com/lychee/lychee/ml"
 )
 
 func TestGenerateDebugRenderOnly(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
 	gin.SetMode(gin.TestMode)
 
 	mock := mockRunner{
@@ -209,8 +209,8 @@ func TestGenerateDebugRenderOnly(t *testing.T) {
 }
 
 func TestChatDebugRenderOnly(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
-	t.Setenv("OLLAMA_GO_TEMPLATE", "1")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "1")
 	gin.SetMode(gin.TestMode)
 
 	mock := mockRunner{

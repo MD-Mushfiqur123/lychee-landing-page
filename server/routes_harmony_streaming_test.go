@@ -13,10 +13,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/llm"
-	"github.com/ollama/ollama/ml"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/llm"
+	"github.com/lychee/lychee/ml"
 )
 
 func getTestTools() []api.Tool {

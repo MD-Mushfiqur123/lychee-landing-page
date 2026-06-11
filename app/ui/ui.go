@@ -1,6 +1,6 @@
 //go:build windows || darwin
 
-// package ui implements a chat interface for Ollama
+// package ui implements a chat interface for Lychee
 package ui
 
 import (
@@ -22,32 +22,32 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/app/server"
-	"github.com/ollama/ollama/app/store"
-	"github.com/ollama/ollama/app/tools"
-	"github.com/ollama/ollama/app/types/not"
-	"github.com/ollama/ollama/app/ui/responses"
-	"github.com/ollama/ollama/app/updater"
-	"github.com/ollama/ollama/app/version"
-	ollamaAuth "github.com/ollama/ollama/auth"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/app/server"
+	"github.com/lychee/lychee/app/store"
+	"github.com/lychee/lychee/app/tools"
+	"github.com/lychee/lychee/app/types/not"
+	"github.com/lychee/lychee/app/ui/responses"
+	"github.com/lychee/lychee/app/updater"
+	"github.com/lychee/lychee/app/version"
+	lycheeAuth "github.com/lychee/lychee/auth"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/types/model"
 	_ "github.com/tkrajina/typescriptify-golang-structs/typescriptify"
 )
 
-//go:generate tscriptify -package=github.com/ollama/ollama/app/ui/responses -target=./app/codegen/gotypes.gen.ts responses/types.go
+//go:generate tscriptify -package=github.com/lychee/lychee/app/ui/responses -target=./app/codegen/gotypes.gen.ts responses/types.go
 //go:generate npm --prefix ./app run build
 
-var CORS = envconfig.Bool("OLLAMA_CORS")
+var CORS = envconfig.Bool("LYCHEE_CORS")
 
-// OllamaDotCom returns the URL for ollama.com, allowing override via environment variable
-var OllamaDotCom = func() string {
-	if url := os.Getenv("OLLAMA_DOT_COM_URL"); url != "" {
+// LycheeDotCom returns the URL for lychee.com, allowing override via environment variable
+var LycheeDotCom = func() string {
+	if url := os.Getenv("LYCHEE_DOT_COM_URL"); url != "" {
 		return url
 	}
-	return "https://ollama.com"
+	return "https://lychee.com"
 }()
 
 type statusRecorder struct {
@@ -121,8 +121,8 @@ func (s *Server) log() *slog.Logger {
 	return s.Logger
 }
 
-// ollamaProxy creates a reverse proxy handler to the Ollama server
-func (s *Server) ollamaProxy() http.Handler {
+// lycheeProxy creates a reverse proxy handler to the Lychee server
+func (s *Server) lycheeProxy() http.Handler {
 	var (
 		proxy   http.Handler
 		proxyMu sync.Mutex
@@ -139,7 +139,7 @@ func (s *Server) ollamaProxy() http.Handler {
 				var err error
 				for i := range 2 {
 					if i > 0 {
-						s.log().Warn("ollama server not ready, retrying", "attempt", i+1)
+						s.log().Warn("lychee server not ready, retrying", "attempt", i+1)
 						time.Sleep(1 * time.Second)
 					}
 
@@ -151,13 +151,13 @@ func (s *Server) ollamaProxy() http.Handler {
 
 				if err != nil {
 					proxyMu.Unlock()
-					s.log().Error("ollama server not ready after retries", "error", err)
-					http.Error(w, "Ollama server is not ready", http.StatusServiceUnavailable)
+					s.log().Error("lychee server not ready after retries", "error", err)
+					http.Error(w, "Lychee server is not ready", http.StatusServiceUnavailable)
 					return
 				}
 
 				target := envconfig.ConnectableHost()
-				s.log().Info("configuring ollama proxy", "target", target.String())
+				s.log().Info("configuring lychee proxy", "target", target.String())
 
 				newProxy := httputil.NewSingleHostReverseProxy(target)
 
@@ -293,16 +293,16 @@ func (s *Server) Handler() http.Handler {
 	mux.Handle("GET /api/v1/cloud", handle(s.getCloudSetting))
 	mux.Handle("POST /api/v1/cloud", handle(s.cloudSetting))
 
-	// Ollama proxy endpoints
-	ollamaProxy := s.ollamaProxy()
-	mux.Handle("GET /api/tags", ollamaProxy)
-	mux.Handle("POST /api/show", ollamaProxy)
-	mux.Handle("GET /api/version", ollamaProxy)
-	mux.Handle("GET /api/status", ollamaProxy)
-	mux.Handle("HEAD /api/version", ollamaProxy)
-	mux.Handle("POST /api/me", ollamaProxy)
-	mux.Handle("POST /api/signout", ollamaProxy)
-	mux.Handle("GET /api/experimental/model-recommendations", ollamaProxy)
+	// Lychee proxy endpoints
+	lycheeProxy := s.lycheeProxy()
+	mux.Handle("GET /api/tags", lycheeProxy)
+	mux.Handle("POST /api/show", lycheeProxy)
+	mux.Handle("GET /api/version", lycheeProxy)
+	mux.Handle("GET /api/status", lycheeProxy)
+	mux.Handle("HEAD /api/version", lycheeProxy)
+	mux.Handle("POST /api/me", lycheeProxy)
+	mux.Handle("POST /api/signout", lycheeProxy)
+	mux.Handle("GET /api/experimental/model-recommendations", lycheeProxy)
 
 	// React app - catch all non-API routes and serve the React app
 	mux.Handle("GET /", s.appHandler())
@@ -361,17 +361,17 @@ func userAgentHTTPClient(timeout time.Duration) *http.Client {
 	}
 }
 
-// doSelfSigned sends a self-signed request to the ollama.com API
+// doSelfSigned sends a self-signed request to the lychee.com API
 func (s *Server) doSelfSigned(ctx context.Context, method, path string) (*http.Response, error) {
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	// Form the string to sign: METHOD,PATH?ts=TIMESTAMP
 	signString := fmt.Sprintf("%s,%s?ts=%s", method, path, timestamp)
-	signature, err := ollamaAuth.Sign(ctx, []byte(signString))
+	signature, err := lycheeAuth.Sign(ctx, []byte(signString))
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign request: %w", err)
 	}
 
-	endpoint := fmt.Sprintf("%s%s?ts=%s", OllamaDotCom, path, timestamp)
+	endpoint := fmt.Sprintf("%s%s?ts=%s", LycheeDotCom, path, timestamp)
 	req, err := http.NewRequestWithContext(ctx, method, endpoint, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -381,11 +381,11 @@ func (s *Server) doSelfSigned(ctx context.Context, method, path string) (*http.R
 	return s.httpClient().Do(req)
 }
 
-// UserData fetches user data from ollama.com API for the current ollama key
+// UserData fetches user data from lychee.com API for the current lychee key
 func (s *Server) UserData(ctx context.Context) (*api.UserResponse, error) {
 	resp, err := s.doSelfSigned(ctx, http.MethodPost, "/api/me")
 	if err != nil {
-		return nil, fmt.Errorf("failed to call ollama.com/api/me: %w", err)
+		return nil, fmt.Errorf("failed to call lychee.com/api/me: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -398,7 +398,7 @@ func (s *Server) UserData(ctx context.Context) (*api.UserResponse, error) {
 		return nil, fmt.Errorf("failed to parse user response: %w", err)
 	}
 
-	user.AvatarURL = fmt.Sprintf("%s/%s", OllamaDotCom, user.AvatarURL)
+	user.AvatarURL = fmt.Sprintf("%s/%s", LycheeDotCom, user.AvatarURL)
 
 	storeUser := store.User{
 		Name:  user.Name,
@@ -412,7 +412,7 @@ func (s *Server) UserData(ctx context.Context) (*api.UserResponse, error) {
 	return &user, nil
 }
 
-// WaitForServer waits for the Ollama server to be ready
+// WaitForServer waits for the Lychee server to be ready
 func WaitForServer(ctx context.Context, timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
@@ -421,12 +421,12 @@ func WaitForServer(ctx context.Context, timeout time.Duration) error {
 			return err
 		}
 		if _, err := c.Version(ctx); err == nil {
-			slog.Debug("ollama server is ready")
+			slog.Debug("lychee server is ready")
 			return nil
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	return errors.New("timeout waiting for Ollama server to be ready")
+	return errors.New("timeout waiting for Lychee server to be ready")
 }
 
 func (s *Server) createChat(w http.ResponseWriter, r *http.Request) error {
@@ -456,7 +456,7 @@ func (s *Server) listChats(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// checkModelUpstream makes a HEAD request to the Ollama registry to get the upstream digest and push time
+// checkModelUpstream makes a HEAD request to the Lychee registry to get the upstream digest and push time
 func (s *Server) checkModelUpstream(ctx context.Context, modelName string, timeout time.Duration) (string, int64, error) {
 	// Create a context with timeout for the registry check
 	checkCtx, cancel := context.WithTimeout(ctx, timeout)
@@ -475,8 +475,8 @@ func (s *Server) checkModelUpstream(ctx context.Context, modelName string, timeo
 		name = "library/" + name
 	}
 
-	// Check the model in the Ollama registry using HEAD request
-	url := OllamaDotCom + "/v2/" + name + "/manifests/" + tag
+	// Check the model in the Lychee registry using HEAD request
+	url := LycheeDotCom + "/v2/" + name + "/manifests/" + tag
 	req, err := http.NewRequestWithContext(checkCtx, "HEAD", url, nil)
 	if err != nil {
 		return "", 0, err
@@ -495,13 +495,13 @@ func (s *Server) checkModelUpstream(ctx context.Context, modelName string, timeo
 		return "", 0, fmt.Errorf("registry returned status %d", resp.StatusCode)
 	}
 
-	digest := resp.Header.Get("ollama-content-digest")
+	digest := resp.Header.Get("lychee-content-digest")
 	if digest == "" {
 		return "", 0, fmt.Errorf("no digest header found")
 	}
 
 	var pushTime int64
-	if pushTimeStr := resp.Header.Get("ollama-push-time"); pushTimeStr != "" {
+	if pushTimeStr := resp.Header.Get("lychee-push-time"); pushTimeStr != "" {
 		if pt, err := strconv.ParseInt(pushTimeStr, 10, 64); err == nil {
 			pushTime = pt
 		}
@@ -1617,14 +1617,14 @@ func userAgent() string {
 	version := buildinfo.Main.Version
 	if version == "(devel)" {
 		// When using `go run .` the version is "(devel)". This is seen
-		// as an invalid version by ollama.com and so it defaults to
+		// as an invalid version by lychee.com and so it defaults to
 		// "needs upgrade" for some requests, such as pulls. These
 		// checks can be skipped by using the special version "v0.0.0",
 		// so we set it to that here.
 		version = "v0.0.0"
 	}
 
-	return fmt.Sprintf("ollama/%s (%s %s) app/%s Go/%s",
+	return fmt.Sprintf("lychee/%s (%s %s) app/%s Go/%s",
 		version,
 		runtime.GOARCH,
 		runtime.GOOS,
@@ -1633,8 +1633,8 @@ func userAgent() string {
 	)
 }
 
-// convertToOllamaTool converts a tool schema from our tools package format to Ollama API format
-func convertToOllamaTool(toolSchema map[string]any) api.Tool {
+// convertToLycheeTool converts a tool schema from our tools package format to Lychee API format
+func convertToLycheeTool(toolSchema map[string]any) api.Tool {
 	tool := api.Tool{
 		Type: "function",
 		Function: api.ToolFunction{
@@ -1790,7 +1790,7 @@ func (s *Server) buildChatRequest(chat *store.Chat, model string, think any, ava
 	if len(availableTools) > 0 {
 		tools := make(api.Tools, len(availableTools))
 		for i, toolSchema := range availableTools {
-			tools[i] = convertToOllamaTool(toolSchema)
+			tools[i] = convertToLycheeTool(toolSchema)
 		}
 		req.Tools = tools
 	}

@@ -1,16 +1,16 @@
-import { Ollama } from "ollama/browser";
-import { OLLAMA_HOST } from "./config";
+import { Lychee as LycheeClient } from "lychee/browser";
+import { LYCHEE_HOST } from "./config";
 
-let _ollamaClient: Ollama | null = null;
+let _lycheeClient: LycheeClient | null = null;
 
-export const ollamaClient = new Proxy({} as Ollama, {
+export const lycheeClient = new Proxy({} as LycheeClient, {
   get(_target, prop) {
-    if (!_ollamaClient) {
-      _ollamaClient = new Ollama({
-        host: OLLAMA_HOST,
+    if (!_lycheeClient) {
+      _lycheeClient = new LycheeClient({
+        host: LYCHEE_HOST,
       });
     }
-    const value = _ollamaClient[prop as keyof Ollama];
-    return typeof value === "function" ? value.bind(_ollamaClient) : value;
+    const value = _lycheeClient[prop as keyof LycheeClient];
+    return typeof value === "function" ? value.bind(_lycheeClient) : value;
   },
 });

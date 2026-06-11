@@ -1,5 +1,5 @@
 // Package config provides integration configuration for external coding tools
-// (Claude Code, Codex, Droid, OpenCode) to use Ollama models.
+// (Claude Code, Codex, Droid, OpenCode) to use Lychee models.
 package config
 
 import (
@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ollama/ollama/cmd/internal/fileutil"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
 )
 
 type integration struct {
@@ -23,9 +23,10 @@ type integration struct {
 type IntegrationConfig = integration
 
 type config struct {
-	Integrations  map[string]*integration `json:"integrations"`
-	LastModel     string                  `json:"last_model,omitempty"`
-	LastSelection string                  `json:"last_selection,omitempty"` // "run" or integration name
+	Integrations     map[string]*integration `json:"integrations"`
+	LastModel        string                  `json:"last_model,omitempty"`
+	LastSelection    string                  `json:"last_selection,omitempty"` // "run" or integration name
+	ShowedStarPrompt bool                    `json:"showed_star_prompt,omitempty"`
 }
 
 func configPath() (string, error) {
@@ -33,7 +34,7 @@ func configPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".ollama", "config.json"), nil
+	return filepath.Join(home, ".lychee", "config.json"), nil
 }
 
 func legacyConfigPath() (string, error) {
@@ -41,10 +42,10 @@ func legacyConfigPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".ollama", "config", "config.json"), nil
+	return filepath.Join(home, ".lychee", "config", "config.json"), nil
 }
 
-// migrateConfig moves the config from the legacy path to ~/.ollama/config.json
+// migrateConfig moves the config from the legacy path to ~/.lychee/config.json
 func migrateConfig() (bool, error) {
 	oldPath, err := legacyConfigPath()
 	if err != nil {
@@ -157,7 +158,7 @@ func SaveIntegration(appName string, models []string) error {
 	return save(cfg)
 }
 
-// MarkIntegrationOnboarded marks an integration as onboarded in Ollama's config.
+// MarkIntegrationOnboarded marks an integration as onboarded in Lychee's config.
 func MarkIntegrationOnboarded(appName string) error {
 	cfg, err := load()
 	if err != nil {
@@ -282,3 +283,23 @@ func listIntegrations() ([]integration, error) {
 
 	return result, nil
 }
+
+// ShowedStarPrompt returns whether the user has already seen the star prompt.
+func ShowedStarPrompt() bool {
+	cfg, err := load()
+	if err != nil {
+		return false
+	}
+	return cfg.ShowedStarPrompt
+}
+
+// SetShowedStarPrompt saves whether the user has seen the star prompt.
+func SetShowedStarPrompt(val bool) error {
+	cfg, err := load()
+	if err != nil {
+		return err
+	}
+	cfg.ShowedStarPrompt = val
+	return save(cfg)
+}
+

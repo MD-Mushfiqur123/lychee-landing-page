@@ -3,7 +3,7 @@ package tools
 import (
 	"testing"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 func TestRegistry_Register(t *testing.T) {
@@ -104,7 +104,7 @@ func TestDefaultRegistry(t *testing.T) {
 }
 
 func TestDefaultRegistry_DisableWebsearch(t *testing.T) {
-	t.Setenv("OLLAMA_AGENT_DISABLE_WEBSEARCH", "1")
+	t.Setenv("LYCHEE_AGENT_DISABLE_WEBSEARCH", "1")
 
 	r := DefaultRegistry()
 
@@ -124,7 +124,7 @@ func TestDefaultRegistry_DisableWebsearch(t *testing.T) {
 }
 
 func TestDefaultRegistry_DisableBash(t *testing.T) {
-	t.Setenv("OLLAMA_AGENT_DISABLE_BASH", "1")
+	t.Setenv("LYCHEE_AGENT_DISABLE_BASH", "1")
 
 	r := DefaultRegistry()
 
@@ -134,8 +134,8 @@ func TestDefaultRegistry_DisableBash(t *testing.T) {
 }
 
 func TestDefaultRegistry_DisableBoth(t *testing.T) {
-	t.Setenv("OLLAMA_AGENT_DISABLE_WEBSEARCH", "1")
-	t.Setenv("OLLAMA_AGENT_DISABLE_BASH", "1")
+	t.Setenv("LYCHEE_AGENT_DISABLE_WEBSEARCH", "1")
+	t.Setenv("LYCHEE_AGENT_DISABLE_BASH", "1")
 
 	r := DefaultRegistry()
 

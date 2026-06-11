@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/types/model"
 )
 
 func TestOpenclawIntegration(t *testing.T) {
@@ -618,7 +618,7 @@ func TestOpenclawEdit(t *testing.T) {
 			t.Fatal(err)
 		}
 		assertOpenclawModelExists(t, configPath, "llama3.2")
-		assertOpenclawPrimaryModel(t, configPath, "ollama/llama3.2")
+		assertOpenclawPrimaryModel(t, configPath, "lychee/llama3.2")
 	})
 
 	t.Run("multiple models - first is primary", func(t *testing.T) {
@@ -628,7 +628,7 @@ func TestOpenclawEdit(t *testing.T) {
 		}
 		assertOpenclawModelExists(t, configPath, "llama3.2")
 		assertOpenclawModelExists(t, configPath, "mistral")
-		assertOpenclawPrimaryModel(t, configPath, "ollama/llama3.2")
+		assertOpenclawPrimaryModel(t, configPath, "lychee/llama3.2")
 	})
 
 	t.Run("preserve other providers", func(t *testing.T) {
@@ -676,8 +676,8 @@ func TestOpenclawEdit(t *testing.T) {
 		json.Unmarshal(data, &cfg)
 		models := cfg["models"].(map[string]any)
 		providers := models["providers"].(map[string]any)
-		ollama := providers["ollama"].(map[string]any)
-		modelList := ollama["models"].([]any)
+		lychee := providers["lychee"].(map[string]any)
+		modelList := lychee["models"].([]any)
 		entry := modelList[0].(map[string]any)
 		entry["customField"] = "user-value"
 		configData, _ := json.MarshalIndent(cfg, "", "  ")
@@ -690,8 +690,8 @@ func TestOpenclawEdit(t *testing.T) {
 		json.Unmarshal(data, &cfg)
 		models = cfg["models"].(map[string]any)
 		providers = models["providers"].(map[string]any)
-		ollama = providers["ollama"].(map[string]any)
-		modelList = ollama["models"].([]any)
+		lychee = providers["lychee"].(map[string]any)
+		modelList = lychee["models"].([]any)
 		entry = modelList[0].(map[string]any)
 		if entry["customField"] != "user-value" {
 			t.Error("custom field was lost")
@@ -760,11 +760,11 @@ func TestOpenclawModels(t *testing.T) {
 		}
 	})
 
-	t.Run("returns all ollama models", func(t *testing.T) {
+	t.Run("returns all lychee models", func(t *testing.T) {
 		configDir := filepath.Join(tmpDir, ".openclaw")
 		os.MkdirAll(configDir, 0o755)
 		os.WriteFile(filepath.Join(configDir, "openclaw.json"), []byte(`{
-			"models":{"providers":{"ollama":{"models":[
+			"models":{"providers":{"lychee":{"models":[
 				{"id":"llama3.2"},
 				{"id":"mistral"}
 			]}}}
@@ -785,8 +785,8 @@ func assertOpenclawModelExists(t *testing.T, path, model string) {
 	json.Unmarshal(data, &cfg)
 	models := cfg["models"].(map[string]any)
 	providers := models["providers"].(map[string]any)
-	ollama := providers["ollama"].(map[string]any)
-	modelList := ollama["models"].([]any)
+	lychee := providers["lychee"].(map[string]any)
+	modelList := lychee["models"].([]any)
 	for _, m := range modelList {
 		if entry, ok := m.(map[string]any); ok {
 			if entry["id"] == model {
@@ -804,8 +804,8 @@ func assertOpenclawModelNotExists(t *testing.T, path, model string) {
 	json.Unmarshal(data, &cfg)
 	models, _ := cfg["models"].(map[string]any)
 	providers, _ := models["providers"].(map[string]any)
-	ollama, _ := providers["ollama"].(map[string]any)
-	modelList, _ := ollama["models"].([]any)
+	lychee, _ := providers["lychee"].(map[string]any)
+	modelList, _ := lychee["models"].([]any)
 	for _, m := range modelList {
 		if entry, ok := m.(map[string]any); ok {
 			if entry["id"] == model {
@@ -888,10 +888,10 @@ func TestOpenclawModelsEdgeCases(t *testing.T) {
 		}
 	})
 
-	t.Run("wrong type at ollama level", func(t *testing.T) {
+	t.Run("wrong type at lychee level", func(t *testing.T) {
 		cleanup()
 		os.MkdirAll(configDir, 0o755)
-		os.WriteFile(configPath, []byte(`{"models":{"providers":{"ollama":"string"}}}`), 0o644)
+		os.WriteFile(configPath, []byte(`{"models":{"providers":{"lychee":"string"}}}`), 0o644)
 		if models := c.Models(); models != nil {
 			t.Errorf("expected nil, got %v", models)
 		}
@@ -900,7 +900,7 @@ func TestOpenclawModelsEdgeCases(t *testing.T) {
 	t.Run("model entry missing id", func(t *testing.T) {
 		cleanup()
 		os.MkdirAll(configDir, 0o755)
-		os.WriteFile(configPath, []byte(`{"models":{"providers":{"ollama":{"models":[{"name":"test"}]}}}}`), 0o644)
+		os.WriteFile(configPath, []byte(`{"models":{"providers":{"lychee":{"models":[{"name":"test"}]}}}}`), 0o644)
 		if len(c.Models()) != 0 {
 			t.Error("expected empty for missing id")
 		}
@@ -909,7 +909,7 @@ func TestOpenclawModelsEdgeCases(t *testing.T) {
 	t.Run("model id is not string", func(t *testing.T) {
 		cleanup()
 		os.MkdirAll(configDir, 0o755)
-		os.WriteFile(configPath, []byte(`{"models":{"providers":{"ollama":{"models":[{"id":123}]}}}}`), 0o644)
+		os.WriteFile(configPath, []byte(`{"models":{"providers":{"lychee":{"models":[{"id":123}]}}}}`), 0o644)
 		if len(c.Models()) != 0 {
 			t.Error("expected empty for non-string id")
 		}
@@ -931,8 +931,8 @@ func TestOpenclawEditSchemaFields(t *testing.T) {
 	json.Unmarshal(data, &cfg)
 	models := cfg["models"].(map[string]any)
 	providers := models["providers"].(map[string]any)
-	ollama := providers["ollama"].(map[string]any)
-	modelList := ollama["models"].([]any)
+	lychee := providers["lychee"].(map[string]any)
+	modelList := lychee["models"].([]any)
 	entry := modelList[0].(map[string]any)
 
 	// Verify base schema fields (always set regardless of API availability)
@@ -967,7 +967,7 @@ func TestOpenclawEditModelNames(t *testing.T) {
 			t.Fatal(err)
 		}
 		assertOpenclawModelExists(t, configPath, "llama3.2:70b")
-		assertOpenclawPrimaryModel(t, configPath, "ollama/llama3.2:70b")
+		assertOpenclawPrimaryModel(t, configPath, "lychee/llama3.2:70b")
 	})
 
 	t.Run("model with slash", func(t *testing.T) {
@@ -976,7 +976,7 @@ func TestOpenclawEditModelNames(t *testing.T) {
 			t.Fatal(err)
 		}
 		assertOpenclawModelExists(t, configPath, "library/model:tag")
-		assertOpenclawPrimaryModel(t, configPath, "ollama/library/model:tag")
+		assertOpenclawPrimaryModel(t, configPath, "lychee/library/model:tag")
 	})
 
 	t.Run("model with hyphen", func(t *testing.T) {
@@ -1036,7 +1036,7 @@ const testOpenclawFixture = `{
   "models": {
     "providers": {
       "anthropic": {"apiKey": "xxx"},
-      "ollama": {
+      "lychee": {
         "baseUrl": "http://127.0.0.1:11434",
         "models": [{"id": "old-model", "customField": "preserved"}]
       }
@@ -1242,7 +1242,7 @@ func TestOpenclawLegacyPaths(t *testing.T) {
 		legacyDir := filepath.Join(tmpDir, ".clawdbot")
 		os.MkdirAll(legacyDir, 0o755)
 		os.WriteFile(filepath.Join(legacyDir, "clawdbot.json"), []byte(`{
-			"models":{"providers":{"ollama":{"models":[{"id":"llama3.2"}]}}}
+			"models":{"providers":{"lychee":{"models":[{"id":"llama3.2"}]}}}
 		}`), 0o644)
 
 		models := c.Models()
@@ -1259,10 +1259,10 @@ func TestOpenclawLegacyPaths(t *testing.T) {
 		os.MkdirAll(newDir, 0o755)
 		os.MkdirAll(legacyDir, 0o755)
 		os.WriteFile(filepath.Join(newDir, "openclaw.json"), []byte(`{
-			"models":{"providers":{"ollama":{"models":[{"id":"new-model"}]}}}
+			"models":{"providers":{"lychee":{"models":[{"id":"new-model"}]}}}
 		}`), 0o644)
 		os.WriteFile(filepath.Join(legacyDir, "clawdbot.json"), []byte(`{
-			"models":{"providers":{"ollama":{"models":[{"id":"legacy-model"}]}}}
+			"models":{"providers":{"lychee":{"models":[{"id":"legacy-model"}]}}}
 		}`), 0o644)
 
 		models := c.Models()
@@ -1503,7 +1503,7 @@ func TestOpenclawChannelsConfigured(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(configDir, "openclaw.json"), []byte(`{
 			"channels": {
 				"defaults": {"dmPolicy": "pairing"},
-				"modelByChannel": {"telegram": "ollama/llama3.2"}
+				"modelByChannel": {"telegram": "lychee/llama3.2"}
 			}
 		}`), 0o644); err != nil {
 			t.Fatal(err)
@@ -2166,15 +2166,15 @@ func TestPrintOpenclawReady(t *testing.T) {
 		r, w, _ := os.Pipe()
 		os.Stderr = w
 
-		printOpenclawReady("openclaw", "ollama", defaultGatewayPort, false)
+		printOpenclawReady("openclaw", "lychee", defaultGatewayPort, false)
 
 		w.Close()
 		os.Stderr = old
 		buf.ReadFrom(r)
 
 		output := buf.String()
-		if !strings.Contains(output, "#token=ollama") {
-			t.Errorf("expected #token=ollama in output, got:\n%s", output)
+		if !strings.Contains(output, "#token=lychee") {
+			t.Errorf("expected #token=lychee in output, got:\n%s", output)
 		}
 	})
 
@@ -2202,7 +2202,7 @@ func TestPrintOpenclawReady(t *testing.T) {
 		r, w, _ := os.Pipe()
 		os.Stderr = w
 
-		printOpenclawReady("openclaw", "ollama", defaultGatewayPort, true)
+		printOpenclawReady("openclaw", "lychee", defaultGatewayPort, true)
 
 		w.Close()
 		os.Stderr = old
@@ -2225,7 +2225,7 @@ func TestPrintOpenclawReady(t *testing.T) {
 		r, w, _ := os.Pipe()
 		os.Stderr = w
 
-		printOpenclawReady("openclaw", "ollama", defaultGatewayPort, false)
+		printOpenclawReady("openclaw", "lychee", defaultGatewayPort, false)
 
 		w.Close()
 		os.Stderr = old
@@ -2408,7 +2408,7 @@ func TestIntegrationOnboarded(t *testing.T) {
 	t.Run("returns true after integrationOnboarded", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		setTestHome(t, tmpDir)
-		os.MkdirAll(filepath.Join(tmpDir, ".ollama"), 0o755)
+		os.MkdirAll(filepath.Join(tmpDir, ".lychee"), 0o755)
 
 		if err := integrationOnboarded("openclaw"); err != nil {
 			t.Fatal(err)
@@ -2422,7 +2422,7 @@ func TestIntegrationOnboarded(t *testing.T) {
 	t.Run("is case insensitive", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		setTestHome(t, tmpDir)
-		os.MkdirAll(filepath.Join(tmpDir, ".ollama"), 0o755)
+		os.MkdirAll(filepath.Join(tmpDir, ".lychee"), 0o755)
 
 		if err := integrationOnboarded("OpenClaw"); err != nil {
 			t.Fatal(err)
@@ -2436,7 +2436,7 @@ func TestIntegrationOnboarded(t *testing.T) {
 	t.Run("preserves existing integration data", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		setTestHome(t, tmpDir)
-		os.MkdirAll(filepath.Join(tmpDir, ".ollama"), 0o755)
+		os.MkdirAll(filepath.Join(tmpDir, ".lychee"), 0o755)
 
 		if err := SaveIntegration("openclaw", []string{"llama3.2", "mistral"}); err != nil {
 			t.Fatal(err)
@@ -2459,7 +2459,7 @@ func TestIntegrationOnboarded(t *testing.T) {
 	})
 }
 
-func TestConfigureOllamaWebSearch(t *testing.T) {
+func TestConfigureLycheeWebSearch(t *testing.T) {
 	home := t.TempDir()
 	setTestHome(t, home)
 
@@ -2474,26 +2474,14 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		configureOllamaWebSearch()
+		configureLycheeWebSearch()
 
 		data, err := os.ReadFile(configPath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		var config map[string]any
-		if err := json.Unmarshal(data, &config); err != nil {
-			t.Fatal(err)
-		}
-
-		plugins, _ := config["plugins"].(map[string]any)
-		if plugins == nil {
-			t.Fatal("plugins section missing")
-		}
 
 		entries, _ := plugins["entries"].(map[string]any)
-		entry, _ := entries["ollama"].(map[string]any)
+		entry, _ := entries["lychee"].(map[string]any)
 		if enabled, _ := entry["enabled"].(bool); !enabled {
-			t.Error("expected entries.ollama.enabled = true")
+			t.Error("expected entries.lychee.enabled = true")
 		}
 		if _, ok := entries["openclaw-web-search"]; ok {
 			t.Error("expected stale openclaw-web-search entry to be absent")
@@ -2509,8 +2497,8 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 		tools, _ := config["tools"].(map[string]any)
 		web, _ := tools["web"].(map[string]any)
 		search, _ := web["search"].(map[string]any)
-		if got, _ := search["provider"].(string); got != "ollama" {
-			t.Errorf("search provider = %q, want %q", got, "ollama")
+		if got, _ := search["provider"].(string); got != "lychee" {
+			t.Errorf("search provider = %q, want %q", got, "lychee")
 		}
 		if enabled, _ := search["enabled"].(bool); !enabled {
 			t.Error("expected tools.web.search.enabled = true")
@@ -2522,8 +2510,8 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		configureOllamaWebSearch()
-		configureOllamaWebSearch()
+		configureLycheeWebSearch()
+		configureLycheeWebSearch()
 
 		data, err := os.ReadFile(configPath)
 		if err != nil {
@@ -2537,10 +2525,10 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 		plugins, _ := config["plugins"].(map[string]any)
 		entries, _ := plugins["entries"].(map[string]any)
 		if len(entries) != 1 {
-			t.Fatalf("expected only bundled ollama entry, got %v", entries)
+			t.Fatalf("expected only bundled lychee entry, got %v", entries)
 		}
-		if _, ok := entries["ollama"]; !ok {
-			t.Fatalf("expected entries.ollama to exist, got %v", entries)
+		if _, ok := entries["lychee"]; !ok {
+			t.Fatalf("expected entries.lychee to exist, got %v", entries)
 		}
 	})
 
@@ -2564,7 +2552,7 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 				},
 			},
 			"tools": map[string]any{
-				"alsoAllow": []any{"ollama_web_search", "ollama_web_fetch", "browser"},
+				"alsoAllow": []any{"lychee_web_search", "lychee_web_fetch", "browser"},
 				"web": map[string]any{
 					"search": map[string]any{"enabled": false},
 					"fetch":  map[string]any{"enabled": false},
@@ -2577,7 +2565,7 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		configureOllamaWebSearch()
+		configureLycheeWebSearch()
 
 		out, err := os.ReadFile(configPath)
 		if err != nil {
@@ -2600,8 +2588,8 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 		if entries["openclaw-web-search"] != nil {
 			t.Error("stale openclaw-web-search entry should be removed")
 		}
-		if ollamaEntry, _ := entries["ollama"].(map[string]any); ollamaEntry == nil {
-			t.Fatal("expected bundled ollama entry to be enabled")
+		if lycheeEntry, _ := entries["lychee"].(map[string]any); lycheeEntry == nil {
+			t.Fatal("expected bundled lychee entry to be enabled")
 		}
 
 		installs, _ := plugins["installs"].(map[string]any)
@@ -2613,7 +2601,7 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 		}
 
 		allow, _ := plugins["allow"].([]any)
-		hasOther, hasStalePlugin, hasOllama := false, false, false
+		hasOther, hasStalePlugin, hasLychee := false, false, false
 		for _, v := range allow {
 			s, _ := v.(string)
 			if s == "some-other-plugin" {
@@ -2622,8 +2610,8 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			if s == "openclaw-web-search" {
 				hasStalePlugin = true
 			}
-			if s == "ollama" {
-				hasOllama = true
+			if s == "lychee" {
+				hasLychee = true
 			}
 		}
 		if !hasOther {
@@ -2632,8 +2620,8 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 		if hasStalePlugin {
 			t.Error("stale openclaw-web-search allow entry should be removed")
 		}
-		if !hasOllama {
-			t.Error("expected plugins.allow to contain bundled ollama plugin")
+		if !hasLychee {
+			t.Error("expected plugins.allow to contain bundled lychee plugin")
 		}
 
 		tools, _ := config["tools"].(map[string]any)
@@ -2644,8 +2632,8 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 		web, _ := tools["web"].(map[string]any)
 		search, _ := web["search"].(map[string]any)
 		fetch, _ := web["fetch"].(map[string]any)
-		if got, _ := search["provider"].(string); got != "ollama" {
-			t.Errorf("search provider = %q, want %q", got, "ollama")
+		if got, _ := search["provider"].(string); got != "lychee" {
+			t.Errorf("search provider = %q, want %q", got, "lychee")
 		}
 		if enabled, _ := search["enabled"].(bool); !enabled {
 			t.Error("expected migrated tools.web.search.enabled = true")
@@ -2692,7 +2680,7 @@ func TestClearSessionModelOverride(t *testing.T) {
 
 	t.Run("clears modelOverride and updates model", func(t *testing.T) {
 		writeSessionsFile(t, map[string]map[string]any{
-			"sess1": {"model": "ollama/old-model", "modelOverride": "old-model", "providerOverride": "ollama"},
+			"sess1": {"model": "lychee/old-model", "modelOverride": "old-model", "providerOverride": "lychee"},
 		})
 		clearSessionModelOverride("new-model")
 		sessions := readSessionsFile(t)
@@ -2713,7 +2701,7 @@ func TestClearSessionModelOverride(t *testing.T) {
 		// but no explicit modelOverride. After changing primary, the session
 		// model field must also be updated.
 		writeSessionsFile(t, map[string]map[string]any{
-			"sess1": {"model": "ollama/old-model"},
+			"sess1": {"model": "lychee/old-model"},
 		})
 		clearSessionModelOverride("new-model")
 		sessions := readSessionsFile(t)
@@ -2746,7 +2734,7 @@ func TestClearSessionModelOverride(t *testing.T) {
 
 	t.Run("handles multiple sessions mixed", func(t *testing.T) {
 		writeSessionsFile(t, map[string]map[string]any{
-			"with-override":    {"model": "old", "modelOverride": "old", "providerOverride": "ollama"},
+			"with-override":    {"model": "old", "modelOverride": "old", "providerOverride": "lychee"},
 			"without-override": {"model": "old"},
 			"already-current":  {"model": "new-model"},
 			"no-model":         {"other": "data"},

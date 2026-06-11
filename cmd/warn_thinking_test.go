@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/types/model"
 )
 
 // Test that a warning is printed when thinking is requested but not supported.
@@ -39,7 +39,7 @@ func TestWarnMissingThinking(t *testing.T) {
 		}))
 		defer srv.Close()
 
-		t.Setenv("OLLAMA_HOST", srv.URL)
+		t.Setenv("LYCHEE_HOST", srv.URL)
 		client, err := api.ClientFromEnvironment()
 		if err != nil {
 			t.Fatal(err)

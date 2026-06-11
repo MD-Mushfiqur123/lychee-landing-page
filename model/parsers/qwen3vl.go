@@ -7,8 +7,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/logutil"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/logutil"
 )
 
 // TODO: call the init function

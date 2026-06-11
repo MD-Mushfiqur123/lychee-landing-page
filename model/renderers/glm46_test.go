@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 func TestGLM46Renderer(t *testing.T) {

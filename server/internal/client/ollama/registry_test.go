@@ -1,4 +1,4 @@
-package ollama
+package lychee
 
 import (
 	"bytes"
@@ -18,8 +18,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/ollama/ollama/server/internal/cache/blob"
-	"github.com/ollama/ollama/server/internal/testutil"
+	"github.com/lychee/lychee/server/internal/cache/blob"
+	"github.com/lychee/lychee/server/internal/testutil"
 )
 
 func ExampleRegistry_cancelOnFirstError() {
@@ -557,7 +557,7 @@ func TestUnlink(t *testing.T) {
 		d := blob.DigestFromBytes("{}")
 		err := blob.PutBytes(rc.Cache, d, "{}")
 		check(err)
-		err = rc.Cache.Link("registry.ollama.ai/library/single:latest", d)
+		err = rc.Cache.Link("registry.lychee.ai/library/single:latest", d)
 		check(err)
 
 		// confirm linked

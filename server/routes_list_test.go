@@ -13,16 +13,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/openai"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/openai"
+	"github.com/lychee/lychee/types/model"
 )
 
 func TestList(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	expectNames := []string{
 		"mistral:7b-instruct-q4_0",

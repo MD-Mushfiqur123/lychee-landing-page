@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/types/model"
 )
 
 func withCodexAppPlatform(t *testing.T, goos string) {
@@ -157,10 +157,10 @@ func TestCodexAppInstalledUsesMacBundleIDFallback(t *testing.T) {
 	}
 }
 
-func TestCodexAppConfigureActivatesOllamaProviderWithoutLegacyProfile(t *testing.T) {
+func TestCodexAppConfigureActivatesLycheeProviderWithoutLegacyProfile(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:9999")
 
 	configPath := filepath.Join(tmpDir, ".codex", "config.toml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
@@ -195,7 +195,7 @@ func TestCodexAppConfigureActivatesOllamaProviderWithoutLegacyProfile(t *testing
 		fmt.Sprintf(`model_provider = %q`, codexAppProfileName),
 		fmt.Sprintf(`model_catalog_json = %q`, catalogPath),
 		codexProviderHeaderFor(codexAppProfileName),
-		`name = "Ollama"`,
+		`name = "Lychee"`,
 		`base_url = "http://127.0.0.1:9999/v1/"`,
 		`wire_api = "responses"`,
 		`[profiles.default]`,
@@ -239,7 +239,7 @@ func TestCodexAppConfigureActivatesOllamaProviderWithoutLegacyProfile(t *testing
 func TestCodexAppConfigureUsesAppSpecificProfileWithoutTouchingCLIProfile(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:9999")
 
 	configPath := filepath.Join(tmpDir, ".codex", "config.toml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
@@ -247,12 +247,12 @@ func TestCodexAppConfigureUsesAppSpecificProfileWithoutTouchingCLIProfile(t *tes
 	}
 	existing := "" +
 		`profile = "default"` + "\n\n" +
-		"[profiles.ollama-launch]\n" +
+		"[profiles.lychee-launch]\n" +
 		`model = "cli-model"` + "\n" +
 		`openai_base_url = "http://cli.invalid/v1/"` + "\n" +
-		`model_provider = "ollama-launch"` + "\n\n" +
-		"[model_providers.ollama-launch]\n" +
-		`name = "CLI Ollama"` + "\n" +
+		`model_provider = "lychee-launch"` + "\n\n" +
+		"[model_providers.lychee-launch]\n" +
+		`name = "CLI Lychee"` + "\n" +
 		`base_url = "http://cli.invalid/v1/"` + "\n" +
 		`wire_api = "responses"` + "\n\n" +
 		"[profiles.default]\n" +
@@ -276,7 +276,7 @@ func TestCodexAppConfigureUsesAppSpecificProfileWithoutTouchingCLIProfile(t *tes
 	if got := codexSectionStringValue(content, codexProfileHeader(), "openai_base_url"); got != "http://cli.invalid/v1/" {
 		t.Fatalf("CLI profile base URL = %q, want preserved CLI URL in:\n%s", got, content)
 	}
-	if got := codexSectionStringValue(content, codexProviderHeader(), "name"); got != "CLI Ollama" {
+	if got := codexSectionStringValue(content, codexProviderHeader(), "name"); got != "CLI Lychee" {
 		t.Fatalf("CLI provider name = %q, want preserved CLI provider in:\n%s", got, content)
 	}
 	if strings.Contains(content, codexProfileHeaderFor(codexAppProfileName)) {
@@ -294,7 +294,7 @@ func TestCodexAppConfigureUsesAppSpecificProfileWithoutTouchingCLIProfile(t *tes
 func TestCodexCLIConfigRefreshLeavesCodexAppConfigActive(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:9999")
 
 	appModels := testLaunchModels("llama3.2", "gemma4")
 	if err := (&CodexApp{}).ConfigureWithModels("llama3.2", appModels); err != nil {
@@ -335,7 +335,7 @@ func TestCodexCLIConfigRefreshLeavesCodexAppConfigActive(t *testing.T) {
 		t.Fatalf("CLI provider should be isolated from app root config, got:\n%s", content)
 	}
 
-	cliProfilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+	cliProfilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 	cliProfileData, err := os.ReadFile(cliProfilePath)
 	if err != nil {
 		t.Fatalf("CLI profile config not created: %v", err)
@@ -386,7 +386,7 @@ func TestCodexCLIConfigRefreshLeavesCodexAppConfigActive(t *testing.T) {
 func TestCodexAppConfigureUsesConnectableHostForUnspecifiedBindAddress(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://0.0.0.0:11434")
+	t.Setenv("LYCHEE_HOST", "http://0.0.0.0:11434")
 
 	if err := (&CodexApp{}).ConfigureWithModels("llama3.2", testLaunchModels("llama3.2")); err != nil {
 		t.Fatalf("ConfigureWithModels returned error: %v", err)
@@ -456,7 +456,7 @@ func TestCodexAppConfigureRejectsMalformedTomlEvenWithExistingRestoreState(t *te
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	existing := "[profiles.ollama-launch\nmodel = \"llama3.2\"\n"
+	existing := "[profiles.lychee-launch\nmodel = \"llama3.2\"\n"
 	if err := os.WriteFile(configPath, []byte(existing), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -491,7 +491,7 @@ func TestCodexAppConfigureRejectsMalformedTomlEvenWithExistingRestoreState(t *te
 func TestCodexAppCurrentModelRequiresManagedActiveProfile(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:11434")
 
 	configPath := filepath.Join(tmpDir, ".codex", "config.toml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
@@ -516,7 +516,7 @@ func TestCodexAppCurrentModelRequiresManagedActiveProfile(t *testing.T) {
 func TestCodexAppCurrentModelReadsManagedRootConfig(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:11434")
 
 	configPath := filepath.Join(tmpDir, ".codex", "config.toml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
@@ -587,7 +587,7 @@ func TestCodexAppCurrentModelRequiresHealthyCatalog(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 			setTestHome(t, tmpDir)
-			t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+			t.Setenv("LYCHEE_HOST", "http://127.0.0.1:11434")
 
 			configPath := filepath.Join(tmpDir, ".codex", "config.toml")
 			if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
@@ -736,7 +736,7 @@ func TestCodexAppConfigureCatalogIncludesExactSelectedModel(t *testing.T) {
 func TestCodexAppConfigureUpgradesLegacyRestoreState(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:9999")
 
 	configPath := filepath.Join(tmpDir, ".codex", "config.toml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
@@ -779,7 +779,7 @@ func TestCodexAppConfigureUpgradesLegacyRestoreState(t *testing.T) {
 func TestCodexAppConfigureMigratesLegacyManagedConfigWithoutPollutingRestoreState(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:9999")
 	withCodexAppPlatform(t, "darwin")
 
 	var openCalls int
@@ -807,7 +807,7 @@ func TestCodexAppConfigureMigratesLegacyManagedConfigWithoutPollutingRestoreStat
 		fmt.Sprintf(`model_provider = %q`, codexAppProfileName) + "\n" +
 		fmt.Sprintf(`model_catalog_json = %q`, catalogPath) + "\n\n" +
 		codexProviderHeaderFor(codexAppProfileName) + "\n" +
-		`name = "Ollama"` + "\n" +
+		`name = "Lychee"` + "\n" +
 		`base_url = "http://127.0.0.1:9999/v1/"` + "\n" +
 		`wire_api = "responses"` + "\n\n" +
 		"[profiles.default]\n" +
@@ -980,7 +980,7 @@ func TestCodexAppRestoreMissingConfigRemovesRestoreState(t *testing.T) {
 func TestCodexAppConfigureMissingConfigReplacesStaleRestoreState(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:9999")
 
 	if err := os.MkdirAll(filepath.Dir(codexAppRestoreStatePath()), 0o755); err != nil {
 		t.Fatal(err)
@@ -1006,7 +1006,7 @@ func TestCodexAppConfigureMissingConfigReplacesStaleRestoreState(t *testing.T) {
 func TestCodexAppConfigureRefreshesRestoreStateAfterManualProfileSwitch(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:9999")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:9999")
 	withCodexAppPlatform(t, "darwin")
 
 	var openCalls int
@@ -1288,15 +1288,15 @@ func TestCodexAppRestoreDoesNotTreatCLIProfileAsOwned(t *testing.T) {
 		t.Fatal(err)
 	}
 	existing := "" +
-		`profile = "ollama-launch"` + "\n" +
+		`profile = "lychee-launch"` + "\n" +
 		`model = "cli-model"` + "\n" +
-		`model_provider = "ollama-launch"` + "\n\n" +
-		"[profiles.ollama-launch]\n" +
+		`model_provider = "lychee-launch"` + "\n\n" +
+		"[profiles.lychee-launch]\n" +
 		`model = "cli-model"` + "\n" +
 		`openai_base_url = "http://cli.invalid/v1/"` + "\n" +
-		`model_provider = "ollama-launch"` + "\n\n" +
-		"[model_providers.ollama-launch]\n" +
-		`name = "CLI Ollama"` + "\n" +
+		`model_provider = "lychee-launch"` + "\n\n" +
+		"[model_providers.lychee-launch]\n" +
+		`name = "CLI Lychee"` + "\n" +
 		`base_url = "http://cli.invalid/v1/"` + "\n" +
 		`wire_api = "responses"` + "\n"
 	if err := os.WriteFile(configPath, []byte(existing), 0o644); err != nil {

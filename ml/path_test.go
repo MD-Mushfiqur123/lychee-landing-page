@@ -6,96 +6,96 @@ import (
 	"testing"
 )
 
-func TestFindLibOllamaPath(t *testing.T) {
+func TestFindLibLycheePath(t *testing.T) {
 	root := t.TempDir()
 
 	tests := []struct {
 		name   string
-		search libOllamaPathSearch
+		search libLycheePathSearch
 		dirs   []string
 		want   string
 	}{
 		{
 			name: "darwin release layout",
-			search: libOllamaPathSearch{
-				executable: filepath.Join(root, "darwin-app", "Ollama.app", "Contents", "Resources", "ollama"),
+			search: libLycheePathSearch{
+				executable: filepath.Join(root, "darwin-app", "Lychee.app", "Contents", "Resources", "lychee"),
 				goos:       "darwin",
 				goarch:     "arm64",
 			},
-			dirs: []string{filepath.Join(root, "darwin-app", "Ollama.app", "Contents", "Resources")},
-			want: filepath.Join(root, "darwin-app", "Ollama.app", "Contents", "Resources"),
+			dirs: []string{filepath.Join(root, "darwin-app", "Lychee.app", "Contents", "Resources")},
+			want: filepath.Join(root, "darwin-app", "Lychee.app", "Contents", "Resources"),
 		},
 		{
 			name: "darwin standard install layout",
-			search: libOllamaPathSearch{
-				executable: filepath.Join(root, "darwin-install", "bin", "ollama"),
+			search: libLycheePathSearch{
+				executable: filepath.Join(root, "darwin-install", "bin", "lychee"),
 				goos:       "darwin",
 				goarch:     "arm64",
 			},
-			dirs: []string{filepath.Join(root, "darwin-install", "lib", "ollama")},
-			want: filepath.Join(root, "darwin-install", "lib", "ollama"),
+			dirs: []string{filepath.Join(root, "darwin-install", "lib", "lychee")},
+			want: filepath.Join(root, "darwin-install", "lib", "lychee"),
 		},
 		{
 			name: "windows release layout",
-			search: libOllamaPathSearch{
-				executable: filepath.Join(root, "windows-release", "ollama.exe"),
+			search: libLycheePathSearch{
+				executable: filepath.Join(root, "windows-release", "lychee.exe"),
 				goos:       "windows",
 				goarch:     "amd64",
 			},
-			dirs: []string{filepath.Join(root, "windows-release", "lib", "ollama")},
-			want: filepath.Join(root, "windows-release", "lib", "ollama"),
+			dirs: []string{filepath.Join(root, "windows-release", "lib", "lychee")},
+			want: filepath.Join(root, "windows-release", "lib", "lychee"),
 		},
 		{
 			name: "windows standard install layout",
-			search: libOllamaPathSearch{
-				executable: filepath.Join(root, "windows-install", "bin", "ollama.exe"),
+			search: libLycheePathSearch{
+				executable: filepath.Join(root, "windows-install", "bin", "lychee.exe"),
 				goos:       "windows",
 				goarch:     "amd64",
 			},
-			dirs: []string{filepath.Join(root, "windows-install", "lib", "ollama")},
-			want: filepath.Join(root, "windows-install", "lib", "ollama"),
+			dirs: []string{filepath.Join(root, "windows-install", "lib", "lychee")},
+			want: filepath.Join(root, "windows-install", "lib", "lychee"),
 		},
 		{
 			name: "linux standard install layout",
-			search: libOllamaPathSearch{
-				executable: filepath.Join(root, "linux-install", "bin", "ollama"),
+			search: libLycheePathSearch{
+				executable: filepath.Join(root, "linux-install", "bin", "lychee"),
 				goos:       "linux",
 				goarch:     "amd64",
 			},
-			dirs: []string{filepath.Join(root, "linux-install", "lib", "ollama")},
-			want: filepath.Join(root, "linux-install", "lib", "ollama"),
+			dirs: []string{filepath.Join(root, "linux-install", "lib", "lychee")},
+			want: filepath.Join(root, "linux-install", "lib", "lychee"),
 		},
 		{
 			name: "local linux underscore dist layout",
-			search: libOllamaPathSearch{
-				executable: filepath.Join(root, "linux-dev", "ollama"),
+			search: libLycheePathSearch{
+				executable: filepath.Join(root, "linux-dev", "lychee"),
 				workingDir: filepath.Join(root, "linux-dev"),
 				goos:       "linux",
 				goarch:     "amd64",
 			},
-			dirs: []string{filepath.Join(root, "linux-dev", "dist", "linux_amd64", "lib", "ollama")},
-			want: filepath.Join(root, "linux-dev", "dist", "linux_amd64", "lib", "ollama"),
+			dirs: []string{filepath.Join(root, "linux-dev", "dist", "linux_amd64", "lib", "lychee")},
+			want: filepath.Join(root, "linux-dev", "dist", "linux_amd64", "lib", "lychee"),
 		},
 		{
 			name: "mlx-only standard install layout",
-			search: libOllamaPathSearch{
-				executable: filepath.Join(root, "mlx-install", "bin", "ollama"),
+			search: libLycheePathSearch{
+				executable: filepath.Join(root, "mlx-install", "bin", "lychee"),
 				goos:       "linux",
 				goarch:     "amd64",
 			},
-			dirs: []string{filepath.Join(root, "mlx-install", "lib", "ollama")},
-			want: filepath.Join(root, "mlx-install", "lib", "ollama"),
+			dirs: []string{filepath.Join(root, "mlx-install", "lib", "lychee")},
+			want: filepath.Join(root, "mlx-install", "lib", "lychee"),
 		},
 		{
 			name: "darwin local build layout before executable directory fallback",
-			search: libOllamaPathSearch{
-				executable: filepath.Join(root, "darwin-dev", "ollama"),
+			search: libLycheePathSearch{
+				executable: filepath.Join(root, "darwin-dev", "lychee"),
 				workingDir: filepath.Join(root, "darwin-dev"),
 				goos:       "darwin",
 				goarch:     "arm64",
 			},
-			dirs: []string{filepath.Join(root, "darwin-dev", "build", "lib", "ollama")},
-			want: filepath.Join(root, "darwin-dev", "build", "lib", "ollama"),
+			dirs: []string{filepath.Join(root, "darwin-dev", "build", "lib", "lychee")},
+			want: filepath.Join(root, "darwin-dev", "build", "lib", "lychee"),
 		},
 	}
 
@@ -107,9 +107,9 @@ func TestFindLibOllamaPath(t *testing.T) {
 				}
 			}
 
-			got := findLibOllamaPath(tt.search)
+			got := findLibLycheePath(tt.search)
 			if got != tt.want {
-				t.Fatalf("findLibOllamaPath() = %q, want %q; candidates: %v", got, tt.want, libOllamaPathCandidates(tt.search))
+				t.Fatalf("findLibLycheePath() = %q, want %q; candidates: %v", got, tt.want, libLycheePathCandidates(tt.search))
 			}
 		})
 	}

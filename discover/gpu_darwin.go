@@ -8,7 +8,7 @@ package discover
 import "C"
 
 import (
-	"github.com/ollama/ollama/format"
+	"github.com/lychee/lychee/format"
 )
 
 const (

@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/manifest"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/manifest"
 )
 
 func TestConvertFromSafetensors(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	// Helper function to create a new layer and return its digest
 	makeTemp := func(content string) string {
@@ -156,15 +156,15 @@ func TestRemoteURL(t *testing.T) {
 			hasError: false,
 		},
 		{
-			name:     "ollama.com special case",
-			input:    "ollama.com",
-			expected: "https://ollama.com:443",
+			name:     "lychee.com special case",
+			input:    "lychee.com",
+			expected: "https://lychee.com:443",
 			hasError: false,
 		},
 		{
-			name:     "http ollama.com special case",
-			input:    "http://ollama.com",
-			expected: "https://ollama.com:443",
+			name:     "http lychee.com special case",
+			input:    "http://lychee.com",
+			expected: "https://lychee.com:443",
 			hasError: false,
 		},
 		{
@@ -234,7 +234,7 @@ func TestRemoteURL_Idempotent(t *testing.T) {
 		"/foo/bar",
 		"example.com",
 		"https://example.com:8080/path",
-		"ollama.com",
+		"lychee.com",
 		"http://localhost:11434",
 	}
 
@@ -258,7 +258,7 @@ func TestRemoteURL_Idempotent(t *testing.T) {
 }
 
 func TestSetTemplate(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	t.Run("valid template", func(t *testing.T) {
 		layers, err := setTemplate(nil, "{{ .Prompt }}")
@@ -270,7 +270,7 @@ func TestSetTemplate(t *testing.T) {
 			t.Fatalf("expected 1 layer, got %d", len(layers))
 		}
 
-		if got, want := layers[0].MediaType, "application/vnd.ollama.image.template"; got != want {
+		if got, want := layers[0].MediaType, "application/vnd.lychee.image.template"; got != want {
 			t.Fatalf("unexpected media type: got %q, want %q", got, want)
 		}
 	})

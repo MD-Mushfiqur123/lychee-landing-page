@@ -3,12 +3,12 @@ package gemma4
 import (
 	"math"
 
-	"github.com/ollama/ollama/fs"
-	"github.com/ollama/ollama/kvcache"
-	"github.com/ollama/ollama/ml"
-	"github.com/ollama/ollama/ml/nn"
-	"github.com/ollama/ollama/ml/nn/rope"
-	"github.com/ollama/ollama/model/input"
+	"github.com/lychee/lychee/fs"
+	"github.com/lychee/lychee/kvcache"
+	"github.com/lychee/lychee/ml"
+	"github.com/lychee/lychee/ml/nn"
+	"github.com/lychee/lychee/ml/nn/rope"
+	"github.com/lychee/lychee/model/input"
 )
 
 const (

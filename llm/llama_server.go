@@ -1,6 +1,6 @@
 // llama_server.go wraps the llama-server binary as a subprocess
 //
-// Ollama uses two chat paths with llama-server. Models with explicit Ollama
+// Lychee uses two chat paths with llama-server. Models with explicit Lychee
 // renderers/parsers, Harmony handling, MLX, or an enabled Go TEMPLATE layer
 // still render prompts in Go and call /completion. Other GGUF chat models use
 // llama-server's chat_template handling through /v1/chat/completions.
@@ -41,10 +41,10 @@ import (
 
 	"golang.org/x/sync/semaphore"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/ml"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/ml"
 )
 
 var grammarJSON = `
@@ -97,7 +97,7 @@ func boundedNumPredict(numPredict, numCtx int) int {
 	if numCtx <= 0 {
 		return numPredict
 	}
-	// Ollama's default num_predict=-1 means "generate until a stop condition".
+	// Lychee's default num_predict=-1 means "generate until a stop condition".
 	// llama-server still needs a finite request budget, so keep open-ended
 	// generations bounded while allowing several full context windows.
 	limit := openEndedGenerationContextMultiplier * numCtx
@@ -124,7 +124,7 @@ type llamaServerRunner struct {
 	options          api.Options
 	modelPath        string
 	// mediaMarker must match the LLAMA_MEDIA_MARKER value passed to llama-server.
-	// llama.cpp randomizes this by default; Ollama renders stable [img-N] markers
+	// llama.cpp randomizes this by default; Lychee renders stable [img-N] markers
 	// and rewrites them before forwarding the request.
 	mediaMarker string
 
@@ -220,10 +220,10 @@ func (s *llamaServerRunner) llamaServerMediaMarker() string {
 func newLlamaServerMediaMarker() string {
 	var b [16]byte
 	if _, err := crand.Read(b[:]); err == nil {
-		return fmt.Sprintf("<__ollama_media_%x__>", b)
+		return fmt.Sprintf("<__lychee_media_%x__>", b)
 	}
 
-	return fmt.Sprintf("<__ollama_media_%d_%d__>", time.Now().UnixNano(), rand.Int63())
+	return fmt.Sprintf("<__lychee_media_%d_%d__>", time.Now().UnixNano(), rand.Int63())
 }
 
 func (s *llamaServerRunner) completionPrompt(prompt, leadingBOS string) string {
@@ -301,7 +301,7 @@ func (s *llamaServerRunner) ContextLength() int {
 	return s.options.NumCtx
 }
 
-// FindLlamaServer locates the llama-server binary in lib/ollama/.
+// FindLlamaServer locates the llama-server binary in lib/lychee/.
 // There is a single binary that dynamically loads GPU backends at runtime.
 func FindLlamaServer() (string, error) {
 	path, candidates, err := findLlamaCppBinary("llama-server", defaultLlamaCppBinarySearch())
@@ -341,6 +341,9 @@ func startLlamaServer(launch llamaServerLaunchConfig, out io.Writer) (cmd *exec.
 		"--offline",
 		"-c", strconv.Itoa(launch.opts.NumCtx * launch.numParallel),
 		"-np", strconv.Itoa(launch.numParallel),
+	}
+	if launch.config.CacheReuse {
+		params = append(params, "--cache-reuse")
 	}
 	params = appendLlamaServerLogArgs(params)
 	params = appendJinjaArgs(params, launch.config)
@@ -473,7 +476,7 @@ func llamaServerLibraryPaths(exe string, gpuLibs []string, envUpdates map[string
 	// 3. User/system library path
 	addPath(llamaDir)
 	for _, dir := range gpuLibs {
-		if dir == ml.LibOllamaPath || dir == llamaDir {
+		if dir == ml.LibLycheePath || dir == llamaDir {
 			continue
 		}
 		if envUpdates["GGML_BACKEND_PATH"] == "" {
@@ -558,7 +561,17 @@ func appendBatchArgs(params []string, opts api.Options, embedding bool, numParal
 	}
 
 	if opts.NumBatch > 0 {
-		params = append(params, "-b", strconv.Itoa(opts.NumBatch), "-ub", strconv.Itoa(opts.NumBatch))
+		ub := opts.NumBatch
+		if numParallel > 1 {
+			ub = opts.NumBatch / 4
+			if ub < 512 {
+				ub = 512
+			}
+			if ub > opts.NumBatch {
+				ub = opts.NumBatch
+			}
+		}
+		params = append(params, "-b", strconv.Itoa(opts.NumBatch), "-ub", strconv.Itoa(ub))
 	}
 	return params
 }
@@ -720,13 +733,13 @@ func NewLlamaServerRunner(
 	arch := f.KV().Architecture()
 	_, isEmbedding := f.KV()[fmt.Sprintf("%s.pooling_type", arch)]
 
-	// Older Ollama-format GGUFs store vision tensors (v.*, mm.*) inline in
+	// Older Lychee-format GGUFs store vision tensors (v.*, mm.*) inline in
 	// the main model file rather than in a separate projector layer. When
 	// the arch has a llama/compat clip handler, we can point --mmproj at
 	// the same file and the in-process shim translates the two views.
 	//
 	// If we auto-enable --mmproj for an arch whose clip handler doesn't
-	// exist yet, upstream's clip loader sees un-translated Ollama tensors
+	// exist yet, upstream's clip loader sees un-translated Lychee tensors
 	// and aborts model load. So gate on an explicit allowlist that mirrors
 	// the compat layer's clip-side coverage in llama/compat/.
 	compatClipArches := map[string]bool{
@@ -1434,7 +1447,7 @@ func (s *llamaServerRunner) Completion(ctx context.Context, req CompletionReques
 		lsReq.Grammar = req.Grammar
 	}
 
-	// Convert media: replace Ollama's stable [img-N] markers with the per-process
+	// Convert media: replace Lychee's stable [img-N] markers with the per-process
 	// llama-server media marker and package the matching payloads as base64.
 	if len(req.Media) > 0 {
 		promptStr := lsReq.Prompt.(string)
@@ -1471,9 +1484,9 @@ func (s *llamaServerRunner) Completion(ctx context.Context, req CompletionReques
 		}
 		slog.Error("llama-server completion error", "error", err)
 		if msg := s.lastErrMsg(); msg != "" {
-			return fmt.Errorf("model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check ollama server logs for details: %s", msg)
+			return fmt.Errorf("model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check lychee server logs for details: %s", msg)
 		}
-		return errors.New("model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check ollama server logs for details")
+		return errors.New("model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check lychee server logs for details")
 	}
 	defer res.Body.Close()
 
@@ -1625,7 +1638,7 @@ func (s *llamaServerRunner) statusErrorMessage(body []byte) string {
 	return errMsg
 }
 
-// convertLogprobs converts llama-server's completion_probabilities to Ollama's Logprob format.
+// convertLogprobs converts llama-server's completion_probabilities to Lychee's Logprob format.
 // includeTop controls whether top alternatives are included in the output.
 func convertLogprobs(probs []llamaServerTokenProb, includeTop bool) []Logprob {
 	if len(probs) == 0 {
@@ -1765,9 +1778,9 @@ func (s *llamaServerRunner) Chat(ctx context.Context, req ChatRequest, fn func(C
 		}
 		slog.Error("llama-server chat error", "error", err)
 		if msg := s.lastErrMsg(); msg != "" {
-			return fmt.Errorf("model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check ollama server logs for details: %s", msg)
+			return fmt.Errorf("model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check lychee server logs for details: %s", msg)
 		}
-		return errors.New("model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check ollama server logs for details")
+		return errors.New("model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check lychee server logs for details")
 	}
 	defer res.Body.Close()
 
@@ -2489,7 +2502,13 @@ func PredictServerVRAM(modelPath string, f *ggml.GGML, numCtx int) uint64 {
 	}
 	kvCache := 2 * layers * kvHeads * headDim * uint64(numCtx) * 2
 
-	return weights + kvCache
+	// Base compute/graph VRAM overhead (e.g., 300 MiB)
+	baseComputeOverhead := uint64(300 * 1024 * 1024)
+
+	// Context-size-dependent memory scaling (e.g., ~10 KiB per context token)
+	contextComputeScaling := uint64(numCtx) * 10240
+
+	return weights + kvCache + baseComputeOverhead + contextComputeScaling
 }
 
 // memoryParsingWriter wraps an io.Writer and parses llama-server log output

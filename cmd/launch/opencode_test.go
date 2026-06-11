@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/types/model"
 )
 
 func TestOpenCodeIntegration(t *testing.T) {
@@ -44,23 +44,23 @@ func TestOpenCodeEdit(t *testing.T) {
 
 		// Verify provider structure
 		provider, _ := cfg["provider"].(map[string]any)
-		ollama, _ := provider["ollama"].(map[string]any)
-		if ollama["name"] != "Ollama" {
-			t.Errorf("provider name = %v, want Ollama", ollama["name"])
+		lychee, _ := provider["lychee"].(map[string]any)
+		if lychee["name"] != "Lychee" {
+			t.Errorf("provider name = %v, want Lychee", lychee["name"])
 		}
-		if ollama["npm"] != "@ai-sdk/openai-compatible" {
-			t.Errorf("npm = %v, want @ai-sdk/openai-compatible", ollama["npm"])
+		if lychee["npm"] != "@ai-sdk/openai-compatible" {
+			t.Errorf("npm = %v, want @ai-sdk/openai-compatible", lychee["npm"])
 		}
 
 		// Verify model exists
-		models, _ := ollama["models"].(map[string]any)
+		models, _ := lychee["models"].(map[string]any)
 		if models["llama3.2"] == nil {
 			t.Error("model llama3.2 not found in config content")
 		}
 
 		// Verify default model
-		if cfg["model"] != "ollama/llama3.2" {
-			t.Errorf("model = %v, want ollama/llama3.2", cfg["model"])
+		if cfg["model"] != "lychee/llama3.2" {
+			t.Errorf("model = %v, want lychee/llama3.2", cfg["model"])
 		}
 	})
 
@@ -74,8 +74,8 @@ func TestOpenCodeEdit(t *testing.T) {
 		var cfg map[string]any
 		json.Unmarshal([]byte(o.configContent), &cfg)
 		provider, _ := cfg["provider"].(map[string]any)
-		ollama, _ := provider["ollama"].(map[string]any)
-		models, _ := ollama["models"].(map[string]any)
+		lychee, _ := provider["lychee"].(map[string]any)
+		models, _ := lychee["models"].(map[string]any)
 
 		if models["llama3.2"] == nil {
 			t.Error("model llama3.2 not found")
@@ -84,8 +84,8 @@ func TestOpenCodeEdit(t *testing.T) {
 			t.Error("model qwen3:32b not found")
 		}
 		// First model should be the default
-		if cfg["model"] != "ollama/llama3.2" {
-			t.Errorf("default model = %v, want ollama/llama3.2", cfg["model"])
+		if cfg["model"] != "lychee/llama3.2" {
+			t.Errorf("default model = %v, want lychee/llama3.2", cfg["model"])
 		}
 	})
 
@@ -126,8 +126,8 @@ func TestOpenCodeEdit(t *testing.T) {
 		var cfg map[string]any
 		json.Unmarshal([]byte(o.configContent), &cfg)
 		provider, _ := cfg["provider"].(map[string]any)
-		ollama, _ := provider["ollama"].(map[string]any)
-		models, _ := ollama["models"].(map[string]any)
+		lychee, _ := provider["lychee"].(map[string]any)
+		models, _ := lychee["models"].(map[string]any)
 		entry, _ := models["glm-4.7:cloud"].(map[string]any)
 
 		limit, ok := entry["limit"].(map[string]any)
@@ -151,8 +151,8 @@ func TestOpenCodeEdit(t *testing.T) {
 		var cfg map[string]any
 		json.Unmarshal([]byte(o.configContent), &cfg)
 		provider, _ := cfg["provider"].(map[string]any)
-		ollama, _ := provider["ollama"].(map[string]any)
-		models, _ := ollama["models"].(map[string]any)
+		lychee, _ := provider["lychee"].(map[string]any)
+		models, _ := lychee["models"].(map[string]any)
 		entry, _ := models["llama3.2"].(map[string]any)
 
 		if entry["limit"] != nil {
@@ -338,8 +338,8 @@ func TestOpenCodeEdit_CloudModelLimitStructure(t *testing.T) {
 	var cfg map[string]any
 	json.Unmarshal([]byte(o.configContent), &cfg)
 	provider, _ := cfg["provider"].(map[string]any)
-	ollama, _ := provider["ollama"].(map[string]any)
-	models, _ := ollama["models"].(map[string]any)
+	lychee, _ := provider["lychee"].(map[string]any)
+	models, _ := lychee["models"].(map[string]any)
 	entry, _ := models["glm-4.7:cloud"].(map[string]any)
 
 	limit, ok := entry["limit"].(map[string]any)
@@ -372,15 +372,15 @@ func TestOpenCodeEdit_SpecialCharsInModelName(t *testing.T) {
 	}
 
 	provider, _ := cfg["provider"].(map[string]any)
-	ollama, _ := provider["ollama"].(map[string]any)
-	models, _ := ollama["models"].(map[string]any)
+	lychee, _ := provider["lychee"].(map[string]any)
+	models, _ := lychee["models"].(map[string]any)
 	if models[specialModel] == nil {
 		t.Errorf("model with special chars not found in config")
 	}
 }
 
 func TestReadModelJSONModels(t *testing.T) {
-	t.Run("reads ollama models from model.json", func(t *testing.T) {
+	t.Run("reads lychee models from model.json", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		setTestHome(t, tmpDir)
 
@@ -388,8 +388,8 @@ func TestReadModelJSONModels(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		state := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
-				map[string]any{"providerID": "ollama", "modelID": "qwen3:32b"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "qwen3:32b"},
 			},
 		}
 		data, _ := json.MarshalIndent(state, "", "  ")
@@ -404,7 +404,7 @@ func TestReadModelJSONModels(t *testing.T) {
 		}
 	})
 
-	t.Run("skips non-ollama providers", func(t *testing.T) {
+	t.Run("skips non-lychee providers", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		setTestHome(t, tmpDir)
 
@@ -413,7 +413,7 @@ func TestReadModelJSONModels(t *testing.T) {
 		state := map[string]any{
 			"recent": []any{
 				map[string]any{"providerID": "openai", "modelID": "gpt-4"},
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
 			},
 		}
 		data, _ := json.MarshalIndent(state, "", "  ")
@@ -463,7 +463,7 @@ func TestOpenCodeResolveContent(t *testing.T) {
 		stateDir := filepath.Join(tmpDir, ".local", "state", "opencode")
 		state := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "different-model"},
+				map[string]any{"providerID": "lychee", "modelID": "different-model"},
 			},
 		}
 		data, _ := json.MarshalIndent(state, "", "  ")
@@ -483,8 +483,8 @@ func TestOpenCodeResolveContent(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		state := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
-				map[string]any{"providerID": "ollama", "modelID": "qwen3:32b"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "qwen3:32b"},
 			},
 		}
 		data, _ := json.MarshalIndent(state, "", "  ")
@@ -498,12 +498,12 @@ func TestOpenCodeResolveContent(t *testing.T) {
 
 		var cfg map[string]any
 		json.Unmarshal([]byte(content), &cfg)
-		if cfg["model"] != "ollama/llama3.2" {
-			t.Errorf("primary = %v, want ollama/llama3.2", cfg["model"])
+		if cfg["model"] != "lychee/llama3.2" {
+			t.Errorf("primary = %v, want lychee/llama3.2", cfg["model"])
 		}
 		provider, _ := cfg["provider"].(map[string]any)
-		ollama, _ := provider["ollama"].(map[string]any)
-		cfgModels, _ := ollama["models"].(map[string]any)
+		lychee, _ := provider["lychee"].(map[string]any)
+		cfgModels, _ := lychee["models"].(map[string]any)
 		if cfgModels["llama3.2"] == nil || cfgModels["qwen3:32b"] == nil {
 			t.Errorf("expected both models in config, got %v", cfgModels)
 		}
@@ -517,8 +517,8 @@ func TestOpenCodeResolveContent(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		state := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
-				map[string]any{"providerID": "ollama", "modelID": "qwen3:32b"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "qwen3:32b"},
 			},
 		}
 		data, _ := json.MarshalIndent(state, "", "  ")
@@ -529,8 +529,8 @@ func TestOpenCodeResolveContent(t *testing.T) {
 
 		var cfg map[string]any
 		json.Unmarshal([]byte(content), &cfg)
-		if cfg["model"] != "ollama/qwen3:32b" {
-			t.Errorf("primary = %v, want ollama/qwen3:32b", cfg["model"])
+		if cfg["model"] != "lychee/qwen3:32b" {
+			t.Errorf("primary = %v, want lychee/qwen3:32b", cfg["model"])
 		}
 	})
 
@@ -542,7 +542,7 @@ func TestOpenCodeResolveContent(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		state := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
 			},
 		}
 		data, _ := json.MarshalIndent(state, "", "  ")
@@ -554,13 +554,13 @@ func TestOpenCodeResolveContent(t *testing.T) {
 		var cfg map[string]any
 		json.Unmarshal([]byte(content), &cfg)
 		provider, _ := cfg["provider"].(map[string]any)
-		ollama, _ := provider["ollama"].(map[string]any)
-		cfgModels, _ := ollama["models"].(map[string]any)
+		lychee, _ := provider["lychee"].(map[string]any)
+		cfgModels, _ := lychee["models"].(map[string]any)
 		if cfgModels["gemma4"] == nil {
 			t.Error("requested model gemma4 not injected into config")
 		}
-		if cfg["model"] != "ollama/gemma4" {
-			t.Errorf("primary = %v, want ollama/gemma4", cfg["model"])
+		if cfg["model"] != "lychee/gemma4" {
+			t.Errorf("primary = %v, want lychee/gemma4", cfg["model"])
 		}
 	})
 
@@ -582,7 +582,7 @@ func TestOpenCodeResolveContent(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		state := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
 			},
 		}
 		data, _ := json.MarshalIndent(state, "", "  ")
@@ -604,8 +604,8 @@ func TestOpenCodeResolveContent(t *testing.T) {
 		var cfg map[string]any
 		json.Unmarshal([]byte(content), &cfg)
 		provider, _ := cfg["provider"].(map[string]any)
-		ollama, _ := provider["ollama"].(map[string]any)
-		cfgModels, _ := ollama["models"].(map[string]any)
+		lychee, _ := provider["lychee"].(map[string]any)
+		cfgModels, _ := lychee["models"].(map[string]any)
 		entry, _ := cfgModels["gemma4"].(map[string]any)
 		limit, _ := entry["limit"].(map[string]any)
 		if limit["context"] != float64(65_536) || limit["output"] != float64(8_192) {
@@ -627,7 +627,7 @@ func TestOpenCodeResolveContent(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		state := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
 			},
 		}
 		data, _ := json.MarshalIndent(state, "", "  ")
@@ -661,8 +661,8 @@ func TestBuildInlineConfig(t *testing.T) {
 		}
 		var cfg map[string]any
 		json.Unmarshal([]byte(content), &cfg)
-		if cfg["model"] != "ollama/qwen3:32b" {
-			t.Errorf("primary = %v, want ollama/qwen3:32b", cfg["model"])
+		if cfg["model"] != "lychee/qwen3:32b" {
+			t.Errorf("primary = %v, want lychee/qwen3:32b", cfg["model"])
 		}
 	})
 }
@@ -676,8 +676,8 @@ func TestOpenCodeEdit_PreservesRecentEntries(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		initial := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "old-A"},
-				map[string]any{"providerID": "ollama", "modelID": "old-B"},
+				map[string]any{"providerID": "lychee", "modelID": "old-A"},
+				map[string]any{"providerID": "lychee", "modelID": "old-B"},
 			},
 		}
 		data, _ := json.MarshalIndent(initial, "", "  ")
@@ -710,8 +710,8 @@ func TestOpenCodeEdit_PreservesRecentEntries(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		initial := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "old-A"},
-				map[string]any{"providerID": "ollama", "modelID": "old-B"},
+				map[string]any{"providerID": "lychee", "modelID": "old-A"},
+				map[string]any{"providerID": "lychee", "modelID": "old-B"},
 			},
 		}
 		data, _ := json.MarshalIndent(initial, "", "  ")
@@ -739,7 +739,7 @@ func TestOpenCodeEdit_PreservesRecentEntries(t *testing.T) {
 		}
 	})
 
-	t.Run("preserves non-ollama entries", func(t *testing.T) {
+	t.Run("preserves non-lychee entries", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		setTestHome(t, tmpDir)
 
@@ -748,7 +748,7 @@ func TestOpenCodeEdit_PreservesRecentEntries(t *testing.T) {
 		initial := map[string]any{
 			"recent": []any{
 				map[string]any{"providerID": "openai", "modelID": "gpt-4"},
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
 			},
 		}
 		data, _ := json.MarshalIndent(initial, "", "  ")
@@ -764,7 +764,7 @@ func TestOpenCodeEdit_PreservesRecentEntries(t *testing.T) {
 		json.Unmarshal(stored, &state)
 		recent, _ := state["recent"].([]any)
 
-		// Should have: qwen3:32b (new), gpt-4 (preserved openai), llama3.2 (preserved ollama)
+		// Should have: qwen3:32b (new), gpt-4 (preserved openai), llama3.2 (preserved lychee)
 		var foundOpenAI bool
 		for _, entry := range recent {
 			e, _ := entry.(map[string]any)
@@ -773,11 +773,11 @@ func TestOpenCodeEdit_PreservesRecentEntries(t *testing.T) {
 			}
 		}
 		if !foundOpenAI {
-			t.Errorf("non-ollama gpt-4 entry was not preserved, got %v", recent)
+			t.Errorf("non-lychee gpt-4 entry was not preserved, got %v", recent)
 		}
 	})
 
-	t.Run("deduplicates ollama models being re-added", func(t *testing.T) {
+	t.Run("deduplicates lychee models being re-added", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		setTestHome(t, tmpDir)
 
@@ -785,7 +785,7 @@ func TestOpenCodeEdit_PreservesRecentEntries(t *testing.T) {
 		os.MkdirAll(stateDir, 0o755)
 		initial := map[string]any{
 			"recent": []any{
-				map[string]any{"providerID": "ollama", "modelID": "llama3.2"},
+				map[string]any{"providerID": "lychee", "modelID": "llama3.2"},
 			},
 		}
 		data, _ := json.MarshalIndent(initial, "", "  ")
@@ -820,11 +820,11 @@ func TestOpenCodeEdit_PreservesRecentEntries(t *testing.T) {
 		stateDir := filepath.Join(tmpDir, ".local", "state", "opencode")
 		os.MkdirAll(stateDir, 0o755)
 
-		// Pre-populate with 9 distinct ollama models
+		// Pre-populate with 9 distinct lychee models
 		recentEntries := make([]any, 0, 9)
 		for i := range 9 {
 			recentEntries = append(recentEntries, map[string]any{
-				"providerID": "ollama",
+				"providerID": "lychee",
 				"modelID":    fmt.Sprintf("old-%d", i),
 			})
 		}
@@ -854,14 +854,14 @@ func TestOpenCodeEdit_BaseURL(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
 
-	// Default OLLAMA_HOST
+	// Default LYCHEE_HOST
 	o.Edit(testLaunchModels("llama3.2"))
 
 	var cfg map[string]any
 	json.Unmarshal([]byte(o.configContent), &cfg)
 	provider, _ := cfg["provider"].(map[string]any)
-	ollama, _ := provider["ollama"].(map[string]any)
-	options, _ := ollama["options"].(map[string]any)
+	lychee, _ := provider["lychee"].(map[string]any)
+	options, _ := lychee["options"].(map[string]any)
 
 	baseURL, _ := options["baseURL"].(string)
 	if baseURL == "" {

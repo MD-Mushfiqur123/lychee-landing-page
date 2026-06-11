@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 func TestCreateImageGen(t *testing.T) {
@@ -20,7 +20,7 @@ func TestCreateImageGen(t *testing.T) {
 
 	// Allow overriding the model directory via env var for local testing,
 	// since the model is ~33GB and may already be downloaded elsewhere.
-	modelDir := os.Getenv("OLLAMA_TEST_IMAGEGEN_MODEL_DIR")
+	modelDir := os.Getenv("LYCHEE_TEST_IMAGEGEN_MODEL_DIR")
 	if modelDir == "" {
 		modelDir = filepath.Join(testdataModelsDir, "Z-Image-Turbo")
 		downloadHFModel(t, "Tongyi-MAI/Z-Image-Turbo", modelDir)
@@ -55,7 +55,7 @@ func TestCreateImageGen(t *testing.T) {
 	}
 
 	t.Logf("Creating imagegen model from %s", absModelDir)
-	runOllamaCreate(ctx, t, modelName, "--experimental", "-f", tmpModelfile)
+	runLycheeCreate(ctx, t, modelName, "--experimental", "-f", tmpModelfile)
 
 	// Verify model exists via show
 	showReq := &api.ShowRequest{Name: modelName}
@@ -73,7 +73,7 @@ func TestCreateImageGen(t *testing.T) {
 			t.Skip("Target system does not support image generation")
 		} else if strings.Contains(err.Error(), "insufficient memory for image generation") {
 			t.Skip("insufficient memory for image generation")
-		} else if strings.Contains(err.Error(), "ollama-mlx: no such file or directory") {
+		} else if strings.Contains(err.Error(), "lychee-mlx: no such file or directory") {
 			t.Skip("unsupported architecture")
 		}
 		t.Fatalf("Image generation failed: %v", err)

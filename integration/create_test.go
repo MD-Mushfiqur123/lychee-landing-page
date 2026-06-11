@@ -13,17 +13,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 const testdataModelsDir = "testdata/models"
 
-// skipIfRemote skips the test if OLLAMA_HOST points to a non-local server.
+// skipIfRemote skips the test if LYCHEE_HOST points to a non-local server.
 // Safetensors/imagegen creation requires localhost since it reads model files
 // from disk and uses the --experimental CLI path.
 func skipIfRemote(t *testing.T) {
 	t.Helper()
-	host := os.Getenv("OLLAMA_HOST")
+	host := os.Getenv("LYCHEE_HOST")
 	if host == "" {
 		return // default is localhost
 	}
@@ -43,7 +43,7 @@ func skipIfRemote(t *testing.T) {
 	if ip != nil && (ip.IsLoopback() || ip.IsUnspecified()) {
 		return
 	}
-	t.Skipf("safetensors/imagegen creation requires a local server (OLLAMA_HOST=%s)", host)
+	t.Skipf("safetensors/imagegen creation requires a local server (LYCHEE_HOST=%s)", host)
 }
 
 // findHFCLI returns the path to the HuggingFace CLI, or "" if not found.
@@ -91,42 +91,42 @@ func downloadHFModel(t *testing.T, repo, destDir string, extraArgs ...string) {
 	}
 }
 
-// ollamaBin returns the path to the ollama binary to use for tests.
-// Prefers OLLAMA_BIN env, then falls back to the built binary at ../ollama
+// lycheeBin returns the path to the lychee binary to use for tests.
+// Prefers LYCHEE_BIN env, then falls back to the built binary at ../lychee
 // (same binary the integration test server uses).
-func ollamaBin() string {
-	if bin := os.Getenv("OLLAMA_BIN"); bin != "" {
+func lycheeBin() string {
+	if bin := os.Getenv("LYCHEE_BIN"); bin != "" {
 		return bin
 	}
-	if abs, err := filepath.Abs("../ollama"); err == nil {
+	if abs, err := filepath.Abs("../lychee"); err == nil {
 		if _, err := os.Stat(abs); err == nil {
 			return abs
 		}
 	}
-	return "ollama"
+	return "lychee"
 }
 
-// ensureMLXLibraryPath sets OLLAMA_LIBRARY_PATH so the MLX dynamic library
+// ensureMLXLibraryPath sets LYCHEE_LIBRARY_PATH so the MLX dynamic library
 // is discoverable. Integration tests run from integration/ dir, so the
 // default CWD-based search won't find the library at the repo root.
 func ensureMLXLibraryPath(t *testing.T) {
 	t.Helper()
-	if libPath, err := filepath.Abs("../build/lib/ollama"); err == nil {
+	if libPath, err := filepath.Abs("../build/lib/lychee"); err == nil {
 		if _, err := os.Stat(libPath); err == nil {
-			if existing := os.Getenv("OLLAMA_LIBRARY_PATH"); existing != "" {
-				t.Setenv("OLLAMA_LIBRARY_PATH", existing+string(filepath.ListSeparator)+libPath)
+			if existing := os.Getenv("LYCHEE_LIBRARY_PATH"); existing != "" {
+				t.Setenv("LYCHEE_LIBRARY_PATH", existing+string(filepath.ListSeparator)+libPath)
 			} else {
-				t.Setenv("OLLAMA_LIBRARY_PATH", libPath)
+				t.Setenv("LYCHEE_LIBRARY_PATH", libPath)
 			}
 		}
 	}
 }
 
-// runOllamaCreate runs "ollama create" as a subprocess. Skips the test if
+// runLycheeCreate runs "lychee create" as a subprocess. Skips the test if
 // the error indicates the server is remote.
-func runOllamaCreate(ctx context.Context, t *testing.T, args ...string) {
+func runLycheeCreate(ctx context.Context, t *testing.T, args ...string) {
 	t.Helper()
-	createCmd := exec.CommandContext(ctx, ollamaBin(), append([]string{"create"}, args...)...)
+	createCmd := exec.CommandContext(ctx, lycheeBin(), append([]string{"create"}, args...)...)
 	var createStderr strings.Builder
 	createCmd.Stdout = os.Stdout
 	createCmd.Stderr = io.MultiWriter(os.Stderr, &createStderr)
@@ -134,7 +134,7 @@ func runOllamaCreate(ctx context.Context, t *testing.T, args ...string) {
 		if strings.Contains(createStderr.String(), "remote") {
 			t.Skip("safetensors creation requires a local server")
 		}
-		t.Fatalf("ollama create failed: %v", err)
+		t.Fatalf("lychee create failed: %v", err)
 	}
 }
 
@@ -174,7 +174,7 @@ func TestCreateSafetensorsLLM(t *testing.T) {
 		t.Fatalf("Failed to write Modelfile: %v", err)
 	}
 
-	runOllamaCreate(ctx, t, modelName, "--experimental", "-f", tmpModelfile)
+	runLycheeCreate(ctx, t, modelName, "--experimental", "-f", tmpModelfile)
 
 	// Verify model exists via show
 	showReq := &api.ShowRequest{Name: modelName}
@@ -260,11 +260,11 @@ func TestCreateGGUF(t *testing.T) {
 		t.Fatalf("Failed to write Modelfile: %v", err)
 	}
 
-	createCmd := exec.CommandContext(ctx, ollamaBin(), "create", modelName, "-f", tmpModelfile)
+	createCmd := exec.CommandContext(ctx, lycheeBin(), "create", modelName, "-f", tmpModelfile)
 	createCmd.Stdout = os.Stdout
 	createCmd.Stderr = os.Stderr
 	if err := createCmd.Run(); err != nil {
-		t.Fatalf("ollama create failed: %v", err)
+		t.Fatalf("lychee create failed: %v", err)
 	}
 
 	// Verify model exists

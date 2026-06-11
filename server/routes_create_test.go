@@ -21,19 +21,19 @@ import (
 	gocmp "github.com/google/go-cmp/cmp"
 	gocmpopts "github.com/google/go-cmp/cmp/cmpopts"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/convert"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/convert"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/types/model"
 )
 
 var stream bool = false
 
 func createBinFile(t *testing.T, kv map[string]any, ti []*ggml.Tensor) (string, string) {
 	t.Helper()
-	t.Setenv("OLLAMA_MODELS", cmp.Or(os.Getenv("OLLAMA_MODELS"), t.TempDir()))
+	t.Setenv("LYCHEE_MODELS", cmp.Or(os.Getenv("LYCHEE_MODELS"), t.TempDir()))
 
 	modelDir := envconfig.Models()
 
@@ -83,8 +83,8 @@ func (t *responseRecorder) CloseNotify() <-chan bool {
 
 func createRequest(t *testing.T, fn func(*gin.Context), body any) *httptest.ResponseRecorder {
 	t.Helper()
-	// if OLLAMA_MODELS is not set, set it to the temp directory
-	t.Setenv("OLLAMA_MODELS", cmp.Or(os.Getenv("OLLAMA_MODELS"), t.TempDir()))
+	// if LYCHEE_MODELS is not set, set it to the temp directory
+	t.Setenv("LYCHEE_MODELS", cmp.Or(os.Getenv("LYCHEE_MODELS"), t.TempDir()))
 
 	w := NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -133,7 +133,7 @@ func readCreatedModelConfig(t *testing.T, name string) model.ConfigV2 {
 }
 
 func TestCreateModelPreservesEmbeddedCompatibilityGGUFWithoutQuantization(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 	oldRun := runLlamaQuantize
 	runLlamaQuantize = func(in, out *os.File, orig *ggml.GGML, fileType ggml.FileType, typeName string, progressFn func(uint64)) error {
 		t.Fatal("llama-quantize should not run for GGUFs with embedded compatibility tensors")
@@ -176,7 +176,7 @@ func TestCreateModelPreservesEmbeddedCompatibilityGGUFWithoutQuantization(t *tes
 	}
 	var found bool
 	for _, layer := range mf.Layers {
-		if layer.MediaType == "application/vnd.ollama.image.model" {
+		if layer.MediaType == "application/vnd.lychee.image.model" {
 			found = true
 		}
 	}
@@ -189,7 +189,7 @@ func TestCreateModelPreservesEmbeddedCompatibilityGGUFWithoutQuantization(t *tes
 }
 
 func TestCreateModelValidatesTextOnlyFileGGUFWithoutQuantization(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 	var gotTypeName string
 	oldRun := runLlamaQuantize
 	runLlamaQuantize = func(in, out *os.File, orig *ggml.GGML, fileType ggml.FileType, typeName string, progressFn func(uint64)) error {
@@ -233,7 +233,7 @@ func TestCreateModelValidatesTextOnlyFileGGUFWithoutQuantization(t *testing.T) {
 }
 
 func TestCreateModelValidatesSplitGGUFWithOriginalShardNames(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 	var gotInput string
 	oldRun := runLlamaQuantize
 	runLlamaQuantize = func(in, out *os.File, orig *ggml.GGML, fileType ggml.FileType, typeName string, progressFn func(uint64)) error {
@@ -320,7 +320,7 @@ func TestCreateModelValidatesSplitGGUFWithOriginalShardNames(t *testing.T) {
 	}
 	var modelLayers int
 	for _, layer := range mf.Layers {
-		if layer.MediaType == "application/vnd.ollama.image.model" {
+		if layer.MediaType == "application/vnd.lychee.image.model" {
 			modelLayers++
 		}
 	}
@@ -330,7 +330,7 @@ func TestCreateModelValidatesSplitGGUFWithOriginalShardNames(t *testing.T) {
 }
 
 func TestBaseLayerTensorsReadsAllSplitGGUFShards(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 	firstData := []byte{1, 2, 3, 4}
 	secondData := []byte{5, 6, 7, 8}
 
@@ -398,7 +398,7 @@ func TestBaseLayerTensorsReadsAllSplitGGUFShards(t *testing.T) {
 }
 
 func TestCreateModelAddsDefaultLlavaProjectorType(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	_, digest := createBinFile(t, map[string]any{
 		"general.architecture":    "clip",
@@ -434,7 +434,7 @@ func TestCreateModelAddsDefaultLlavaProjectorType(t *testing.T) {
 	}
 	var projectorLayer manifest.Layer
 	for _, layer := range mf.Layers {
-		if layer.MediaType == "application/vnd.ollama.image.projector" {
+		if layer.MediaType == "application/vnd.lychee.image.projector" {
 			projectorLayer = layer
 			break
 		}
@@ -466,7 +466,7 @@ func TestCreateModelAddsDefaultLlavaProjectorType(t *testing.T) {
 }
 
 func TestGGUFLayersClassifiesMMProjAsProjector(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	_, digest := createBinFile(t, map[string]any{
 		"general.architecture":            "clip",
@@ -498,13 +498,13 @@ func TestGGUFLayersClassifiesMMProjAsProjector(t *testing.T) {
 	if len(layers) != 1 {
 		t.Fatalf("layers = %d, want 1", len(layers))
 	}
-	if got := layers[0].MediaType; got != "application/vnd.ollama.image.projector" {
+	if got := layers[0].MediaType; got != "application/vnd.lychee.image.projector" {
 		t.Fatalf("media type = %q, want projector", got)
 	}
 }
 
 func TestCreateModelQuantizeRestoresEmbeddedCompatibilityTensors(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 	oldRun := runLlamaQuantize
 	runLlamaQuantize = func(in, out *os.File, orig *ggml.GGML, fileType ggml.FileType, typeName string, progressFn func(uint64)) error {
 		kv := ggml.KV{
@@ -568,7 +568,7 @@ func TestCreateModelQuantizeRestoresEmbeddedCompatibilityTensors(t *testing.T) {
 
 	var modelLayer manifest.Layer
 	for _, layer := range mf.Layers {
-		if layer.MediaType == "application/vnd.ollama.image.model" {
+		if layer.MediaType == "application/vnd.lychee.image.model" {
 			modelLayer = layer
 			break
 		}
@@ -613,7 +613,7 @@ func TestCreateModelQuantizeRestoresEmbeddedCompatibilityTensors(t *testing.T) {
 }
 
 func TestCreateModelRejectsFileGGUFWhenValidationFails(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 	oldRun := runLlamaQuantize
 	runLlamaQuantize = func(*os.File, *os.File, *ggml.GGML, ggml.FileType, string, func(uint64)) error {
 		return fmt.Errorf("load failed")
@@ -671,7 +671,7 @@ func TestCreateFromBin(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 
 	var s Server
 
@@ -689,7 +689,7 @@ func TestCreateFromBin(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -733,7 +733,7 @@ func TestCreateFromModel(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, nil, nil)
@@ -749,7 +749,7 @@ func TestCreateFromModel(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	w = createRequest(t, s.CreateHandler, api.CreateRequest{
@@ -763,8 +763,8 @@ func TestCreateFromModel(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test2", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test2", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -777,7 +777,7 @@ func TestCreateFromModelInheritsRendererParser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	const (
@@ -843,7 +843,7 @@ func TestCreateRemovesLayers(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, nil, nil)
@@ -859,7 +859,7 @@ func TestCreateRemovesLayers(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -880,7 +880,7 @@ func TestCreateRemovesLayers(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -894,7 +894,7 @@ func TestCreateUnsetsSystem(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, nil, nil)
@@ -910,7 +910,7 @@ func TestCreateUnsetsSystem(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -931,7 +931,7 @@ func TestCreateUnsetsSystem(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -944,7 +944,7 @@ func TestCreateMergeParameters(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, nil, nil)
@@ -964,7 +964,7 @@ func TestCreateMergeParameters(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -989,8 +989,8 @@ func TestCreateMergeParameters(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test2", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test2", "latest"),
 	})
 
 	// Display contents of each blob in the directory
@@ -1048,8 +1048,8 @@ func TestCreateMergeParameters(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test2", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test2", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -1079,7 +1079,7 @@ func TestCreateReplacesMessages(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, nil, nil)
@@ -1108,7 +1108,7 @@ func TestCreateReplacesMessages(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -1142,8 +1142,8 @@ func TestCreateReplacesMessages(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test2", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test2", "latest"),
 	})
 
 	// Old layers will not have been pruned
@@ -1186,7 +1186,7 @@ func TestCreateTemplateSystem(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, nil, nil)
@@ -1203,7 +1203,7 @@ func TestCreateTemplateSystem(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -1282,7 +1282,7 @@ func TestCreateAndShowRemoteModel(t *testing.T) {
 	w := createRequest(t, s.CreateHandler, api.CreateRequest{
 		Model:      "test",
 		From:       "bob",
-		RemoteHost: "https://ollama.com",
+		RemoteHost: "https://lychee.com",
 		Info: map[string]any{
 			"capabilities":       []string{"completion", "tools", "thinking"},
 			"model_family":       "gptoss",
@@ -1355,7 +1355,7 @@ func TestCreateRemoteModelRejectsDraftFiles(t *testing.T) {
 	w := createRequest(t, s.CreateHandler, api.CreateRequest{
 		Model:      "test-remote-draft",
 		From:       "bob",
-		RemoteHost: "https://ollama.com",
+		RemoteHost: "https://lychee.com",
 		DraftFiles: map[string]string{"draft.gguf": digest},
 		Stream:     &stream,
 	})
@@ -1401,8 +1401,8 @@ func TestCreateFromCloudSourceSuffix(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resp.RemoteHost != "https://ollama.com:443" {
-		t.Fatalf("expected remote host https://ollama.com:443, got %q", resp.RemoteHost)
+	if resp.RemoteHost != "https://lychee.com:443" {
+		t.Fatalf("expected remote host https://lychee.com:443, got %q", resp.RemoteHost)
 	}
 
 	if resp.RemoteModel != "gpt-oss:20b" {
@@ -1414,7 +1414,7 @@ func TestCreateLicenses(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, nil, nil)
@@ -1430,7 +1430,7 @@ func TestCreateLicenses(t *testing.T) {
 	}
 
 	checkFileExists(t, filepath.Join(p, "manifests", "*", "*", "*", "*"), []string{
-		filepath.Join(p, "manifests", "registry.ollama.ai", "library", "test", "latest"),
+		filepath.Join(p, "manifests", "registry.lychee.ai", "library", "test", "latest"),
 	})
 
 	checkFileExists(t, filepath.Join(p, "blobs", "*"), []string{
@@ -1463,7 +1463,7 @@ func TestCreateDetectTemplate(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	t.Run("matched", func(t *testing.T) {
@@ -1511,7 +1511,7 @@ func TestCreateGemma4KeepsDynamicRendererAlias(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, ggml.KV{
@@ -1564,7 +1564,7 @@ func TestCreateLagunaDetectsRendererParser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	_, digest := createBinFile(t, ggml.KV{
@@ -1619,7 +1619,7 @@ func TestCreateNemotronHDefaultsRendererParser(t *testing.T) {
 	for _, arch := range []string{"nemotron_h", "nemotron_h_moe", "nemotron_h_omni"} {
 		t.Run(arch, func(t *testing.T) {
 			p := t.TempDir()
-			t.Setenv("OLLAMA_MODELS", p)
+			t.Setenv("LYCHEE_MODELS", p)
 			var s Server
 
 			_, digest := createBinFile(t, ggml.KV{
@@ -1653,7 +1653,7 @@ func TestCreateNemotronHDefaultsKeepExplicitRendererParser(t *testing.T) {
 	for _, arch := range []string{"nemotron_h", "nemotron_h_moe", "nemotron_h_omni"} {
 		t.Run(arch, func(t *testing.T) {
 			p := t.TempDir()
-			t.Setenv("OLLAMA_MODELS", p)
+			t.Setenv("LYCHEE_MODELS", p)
 			var s Server
 
 			_, digest := createBinFile(t, ggml.KV{
@@ -1726,7 +1726,7 @@ func TestDetectModelTypeFromFiles(t *testing.T) {
 
 	t.Run("unsupported file type", func(t *testing.T) {
 		p := t.TempDir()
-		t.Setenv("OLLAMA_MODELS", p)
+		t.Setenv("LYCHEE_MODELS", p)
 
 		data := []byte("12345678")
 		digest := fmt.Sprintf("sha256:%x", sha256.Sum256(data))
@@ -1756,7 +1756,7 @@ func TestDetectModelTypeFromFiles(t *testing.T) {
 
 	t.Run("file with less than 4 bytes", func(t *testing.T) {
 		p := t.TempDir()
-		t.Setenv("OLLAMA_MODELS", p)
+		t.Setenv("LYCHEE_MODELS", p)
 
 		data := []byte("123")
 		digest := fmt.Sprintf("sha256:%x", sha256.Sum256(data))
@@ -1834,7 +1834,7 @@ func createSafetensorsTestModel(t *testing.T, modelName string, config model.Con
 func TestCreateFromSafetensorsModel_PreservesConfig(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	// Create a source safetensors model with specific config fields
@@ -1904,7 +1904,7 @@ func TestCreateFromSafetensorsModel_PreservesConfig(t *testing.T) {
 	// Verify system prompt was added
 	var hasSystem bool
 	for _, l := range mf.Layers {
-		if l.MediaType == "application/vnd.ollama.image.system" {
+		if l.MediaType == "application/vnd.lychee.image.system" {
 			hasSystem = true
 			break
 		}
@@ -1933,7 +1933,7 @@ func TestCreateFromSafetensorsModel_PreservesConfig(t *testing.T) {
 func TestCreateFromSafetensorsModel_OverrideSystem(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	// Create source with a system prompt
@@ -1985,7 +1985,7 @@ func TestCreateFromSafetensorsModel_OverrideSystem(t *testing.T) {
 func TestCreateFromSafetensorsModel_PreservesLayerNames(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 	var s Server
 
 	// Create JSON config blobs to include as layers
@@ -1996,13 +1996,13 @@ func TestCreateFromSafetensorsModel_PreservesLayerNames(t *testing.T) {
 
 	extraLayers := []manifest.Layer{
 		{
-			MediaType: "application/vnd.ollama.image.json",
+			MediaType: "application/vnd.lychee.image.json",
 			Digest:    configDigest,
 			Size:      int64(len(configJSON)),
 			Name:      "config.json",
 		},
 		{
-			MediaType: "application/vnd.ollama.image.json",
+			MediaType: "application/vnd.lychee.image.json",
 			Digest:    tokenizerDigest,
 			Size:      int64(len(tokenizerJSON)),
 			Name:      "tokenizer.json",
@@ -2041,7 +2041,7 @@ func TestCreateFromSafetensorsModel_PreservesLayerNames(t *testing.T) {
 	// Check JSON layer names are preserved
 	jsonNames := make(map[string]bool)
 	for _, l := range mf.Layers {
-		if l.MediaType == "application/vnd.ollama.image.json" && l.Name != "" {
+		if l.MediaType == "application/vnd.lychee.image.json" && l.Name != "" {
 			jsonNames[l.Name] = true
 		}
 	}

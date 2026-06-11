@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/ollama/ollama/x/mlxrunner/batch"
-	"github.com/ollama/ollama/x/mlxrunner/cache"
-	"github.com/ollama/ollama/x/mlxrunner/mlx"
-	"github.com/ollama/ollama/x/mlxrunner/model"
-	"github.com/ollama/ollama/x/tokenizer"
+	"github.com/lychee/lychee/x/mlxrunner/batch"
+	"github.com/lychee/lychee/x/mlxrunner/cache"
+	"github.com/lychee/lychee/x/mlxrunner/mlx"
+	"github.com/lychee/lychee/x/mlxrunner/model"
+	"github.com/lychee/lychee/x/tokenizer"
 )
 
 // Model is the interface that model implementations must satisfy.

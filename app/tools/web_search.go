@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/auth"
+	"github.com/lychee/lychee/auth"
 )
 
 type WebSearch struct{}
@@ -38,7 +38,7 @@ func (w *WebSearch) Name() string {
 }
 
 func (w *WebSearch) Description() string {
-	return "Search the web for real-time information using ollama.com web search API."
+	return "Search the web for real-time information using lychee.com web search API."
 }
 
 func (w *WebSearch) Prompt() string {
@@ -107,7 +107,7 @@ func performWebSearch(ctx context.Context, query string, maxResults int) (*Searc
 		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	searchURL, err := url.Parse("https://ollama.com/api/web_search")
+	searchURL, err := url.Parse("https://lychee.com/api/web_search")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse search URL: %w", err)
 	}

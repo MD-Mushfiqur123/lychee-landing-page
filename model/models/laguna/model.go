@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ollama/ollama/fs"
-	"github.com/ollama/ollama/kvcache"
-	"github.com/ollama/ollama/ml"
-	"github.com/ollama/ollama/ml/nn"
-	"github.com/ollama/ollama/ml/nn/rope"
-	"github.com/ollama/ollama/model"
-	"github.com/ollama/ollama/model/input"
-	"github.com/ollama/ollama/tokenizer"
+	"github.com/lychee/lychee/fs"
+	"github.com/lychee/lychee/kvcache"
+	"github.com/lychee/lychee/ml"
+	"github.com/lychee/lychee/ml/nn"
+	"github.com/lychee/lychee/ml/nn/rope"
+	"github.com/lychee/lychee/model"
+	"github.com/lychee/lychee/model/input"
+	"github.com/lychee/lychee/tokenizer"
 )
 
 const (

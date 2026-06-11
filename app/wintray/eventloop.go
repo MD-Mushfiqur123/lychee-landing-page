@@ -227,7 +227,7 @@ func quit() {
 	}
 }
 
-// findExistingInstance attempts to find an existing Ollama instance window
+// findExistingInstance attempts to find an existing Lychee instance window
 // Returns the window handle if found, 0 if not found
 func findExistingInstance() uintptr {
 	classNamePtr, err := windows.UTF16PtrFromString(ClassName)

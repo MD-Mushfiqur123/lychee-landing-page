@@ -130,7 +130,7 @@ func TestNoConfigToMigrate(t *testing.T) {
 func TestCloudMigrationFromAirplaneMode(t *testing.T) {
 	tmpHome := t.TempDir()
 	setTestHome(t, tmpHome)
-	t.Setenv("OLLAMA_NO_CLOUD", "")
+	t.Setenv("LYCHEE_NO_CLOUD", "")
 
 	dbPath := filepath.Join(tmpHome, "db.sqlite")
 	db, err := newDatabase(dbPath)
@@ -160,7 +160,7 @@ func TestCloudMigrationFromAirplaneMode(t *testing.T) {
 		t.Fatal("expected cloud to be disabled after migrating airplane_mode=true")
 	}
 
-	configPath := filepath.Join(tmpHome, ".ollama", serverConfigFilename)
+	configPath := filepath.Join(tmpHome, ".lychee", serverConfigFilename)
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		t.Fatalf("failed to read migrated server config: %v", err)
@@ -170,8 +170,8 @@ func TestCloudMigrationFromAirplaneMode(t *testing.T) {
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		t.Fatalf("failed to parse migrated server config: %v", err)
 	}
-	if cfg["disable_ollama_cloud"] != true {
-		t.Fatalf("disable_ollama_cloud = %v, want true", cfg["disable_ollama_cloud"])
+	if cfg["disable_lychee_cloud"] != true {
+		t.Fatalf("disable_lychee_cloud = %v, want true", cfg["disable_lychee_cloud"])
 	}
 
 	var airplaneMode, migrated bool
@@ -223,7 +223,7 @@ const (
 		stream BOOLEAN NOT NULL DEFAULT 0,
 		model_name TEXT,
 		model_cloud BOOLEAN,
-		model_ollama_host BOOLEAN,
+		model_lychee_host BOOLEAN,
 		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		thinking_time_start TIMESTAMP,

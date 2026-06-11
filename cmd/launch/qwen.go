@@ -9,12 +9,12 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ollama/ollama/cmd/config"
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/envconfig"
+	"github.com/lychee/lychee/cmd/config"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/envconfig"
 )
 
-const qwenOllamaEnvKey = "OLLAMA_API_KEY"
+const qwenLycheeEnvKey = "LYCHEE_API_KEY"
 
 var qwenGOOS = runtime.GOOS
 
@@ -141,7 +141,7 @@ func ensureQwenInstalled() (string, error) {
 }
 
 func qwenInstallShimDir() (string, func(), error) {
-	dir, err := os.MkdirTemp("", "ollama-qwen-install-*")
+	dir, err := os.MkdirTemp("", "lychee-qwen-install-*")
 	if err != nil {
 		return "", nil, err
 	}
@@ -185,7 +185,7 @@ func checkQwenInstallerDependencies() error {
 	switch qwenGOOS {
 	case "windows":
 		if _, err := exec.LookPath("powershell"); err != nil {
-			return fmt.Errorf("qwen is not installed and required dependencies are missing\n\nInstall the following first:\n  PowerShell: https://learn.microsoft.com/powershell/\n\nThen re-run:\n  ollama launch qwen")
+			return fmt.Errorf("qwen is not installed and required dependencies are missing\n\nInstall the following first:\n  PowerShell: https://learn.microsoft.com/powershell/\n\nThen re-run:\n  lychee launch qwen")
 		}
 	default:
 		var missing []string
@@ -196,7 +196,7 @@ func checkQwenInstallerDependencies() error {
 			missing = append(missing, "bash: https://www.gnu.org/software/bash/")
 		}
 		if len(missing) > 0 {
-			return fmt.Errorf("qwen is not installed and required dependencies are missing\n\nInstall the following first:\n  %s\n\nThen re-run:\n  ollama launch qwen", strings.Join(missing, "\n  "))
+			return fmt.Errorf("qwen is not installed and required dependencies are missing\n\nInstall the following first:\n  %s\n\nThen re-run:\n  lychee launch qwen", strings.Join(missing, "\n  "))
 		}
 	}
 	return nil
@@ -262,7 +262,7 @@ func (q *Qwen) Configure(model string) error {
 		return err
 	}
 
-	applyQwenOllamaConfig(cfg, model)
+	applyQwenLycheeConfig(cfg, model)
 
 	data, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {
@@ -272,9 +272,9 @@ func (q *Qwen) Configure(model string) error {
 	return fileutil.WriteWithBackup(configPath, data, "qwen")
 }
 
-func applyQwenOllamaConfig(cfg map[string]any, model string) {
+func applyQwenLycheeConfig(cfg map[string]any, model string) {
 	envCfg := qwenMap(cfg["env"])
-	envCfg[qwenOllamaEnvKey] = "ollama"
+	envCfg[qwenLycheeEnvKey] = "lychee"
 	cfg["env"] = envCfg
 
 	modelProviders := qwenMap(cfg["modelProviders"])
@@ -303,7 +303,7 @@ func qwenMap(value any) map[string]any {
 func qwenMergeOpenAIProviders(value any, provider map[string]any) []any {
 	merged := []any{provider}
 	for _, existing := range qwenProviderList(value) {
-		if qwenIsOllamaProvider(existing) {
+		if qwenIsLycheeProvider(existing) {
 			continue
 		}
 		merged = append(merged, existing)
@@ -326,14 +326,14 @@ func qwenProviderList(value any) []any {
 	}
 }
 
-func qwenIsOllamaProvider(value any) bool {
+func qwenIsLycheeProvider(value any) bool {
 	provider, ok := value.(map[string]any)
 	if !ok {
 		return false
 	}
 	envKey, _ := provider["envKey"].(string)
 	baseURL, _ := provider["baseUrl"].(string)
-	return envKey == qwenOllamaEnvKey && strings.TrimRight(baseURL, "/") == qwenBaseURL()
+	return envKey == qwenLycheeEnvKey && strings.TrimRight(baseURL, "/") == qwenBaseURL()
 }
 
 func (q *Qwen) CurrentModel() string {
@@ -410,9 +410,9 @@ func qwenBaseURL() string {
 func qwenProvider(model string) map[string]any {
 	return map[string]any{
 		"id":      model,
-		"name":    fmt.Sprintf("%s (Ollama)", model),
+		"name":    fmt.Sprintf("%s (Lychee)", model),
 		"baseUrl": qwenBaseURL(),
-		"envKey":  qwenOllamaEnvKey,
+		"envKey":  qwenLycheeEnvKey,
 	}
 }
 
@@ -429,7 +429,7 @@ func qwenLaunchArgs(model string, args []string) []string {
 
 func qwenLaunchEnv(model string) []string {
 	env := os.Environ()
-	env = qwenUpsertEnv(env, "OPENAI_API_KEY", "ollama")
+	env = qwenUpsertEnv(env, "OPENAI_API_KEY", "lychee")
 	env = qwenUpsertEnv(env, "OPENAI_BASE_URL", qwenBaseURL())
 	if model != "" {
 		env = qwenUpsertEnv(env, "OPENAI_MODEL", model)

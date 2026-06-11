@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 func TestRendererSimple(t *testing.T) {

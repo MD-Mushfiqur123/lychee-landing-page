@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 // lagunaToolJSON is the get_weather tool as serialized into <available_tools>,
@@ -165,7 +165,7 @@ func TestLagunaRendererMatchesLocalJinjaControlFlow(t *testing.T) {
 	if os.Getenv("VERIFY_LAGUNA_JINJA2") == "" {
 		t.Skip("set VERIFY_LAGUNA_JINJA2=1 to compare against the local Laguna chat_template.jinja")
 	}
-	python := "/Users/daniel/.codex/worktrees/7038/ollama/.venv/bin/python3"
+	python := "/Users/daniel/.codex/worktrees/7038/lychee/.venv/bin/python3"
 	if _, err := os.Stat(python); err != nil {
 		t.Fatalf("VERIFY_LAGUNA_JINJA2 requires %s with jinja2 installed", python)
 	}

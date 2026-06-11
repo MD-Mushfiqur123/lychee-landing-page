@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	fsggml "github.com/ollama/ollama/fs/ggml"
+	fsggml "github.com/lychee/lychee/fs/ggml"
 )
 
 func init() {

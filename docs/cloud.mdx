@@ -5,18 +5,19 @@ sidebarTitle: Cloud
 
 ## Cloud Models
 
-Ollama's cloud models are a new kind of model in Ollama that can run without a powerful GPU. Instead, cloud models are automatically offloaded to Ollama's cloud service while offering the same capabilities as local models, making it possible to keep using your local tools while running larger models that wouldn't fit on a personal computer.
+Lychee's cloud models are a new kind of model in Lychee that can run without a powerful GPU. Instead, cloud models are automatically offloaded to Lychee's cloud service while offering the same capabilities as local models, making it possible to keep using your local tools while running larger models that wouldn't fit on a personal computer.
 
 ### Supported models
 
-For a list of supported models, see Ollama's [model library](https://ollama.com/search?c=cloud).
+For a list of supported models, see Lychee's [model library](https://lychee.ai/search?c=cloud).
+
 
 ### Running Cloud models
 
-Ollama's cloud models require an account on [ollama.com](https://ollama.com). To sign in or create an account, run:
+Lychee's cloud models require an account on [lychee.ai](https://lychee.ai). To sign in or create an account, run:
 
 ```
-ollama signin
+lychee signin
 ```
 
 <Tabs>
@@ -25,7 +26,7 @@ ollama signin
 To run a cloud model, open the terminal and run:
 
 ```
-ollama run gpt-oss:120b-cloud
+lychee run gpt-oss:120b-cloud
 ```
 
   </Tab>
@@ -34,19 +35,19 @@ ollama run gpt-oss:120b-cloud
 First, pull a cloud model so it can be accessed:
 
 ```
-ollama pull gpt-oss:120b-cloud
+lychee pull gpt-oss:120b-cloud
 ```
 
-Next, install [Ollama's Python library](https://github.com/ollama/ollama-python):
+Next, install [Lychee's Python library](https://github.com/lychee/lychee-python):
 
 ```
-pip install ollama
+pip install lychee
 ```
 
 Next, create and run a simple Python script:
 
 ```python
-from ollama import Client
+from lychee import Client
 
 client = Client()
 
@@ -67,23 +68,23 @@ for part in client.chat('gpt-oss:120b-cloud', messages=messages, stream=True):
 First, pull a cloud model so it can be accessed:
 
 ```
-ollama pull gpt-oss:120b-cloud
+lychee pull gpt-oss:120b-cloud
 ```
 
-Next, install [Ollama's JavaScript library](https://github.com/ollama/ollama-js):
+Next, install [Lychee's JavaScript library](https://github.com/lychee/lychee-js):
 
 ```
-npm i ollama
+npm i lychee
 ```
 
 Then use the library to run a cloud model:
 
 ```typescript
-import { Ollama } from "ollama";
+import { Lychee } from "lychee";
 
-const ollama = new Ollama();
+const lychee = new Lychee();
 
-const response = await ollama.chat({
+const response = await lychee.chat({
   model: "gpt-oss:120b-cloud",
   messages: [{ role: "user", content: "Explain quantum computing" }],
   stream: true,
@@ -100,10 +101,10 @@ for await (const part of response) {
 First, pull a cloud model so it can be accessed:
 
 ```
-ollama pull gpt-oss:120b-cloud
+lychee pull gpt-oss:120b-cloud
 ```
 
-Run the following cURL command to run the command via Ollama's API:
+Run the following cURL command to run the command via Lychee's API:
 
 ```
 curl http://localhost:11434/api/chat -d '{
@@ -121,24 +122,24 @@ curl http://localhost:11434/api/chat -d '{
 
 ## Cloud API access
 
-Cloud models can also be accessed directly on ollama.com's API. In this mode, ollama.com acts as a remote Ollama host.
+Cloud models can also be accessed directly on lychee.ai's API. In this mode, lychee.ai acts as a remote Lychee host.
 
 ### Authentication
 
-For direct access to ollama.com's API, first create an [API key](https://ollama.com/settings/keys).
+For direct access to lychee.ai's API, first create an [API key](https://lychee.ai/settings/keys).
 
-Then, set the `OLLAMA_API_KEY` environment variable to your API key.
+Then, set the `LYCHEE_API_KEY` environment variable to your API key.
 
 ```
-export OLLAMA_API_KEY=your_api_key
+export LYCHEE_API_KEY=your_api_key
 ```
 
 ### Listing models
 
-For models available directly via Ollama's API, models can be listed via:
+For models available directly via Lychee's API, models can be listed via:
 
 ```
-curl https://ollama.com/api/tags
+curl https://lychee.ai/api/tags
 ```
 
 ### Generating a response
@@ -146,21 +147,21 @@ curl https://ollama.com/api/tags
 <Tabs>
   <Tab title="Python">
 
-First, install [Ollama's Python library](https://github.com/ollama/ollama-python)
+First, install [Lychee's Python library](https://github.com/lychee/lychee-python)
 
 ```
-pip install ollama
+pip install lychee
 ```
 
 Then make a request
 
 ```python
 import os
-from ollama import Client
+from lychee import Client
 
 client = Client(
-    host="https://ollama.com",
-    headers={'Authorization': 'Bearer ' + os.environ.get('OLLAMA_API_KEY')}
+    host="https://lychee.ai",
+    headers={'Authorization': 'Bearer ' + os.environ.get('LYCHEE_API_KEY')}
 )
 
 messages = [
@@ -177,25 +178,25 @@ for part in client.chat('gpt-oss:120b', messages=messages, stream=True):
   </Tab>
   <Tab title="JavaScript">
 
-First, install [Ollama's JavaScript library](https://github.com/ollama/ollama-js):
+First, install [Lychee's JavaScript library](https://github.com/lychee/lychee-js):
 
 ```
-npm i ollama
+npm i lychee
 ```
 
 Next, make a request to the model:
 
 ```typescript
-import { Ollama } from "ollama";
+import { Lychee } from "lychee";
 
-const ollama = new Ollama({
-  host: "https://ollama.com",
+const lychee = new Lychee({
+  host: "https://lychee.ai",
   headers: {
-    Authorization: "Bearer " + process.env.OLLAMA_API_KEY,
+    Authorization: "Bearer " + process.env.LYCHEE_API_KEY,
   },
 });
 
-const response = await ollama.chat({
+const response = await lychee.chat({
   model: "gpt-oss:120b",
   messages: [{ role: "user", content: "Explain quantum computing" }],
   stream: true,
@@ -209,11 +210,11 @@ for await (const part of response) {
   </Tab>
   <Tab title="cURL">
 
-Generate a response via Ollama's chat API:
+Generate a response via Lychee's chat API:
 
 ```
-curl https://ollama.com/api/chat \
-  -H "Authorization: Bearer $OLLAMA_API_KEY" \
+curl https://lychee.ai/api/chat \
+  -H "Authorization: Bearer $LYCHEE_API_KEY" \
   -d '{
     "model": "gpt-oss:120b",
     "messages": [{
@@ -229,16 +230,16 @@ curl https://ollama.com/api/chat \
 
 ## Local only
 
-Ollama can run in local-only mode by [disabling Ollama's cloud](./faq#how-do-i-disable-ollama-cloud) features.
+Lychee can run in local-only mode by [disabling Lychee's cloud](./faq#how-do-i-disable-lychee-cloud) features.
 
 ## Deprecations
 
-Ollama will occasionally deprecate and retire older cloud models as newer and better open-source models are released.
-Tools and applications relying on Ollama Cloud models may need to be updated to keep working. Impacted users will be
+Lychee will occasionally deprecate and retire older cloud models as newer and better open-source models are released.
+Tools and applications relying on Lychee Cloud models may need to be updated to keep working. Impacted users will be
 notified in advance of model deprecation and retirement. Deprecations will be communicated through email and on the
-Ollama website.
+Lychee website.
 
-Ollama Cloud model retirement does not affect local models.
+Lychee Cloud model retirement does not affect local models.
 
 ### Upcoming deprecations
 

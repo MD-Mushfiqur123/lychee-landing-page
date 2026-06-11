@@ -15,13 +15,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/model/parsers"
-	ollamatemplate "github.com/ollama/ollama/template"
-	"github.com/ollama/ollama/thinking"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/model/parsers"
+	lychetemplate "github.com/lychee/lychee/template"
+	"github.com/lychee/lychee/thinking"
+	"github.com/lychee/lychee/types/model"
 )
 
 type modelListSummary struct {
@@ -418,24 +418,24 @@ func readModelListConfig(mf *manifest.Manifest) (model.ConfigV2, error) {
 	return cfg, nil
 }
 
-func readModelListLayers(mf *manifest.Manifest, summary *modelListSummary) (string, int, *ollamatemplate.Template, error) {
+func readModelListLayers(mf *manifest.Manifest, summary *modelListSummary) (string, int, *lychetemplate.Template, error) {
 	var modelPath string
 	var projectorCount int
-	tmpl := ollamatemplate.DefaultTemplate
+	tmpl := lychetemplate.DefaultTemplate
 
 	for _, layer := range mf.Layers {
 		switch layer.MediaType {
-		case "application/vnd.ollama.image.model":
+		case "application/vnd.lychee.image.model":
 			filename, err := manifest.BlobsPath(layer.Digest)
 			if err != nil {
 				return "", 0, nil, err
 			}
 			modelPath = filename
 			summary.Details.ParentModel = layer.From
-		case "application/vnd.ollama.image.projector":
+		case "application/vnd.lychee.image.projector":
 			projectorCount++
-		case "application/vnd.ollama.image.prompt",
-			"application/vnd.ollama.image.template":
+		case "application/vnd.lychee.image.prompt",
+			"application/vnd.lychee.image.template":
 			filename, err := manifest.BlobsPath(layer.Digest)
 			if err != nil {
 				return "", 0, nil, err
@@ -445,7 +445,7 @@ func readModelListLayers(mf *manifest.Manifest, summary *modelListSummary) (stri
 				return "", 0, nil, err
 			}
 
-			tmpl, err = ollamatemplate.Parse(string(bts))
+			tmpl, err = lychetemplate.Parse(string(bts))
 			if err != nil {
 				return "", 0, nil, err
 			}

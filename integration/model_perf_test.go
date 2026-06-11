@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/format"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/format"
 )
 
 var (
@@ -39,7 +39,7 @@ var (
 // cat int.log | grep MODEL_PERF_HEADER | head -1| cut -f2- -d: > perf.csv
 // cat int.log | grep MODEL_PERF_DATA | cut -f2- -d: >> perf.csv
 func TestModelsPerf(t *testing.T) {
-	doModelPerfTest(t, append(ollamaEngineChatModels, llamaRunnerChatModels...))
+	doModelPerfTest(t, append(lycheeEngineChatModels, llamaRunnerChatModels...))
 }
 
 func TestLibraryModelsPerf(t *testing.T) {
@@ -57,10 +57,10 @@ func doModelPerfTest(t *testing.T, chatModels []string) {
 	// TODO use info API eventually
 	var maxVram uint64
 	var err error
-	if s := os.Getenv("OLLAMA_MAX_VRAM"); s != "" {
+	if s := os.Getenv("LYCHEE_MAX_VRAM"); s != "" {
 		maxVram, err = strconv.ParseUint(s, 10, 64)
 		if err != nil {
-			t.Fatalf("invalid  OLLAMA_MAX_VRAM %v", err)
+			t.Fatalf("invalid  LYCHEE_MAX_VRAM %v", err)
 		}
 	} else {
 		slog.Warn("No VRAM info available, testing all models, so larger ones might timeout...")
@@ -72,7 +72,7 @@ func doModelPerfTest(t *testing.T, chatModels []string) {
 	}
 	longPrompt := "summarize the following: " + string(data)
 
-	targetArch := os.Getenv("OLLAMA_TEST_ARCHITECTURE")
+	targetArch := os.Getenv("LYCHEE_TEST_ARCHITECTURE")
 
 	for _, model := range chatModels {
 		if !strings.Contains(model, ":") {

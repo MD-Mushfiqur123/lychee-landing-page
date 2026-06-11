@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	pidFile       = filepath.Join(os.Getenv("LOCALAPPDATA"), "Ollama", "ollama.pid")
-	serverLogPath = filepath.Join(os.Getenv("LOCALAPPDATA"), "Ollama", "server.log")
+	pidFile       = filepath.Join(os.Getenv("LOCALAPPDATA"), "Lychee", "lychee.pid")
+	serverLogPath = filepath.Join(os.Getenv("LOCALAPPDATA"), "Lychee", "server.log")
 )
 
 func commandContext(ctx context.Context, name string, arg ...string) *exec.Cmd {
@@ -101,12 +101,12 @@ func terminated(pid int) (bool, error) {
 	return true, nil
 }
 
-func ollamaServeProcess(pid int) bool {
+func lycheeServeProcess(pid int) bool {
 	cmd := exec.Command("wmic", "process", "where", fmt.Sprintf("ProcessId=%d", pid), "get", "CommandLine", "/value")
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	output, err := cmd.Output()
 	if err != nil {
-		slog.Debug("failed to inspect ollama process", "pid", pid, "err", err)
+		slog.Debug("failed to inspect lychee process", "pid", pid, "err", err)
 		return false
 	}
 
@@ -117,24 +117,24 @@ func ollamaServeProcess(pid int) bool {
 			continue
 		}
 
-		return ollamaServeArgs(strings.Fields(strings.ToLower(commandLine)))
+		return lycheeServeArgs(strings.Fields(strings.ToLower(commandLine)))
 	}
 
 	return false
 }
 
-// reapServers kills external ollama serve processes except our own.
+// reapServers kills external lychee serve processes except our own.
 func reapServers() error {
 	// Get current process ID to avoid killing ourselves
 	currentPID := os.Getpid()
 
-	// Use wmic to find ollama processes
-	cmd := exec.Command("wmic", "process", "where", "name='ollama.exe'", "get", "ProcessId")
+	// Use wmic to find lychee processes
+	cmd := exec.Command("wmic", "process", "where", "name='lychee.exe'", "get", "ProcessId")
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	output, err := cmd.Output()
 	if err != nil {
-		// No ollama processes found
-		slog.Debug("no ollama processes found")
+		// No lychee processes found
+		slog.Debug("no lychee processes found")
 		return nil //nolint:nilerr
 	}
 
@@ -160,13 +160,13 @@ func reapServers() error {
 		if pid == currentPID {
 			continue
 		}
-		if !ollamaServeProcess(pid) {
+		if !lycheeServeProcess(pid) {
 			continue
 		}
 
 		cmd := exec.Command("taskkill", "/F", "/T", "/PID", pidStr)
 		if err := cmd.Run(); err != nil {
-			slog.Warn("failed to kill ollama process", "pid", pid, "err", err)
+			slog.Warn("failed to kill lychee process", "pid", pid, "err", err)
 		}
 	}
 

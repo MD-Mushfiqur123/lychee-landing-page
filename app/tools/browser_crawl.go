@@ -39,7 +39,7 @@ type CrawlResponse struct {
 	Results map[string][]CrawlResult `json:"results"`
 }
 
-// BrowserCrawler tool for crawling web pages using ollama.com crawl API
+// BrowserCrawler tool for crawling web pages using lychee.com crawl API
 type BrowserCrawler struct{}
 
 func (g *BrowserCrawler) Name() string {
@@ -104,7 +104,7 @@ func (g *BrowserCrawler) Execute(ctx context.Context, args map[string]any) (*Cra
 	return g.performWebCrawl(ctx, urls)
 }
 
-// performWebCrawl handles the actual HTTP request to ollama.com crawl API
+// performWebCrawl handles the actual HTTP request to lychee.com crawl API
 func (g *BrowserCrawler) performWebCrawl(ctx context.Context, urls []string) (*CrawlResponse, error) {
 	result := &CrawlResponse{Results: make(map[string][]CrawlResult, len(urls))}
 

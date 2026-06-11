@@ -17,9 +17,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/format"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/format"
 )
 
 func TestModelRecommendationsDefaultOrder(t *testing.T) {
@@ -555,7 +555,7 @@ func setupModelRecommendationsTestEnv(t *testing.T, noCloudEnv string) {
 	if noCloudEnv == "" {
 		noCloudEnv = "false"
 	}
-	t.Setenv("OLLAMA_NO_CLOUD", noCloudEnv)
+	t.Setenv("LYCHEE_NO_CLOUD", noCloudEnv)
 	envconfig.ReloadServerConfig()
 	t.Cleanup(envconfig.ReloadServerConfig)
 }

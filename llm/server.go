@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/format"
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/ml"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/format"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/ml"
 )
 
 var ErrLoadRequiredFull = errors.New("unable to load full model on GPU")
@@ -82,6 +82,7 @@ type LlamaServerConfig struct {
 	ContextShift   bool
 	EnableMTP      bool
 	DraftModelPath string
+	CacheReuse     bool
 }
 
 // LoadModel will load a model from disk. The model must be in the GGML format.

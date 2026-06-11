@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/ollama/ollama/model/parsers"
+	"github.com/lychee/lychee/model/parsers"
 )
 
 func TestResolveGemma4Renderer(t *testing.T) {

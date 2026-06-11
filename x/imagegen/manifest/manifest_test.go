@@ -9,10 +9,10 @@ func TestTotalTensorSize(t *testing.T) {
 	m := &ModelManifest{
 		Manifest: &Manifest{
 			Layers: []ManifestLayer{
-				{MediaType: "application/vnd.ollama.image.tensor", Size: 1000},
-				{MediaType: "application/vnd.ollama.image.tensor", Size: 2000},
-				{MediaType: "application/vnd.ollama.image.json", Size: 500}, // not a tensor
-				{MediaType: "application/vnd.ollama.image.tensor", Size: 3000},
+				{MediaType: "application/vnd.lychee.image.tensor", Size: 1000},
+				{MediaType: "application/vnd.lychee.image.tensor", Size: 2000},
+				{MediaType: "application/vnd.lychee.image.json", Size: 500}, // not a tensor
+				{MediaType: "application/vnd.lychee.image.tensor", Size: 3000},
 			},
 		},
 	}
@@ -36,20 +36,20 @@ func TestTotalTensorSizeEmpty(t *testing.T) {
 	}
 }
 
-func TestManifestAndBlobDirsRespectOLLAMAModels(t *testing.T) {
+func TestManifestAndBlobDirsRespectLYCHEEModels(t *testing.T) {
 	modelsDir := filepath.Join(t.TempDir(), "models")
 
 	// Simulate packaged/systemd environment
-	t.Setenv("OLLAMA_MODELS", modelsDir)
-	t.Setenv("HOME", "/usr/share/ollama")
+	t.Setenv("LYCHEE_MODELS", modelsDir)
+	t.Setenv("HOME", "/usr/share/lychee")
 
-	// Manifest dir must respect OLLAMA_MODELS
+	// Manifest dir must respect LYCHEE_MODELS
 	wantManifest := filepath.Join(modelsDir, "manifests")
 	if got := DefaultManifestDir(); got != wantManifest {
 		t.Fatalf("DefaultManifestDir() = %q, want %q", got, wantManifest)
 	}
 
-	// Blob dir must respect OLLAMA_MODELS
+	// Blob dir must respect LYCHEE_MODELS
 	wantBlobs := filepath.Join(modelsDir, "blobs")
 	if got := DefaultBlobDir(); got != wantBlobs {
 		t.Fatalf("DefaultBlobDir() = %q, want %q", got, wantBlobs)

@@ -9,17 +9,17 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ollama/ollama/envconfig"
+	"github.com/lychee/lychee/envconfig"
 )
 
 const serverConfigFilename = "server.json"
 
 type serverConfig struct {
-	DisableOllamaCloud bool `json:"disable_ollama_cloud,omitempty"`
+	DisableLycheeCloud bool `json:"disable_lychee_cloud,omitempty"`
 }
 
 // CloudDisabled returns whether cloud features should be disabled.
-// The source of truth is: OLLAMA_NO_CLOUD OR ~/.ollama/server.json:disable_ollama_cloud.
+// The source of truth is: LYCHEE_NO_CLOUD OR ~/.lychee/server.json:disable_lychee_cloud.
 func (s *Store) CloudDisabled() (bool, error) {
 	disabled, _, err := s.CloudStatus()
 	return disabled, err
@@ -41,7 +41,7 @@ func (s *Store) CloudStatus() (bool, string, error) {
 	return envDisabled || configDisabled, cloudStatusSource(envDisabled, configDisabled), nil
 }
 
-// SetCloudEnabled writes the cloud setting to ~/.ollama/server.json.
+// SetCloudEnabled writes the cloud setting to ~/.lychee/server.json.
 func (s *Store) SetCloudEnabled(enabled bool) error {
 	if err := s.ensureDB(); err != nil {
 		return err
@@ -69,7 +69,7 @@ func setCloudEnabled(enabled bool) error {
 		return fmt.Errorf("read server config: %w", err)
 	}
 
-	configMap["disable_ollama_cloud"] = !enabled
+	configMap["disable_lychee_cloud"] = !enabled
 
 	data, err := json.MarshalIndent(configMap, "", "  ")
 	if err != nil {
@@ -101,7 +101,7 @@ func readServerConfigCloudDisabled() (bool, error) {
 	var cfg serverConfig
 	// Invalid or unexpected JSON should not block startup; treat as default.
 	if json.Unmarshal(data, &cfg) == nil {
-		return cfg.DisableOllamaCloud, nil
+		return cfg.DisableLycheeCloud, nil
 	}
 	return false, nil
 }
@@ -111,7 +111,7 @@ func serverConfigPath() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("resolve home directory: %w", err)
 	}
-	return filepath.Join(home, ".ollama", serverConfigFilename), nil
+	return filepath.Join(home, ".lychee", serverConfigFilename), nil
 }
 
 func cloudStatusSource(envDisabled bool, configDisabled bool) string {

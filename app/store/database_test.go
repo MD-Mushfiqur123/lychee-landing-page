@@ -302,7 +302,7 @@ func TestChatDeletionWithCascade(t *testing.T) {
 		}
 		defer db.Close()
 
-		// First disable foreign keys to simulate the bug from ollama/ollama#11785
+		// First disable foreign keys to simulate the bug from lychee/lychee#11785
 		_, err = db.conn.Exec("PRAGMA foreign_keys = OFF")
 		if err != nil {
 			t.Fatalf("failed to disable foreign keys: %v", err)
@@ -323,7 +323,7 @@ func TestChatDeletionWithCascade(t *testing.T) {
 			t.Fatalf("failed to insert test message: %v", err)
 		}
 
-		// Delete chat but keep message (simulating the bug from ollama/ollama#11785)
+		// Delete chat but keep message (simulating the bug from lychee/lychee#11785)
 		_, err = db.conn.Exec("DELETE FROM chats WHERE id = ?", testChatID)
 		if err != nil {
 			t.Fatalf("failed to delete chat: %v", err)

@@ -52,7 +52,7 @@ var integrationSpecs = []*IntegrationSpec{
 		Name:        "claude-desktop",
 		Runner:      &ClaudeDesktop{},
 		Aliases:     []string{"claude-app"},
-		Description: "Claude Desktop with Ollama Cloud",
+		Description: "Claude Desktop with Lychee Cloud",
 		Hidden:      true,
 		Install: IntegrationInstallSpec{
 			CheckInstalled: func() bool {
@@ -434,7 +434,7 @@ func IntegrationSelectionItems() ([]ModelItem, error) {
 func IsIntegrationInstalled(name string) bool {
 	integration, err := integrationFor(name)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Ollama couldn't find integration %q, so it'll show up as not installed.\n", name)
+		fmt.Fprintf(os.Stderr, "Lychee couldn't find integration %q, so it'll show up as not installed.\n", name)
 		return false
 	}
 	return integration.installed

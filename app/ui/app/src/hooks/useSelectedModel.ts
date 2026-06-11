@@ -81,7 +81,7 @@ export function useSelectedModel(currentChatId?: string, searchQuery?: string) {
         new Model({
           model: cloudModel,
           cloud: true,
-          ollama_host: false,
+          lychee_host: false,
         })
       );
     }
@@ -92,7 +92,7 @@ export function useSelectedModel(currentChatId?: string, searchQuery?: string) {
         new Model({
           model: settings.selectedModel,
           cloud: settings.selectedModel.endsWith("cloud"),
-          ollama_host: false,
+          lychee_host: false,
         })) ||
       null
     );

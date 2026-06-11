@@ -1,23 +1,23 @@
 # Documentation
 
 ### Getting Started
-* [Quickstart](https://docs.ollama.com/quickstart)
+* [Quickstart](https://docs.lychee.com/quickstart)
 * [Examples](./examples.md)
-* [Importing models](https://docs.ollama.com/import)
-* [MacOS Documentation](https://docs.ollama.com/macos)
-* [Linux Documentation](https://docs.ollama.com/linux)
-* [Windows Documentation](https://docs.ollama.com/windows)
-* [Docker Documentation](https://docs.ollama.com/docker)
+* [Importing models](https://docs.lychee.com/import)
+* [MacOS Documentation](https://docs.lychee.com/macos)
+* [Linux Documentation](https://docs.lychee.com/linux)
+* [Windows Documentation](https://docs.lychee.com/windows)
+* [Docker Documentation](https://docs.lychee.com/docker)
 
 ### Reference
 
-* [API Reference](https://docs.ollama.com/api)
-* [Modelfile Reference](https://docs.ollama.com/modelfile)
-* [OpenAI Compatibility](https://docs.ollama.com/api/openai-compatibility)
+* [API Reference](https://docs.lychee.com/api)
+* [Modelfile Reference](https://docs.lychee.com/modelfile)
+* [OpenAI Compatibility](https://docs.lychee.com/api/openai-compatibility)
 * [Anthropic Compatibility](./api/anthropic-compatibility.mdx)
 
 ### Resources
 
-* [Troubleshooting Guide](https://docs.ollama.com/troubleshooting)
-* [FAQ](https://docs.ollama.com/faq#faq)
+* [Troubleshooting Guide](https://docs.lychee.com/troubleshooting)
+* [FAQ](https://docs.lychee.com/faq#faq)
 * [Development guide](./development.md)

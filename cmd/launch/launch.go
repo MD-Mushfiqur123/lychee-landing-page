@@ -10,9 +10,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/cmd/config"
-	modelpkg "github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/cmd/config"
+	modelpkg "github.com/lychee/lychee/types/model"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -181,9 +181,9 @@ type ManagedAutodiscoveryIntegration interface {
 }
 
 // ManagedAutodiscoveryCloudIntegration marks an autodiscovery integration whose
-// discovered model catalog depends on the user's local Ollama Cloud auth state.
+// discovered model catalog depends on the user's local Lychee Cloud auth state.
 type ManagedAutodiscoveryCloudIntegration interface {
-	UsesOllamaCloud() bool
+	UsesLycheeCloud() bool
 }
 
 // RestoreHintIntegration can provide a short restore command after launch
@@ -229,7 +229,7 @@ type ManagedInteractiveOnboarding interface {
 }
 
 // ManagedModelReadinessSkipper lets managed integrations opt out of local
-// Ollama model readiness checks when the configured runtime is not the local
+// Lychee model readiness checks when the configured runtime is not the local
 // daemon.
 type ManagedModelReadinessSkipper interface {
 	SkipModelReadiness() bool
@@ -279,10 +279,10 @@ func LaunchCmd(checkServerHeartbeat func(cmd *cobra.Command, args []string) erro
 
 	cmd := &cobra.Command{
 		Use:   "launch [INTEGRATION] [-- [EXTRA_ARGS...]]",
-		Short: "Launch the Ollama menu or an integration",
-		Long: `Launch the Ollama interactive menu, or directly launch a specific integration.
+		Short: "Launch the Lychee menu or an integration",
+		Long: `Launch the Lychee interactive menu, or directly launch a specific integration.
 
-Without arguments, this is equivalent to running 'ollama' directly.
+Without arguments, this is equivalent to running 'lychee' directly.
 Flags and extra arguments require an integration name.
 
 Supported integrations:
@@ -304,16 +304,16 @@ Supported integrations:
   vscode          VS Code (aliases: code)
 
 Examples:
-  ollama launch
-  ollama launch claude
-  ollama launch claude --model <model>
-  ollama launch codex-app
-  ollama launch codex-app --restore
-  ollama launch hermes
-  ollama launch hermes-desktop
-  ollama launch droid --config (does not auto-launch)
-  ollama launch codex --restore
-  ollama launch codex -- --sandbox workspace-write`,
+  lychee launch
+  lychee launch claude
+  lychee launch claude --model <model>
+  lychee launch codex-app
+  lychee launch codex-app --restore
+  lychee launch hermes
+  lychee launch hermes-desktop
+  lychee launch droid --config (does not auto-launch)
+  lychee launch codex --restore
+  lychee launch codex -- --sandbox workspace-write`,
 		Args: cobra.ArbitraryArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if restoreFlag || launchCommandCanSkipHeartbeat(args) {
@@ -350,7 +350,7 @@ Examples:
 
 			if name == "" {
 				if cmd.Flags().Changed("model") || cmd.Flags().Changed("config") || cmd.Flags().Changed("yes") || cmd.Flags().Changed("restore") || len(passArgs) > 0 {
-					return fmt.Errorf("flags and extra args require an integration name, for example: 'ollama launch claude --model qwen3.5'")
+					return fmt.Errorf("flags and extra args require an integration name, for example: 'lychee launch claude --model qwen3.5'")
 				}
 				runTUI(cmd)
 				return nil
@@ -549,7 +549,7 @@ func restoreIntegration(name string, runner Runner, req IntegrationLaunchRequest
 }
 
 func launchIntegrationPolicy(req IntegrationLaunchRequest) LaunchPolicy {
-	// TUI does not set a policy, whereas ollama launch <app> does as it can
+	// TUI does not set a policy, whereas lychee launch <app> does as it can
 	// have flags which change the behavior.
 	if req.Policy != nil {
 		return *req.Policy
@@ -815,7 +815,7 @@ func (c *launcherClient) launchManagedSingleIntegration(ctx context.Context, nam
 
 	if !managedIntegrationOnboarded(saved, managed) {
 		if !isInteractiveSession() && managedRequiresInteractiveOnboarding(managed) {
-			return fmt.Errorf("%s still needs interactive gateway setup; run 'ollama launch %s' in a terminal to finish onboarding", runner, name)
+			return fmt.Errorf("%s still needs interactive gateway setup; run 'lychee launch %s' in a terminal to finish onboarding", runner, name)
 		}
 		if err := managed.Onboard(); err != nil {
 			return err
@@ -860,7 +860,7 @@ func (c *launcherClient) launchManagedAutodiscoveryIntegration(ctx context.Conte
 
 	if !managedIntegrationOnboarded(saved, autodiscovery) {
 		if !isInteractiveSession() && managedRequiresInteractiveOnboarding(autodiscovery) {
-			return fmt.Errorf("%s still needs interactive gateway setup; run 'ollama launch %s' in a terminal to finish onboarding", runner, name)
+			return fmt.Errorf("%s still needs interactive gateway setup; run 'lychee launch %s' in a terminal to finish onboarding", runner, name)
 		}
 		if err := autodiscovery.Onboard(); err != nil {
 			return err
@@ -879,7 +879,7 @@ func (c *launcherClient) launchManagedAutodiscoveryIntegration(ctx context.Conte
 }
 
 func (c *launcherClient) managedAutodiscoveryUsable(ctx context.Context, autodiscovery ManagedAutodiscoveryIntegration) bool {
-	if !managedAutodiscoveryUsesOllamaCloud(autodiscovery) {
+	if !managedAutodiscoveryUsesLycheeCloud(autodiscovery) {
 		return true
 	}
 	if disabled, known := cloudStatusDisabled(ctx, c.apiClient); known && disabled {
@@ -889,15 +889,15 @@ func (c *launcherClient) managedAutodiscoveryUsable(ctx context.Context, autodis
 }
 
 func (c *launcherClient) ensureManagedAutodiscoveryUsable(ctx context.Context, autodiscovery ManagedAutodiscoveryIntegration, label string) error {
-	if !managedAutodiscoveryUsesOllamaCloud(autodiscovery) {
+	if !managedAutodiscoveryUsesLycheeCloud(autodiscovery) {
 		return nil
 	}
 	return ensureCloudAuth(ctx, c.apiClient, label)
 }
 
-func managedAutodiscoveryUsesOllamaCloud(autodiscovery ManagedAutodiscoveryIntegration) bool {
+func managedAutodiscoveryUsesLycheeCloud(autodiscovery ManagedAutodiscoveryIntegration) bool {
 	cloud, ok := autodiscovery.(ManagedAutodiscoveryCloudIntegration)
-	return ok && cloud.UsesOllamaCloud()
+	return ok && cloud.UsesLycheeCloud()
 }
 
 func printRestoreHint(integration any) {
@@ -1037,7 +1037,7 @@ func (c *launcherClient) selectSingleModelWithSelectorReady(ctx context.Context,
 		return "", fmt.Errorf("no selector configured")
 	}
 
-	items, _, err := c.loadSelectableModels(ctx, nil, current, "no models available, run 'ollama pull <model>' first")
+	items, _, err := c.loadSelectableModels(ctx, nil, current, "no models available, run 'lychee pull <model>' first")
 	if err != nil {
 		return "", err
 	}

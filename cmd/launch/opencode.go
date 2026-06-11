@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"slices"
 
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/envconfig"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/envconfig"
 )
 
 // OpenCode implements Runner and Editor for OpenCode integration.
@@ -173,10 +173,10 @@ func (o *OpenCode) Edit(models []LaunchModel) error {
 		modelSet[m] = true
 	}
 
-	// Filter out existing Ollama models we're about to re-add
+	// Filter out existing Lychee models we're about to re-add
 	newRecent := slices.DeleteFunc(slices.Clone(recent), func(entry any) bool {
 		e, ok := entry.(map[string]any)
-		if !ok || e["providerID"] != "ollama" {
+		if !ok || e["providerID"] != "lychee" {
 			return false
 		}
 		modelID, _ := e["modelID"].(string)
@@ -186,7 +186,7 @@ func (o *OpenCode) Edit(models []LaunchModel) error {
 	// Prepend models in reverse order so first model ends up first
 	for _, model := range slices.Backward(modelList) {
 		newRecent = slices.Insert(newRecent, 0, any(map[string]any{
-			"providerID": "ollama",
+			"providerID": "lychee",
 			"modelID":    model,
 		}))
 	}
@@ -217,16 +217,16 @@ func buildInlineConfig(primary LaunchModel, models []LaunchModel) (string, error
 	config := map[string]any{
 		"$schema": "https://opencode.ai/config.json",
 		"provider": map[string]any{
-			"ollama": map[string]any{
+			"lychee": map[string]any{
 				"npm":  "@ai-sdk/openai-compatible",
-				"name": "Ollama",
+				"name": "Lychee",
 				"options": map[string]any{
 					"baseURL": envconfig.Host().String() + "/v1",
 				},
 				"models": buildModelEntries(models),
 			},
 		},
-		"model": "ollama/" + primary.Name,
+		"model": "lychee/" + primary.Name,
 	}
 	data, err := json.Marshal(config)
 	if err != nil {
@@ -235,7 +235,7 @@ func buildInlineConfig(primary LaunchModel, models []LaunchModel) (string, error
 	return string(data), nil
 }
 
-// readModelJSONModels reads ollama model IDs from the opencode model.json state file
+// readModelJSONModels reads lychee model IDs from the opencode model.json state file
 func readModelJSONModels() []string {
 	statePath, err := openCodeStatePath()
 	if err != nil {
@@ -256,7 +256,7 @@ func readModelJSONModels() []string {
 		if !ok {
 			continue
 		}
-		if e["providerID"] != "ollama" {
+		if e["providerID"] != "lychee" {
 			continue
 		}
 		if id, ok := e["modelID"].(string); ok && id != "" {

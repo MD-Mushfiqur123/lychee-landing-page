@@ -10,10 +10,10 @@ import (
 	"math"
 	"time"
 
-	"github.com/ollama/ollama/x/imagegen/manifest"
-	"github.com/ollama/ollama/x/imagegen/mlx"
-	"github.com/ollama/ollama/x/imagegen/models/qwen3"
-	"github.com/ollama/ollama/x/imagegen/tokenizer"
+	"github.com/lychee/lychee/x/imagegen/manifest"
+	"github.com/lychee/lychee/x/imagegen/mlx"
+	"github.com/lychee/lychee/x/imagegen/models/qwen3"
+	"github.com/lychee/lychee/x/imagegen/tokenizer"
 	"golang.org/x/image/draw"
 )
 
@@ -46,7 +46,7 @@ type Model struct {
 // Go's ForwardWithLayerOutputs captures after layer i runs, so we use [8, 17, 26].
 var TextEncoderLayerIndices = []int{8, 17, 26}
 
-// Load loads the FLUX.2 Klein model from ollama blob storage.
+// Load loads the FLUX.2 Klein model from lychee blob storage.
 func (m *Model) Load(modelName string) error {
 	fmt.Printf("Loading FLUX.2 Klein model from manifest: %s...\n", modelName)
 	start := time.Now()

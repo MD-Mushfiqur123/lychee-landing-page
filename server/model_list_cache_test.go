@@ -9,9 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/types/model"
 )
 
 func TestModelListCacheHydratesSummary(t *testing.T) {

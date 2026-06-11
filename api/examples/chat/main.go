@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 func main() {

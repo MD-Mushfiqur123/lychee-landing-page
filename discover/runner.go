@@ -14,11 +14,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/format"
-	"github.com/ollama/ollama/llm"
-	"github.com/ollama/ollama/logutil"
-	"github.com/ollama/ollama/ml"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/format"
+	"github.com/lychee/lychee/llm"
+	"github.com/lychee/lychee/logutil"
+	"github.com/lychee/lychee/ml"
 )
 
 var (
@@ -45,7 +45,7 @@ func GPUDevices(ctx context.Context, runners []ml.FilteredRunnerDiscovery) []ml.
 	if !bootstrapped {
 		msg = "GPU bootstrap discovery took"
 		libDirs = make(map[string]struct{})
-		files, err := filepath.Glob(filepath.Join(ml.LibOllamaPath, "*", "*ggml-*"))
+		files, err := filepath.Glob(filepath.Join(ml.LibLycheePath, "*", "*ggml-*"))
 		if err != nil {
 			slog.Debug("unable to lookup runner library directories", "error", err)
 		}
@@ -94,14 +94,14 @@ func GPUDevices(ctx context.Context, runners []ml.FilteredRunnerDiscovery) []ml.
 				} else if jetpack != "" && filepath.Base(dir) != "cuda_"+jetpack {
 					continue
 				} else if jetpack == "" && strings.Contains(filepath.Base(dir), "cuda_jetpack") {
-					slog.Debug("jetpack not detected (set JETSON_JETPACK or OLLAMA_LLM_LIBRARY to override), skipping", "libDir", dir)
+					slog.Debug("jetpack not detected (set JETSON_JETPACK or LYCHEE_LLM_LIBRARY to override), skipping", "libDir", dir)
 					continue
 				} else if !envconfig.EnableVulkan(true) && strings.Contains(filepath.Base(dir), "vulkan") {
 					continue
 				}
-				dirs = []string{ml.LibOllamaPath, dir}
+				dirs = []string{ml.LibLycheePath, dir}
 			} else {
-				dirs = []string{ml.LibOllamaPath}
+				dirs = []string{ml.LibLycheePath}
 			}
 
 			ctx1stPass, cancel := context.WithTimeout(ctx, bootstrapTimeout)
@@ -245,7 +245,7 @@ func GPUDevices(ctx context.Context, runners []ml.FilteredRunnerDiscovery) []ml.
 		libDirs = make(map[string]struct{})
 		for _, dev := range devices {
 			dir := dev.LibraryPath[len(dev.LibraryPath)-1]
-			if dir != ml.LibOllamaPath {
+			if dir != ml.LibLycheePath {
 				libDirs[dir] = struct{}{}
 			}
 		}
@@ -336,7 +336,7 @@ func GPUDevices(ctx context.Context, runners []ml.FilteredRunnerDiscovery) []ml.
 			devFilter := ml.GetDevicesEnv(devices)
 
 			for dir := range libDirs {
-				updatedDevices := bootstrapDevicesWithMetalRetry(rctx, ctx, 3*time.Second, []string{ml.LibOllamaPath, dir}, devFilter)
+				updatedDevices := bootstrapDevicesWithMetalRetry(rctx, ctx, 3*time.Second, []string{ml.LibLycheePath, dir}, devFilter)
 				for _, u := range updatedDevices {
 					for i := range devices {
 						if sameRefreshDevice(u, devices[i]) {
@@ -393,7 +393,7 @@ func filterIntegratedGPUs(devices []ml.DeviceInfo) []ml.DeviceInfo {
 			continue
 		}
 
-		slog.Info("dropping integrated GPU; to enable, set OLLAMA_IGPU_ENABLE=1",
+		slog.Info("dropping integrated GPU; to enable, set LYCHEE_IGPU_ENABLE=1",
 			"id", device.ID,
 			"library", device.Library,
 			"compute", device.Compute(),
@@ -476,15 +476,15 @@ func filterOverlapByLibrary(supported map[string]map[string]map[string]int, need
 	}
 }
 
-func bootstrapDevicesWithMetalRetry(firstAttemptCtx, retryParentCtx context.Context, timeout time.Duration, ollamaLibDirs []string, extraEnvs map[string]string) []ml.DeviceInfo {
-	extraEnvs = normalizeDiscoveryEnv(ollamaLibDirs, extraEnvs)
+func bootstrapDevicesWithMetalRetry(firstAttemptCtx, retryParentCtx context.Context, timeout time.Duration, lycheeLibDirs []string, extraEnvs map[string]string) []ml.DeviceInfo {
+	extraEnvs = normalizeDiscoveryEnv(lycheeLibDirs, extraEnvs)
 
 	runDiscovery := func(ctx context.Context, extraEnvs map[string]string) ([]ml.DeviceInfo, *llm.StatusWriter, error) {
 		start := time.Now()
 		defer func() {
-			slog.Debug("bootstrap discovery took", "duration", time.Since(start), "OLLAMA_LIBRARY_PATH", ollamaLibDirs, "extra_envs", extraEnvs)
+			slog.Debug("bootstrap discovery took", "duration", time.Since(start), "LYCHEE_LIBRARY_PATH", lycheeLibDirs, "extra_envs", extraEnvs)
 		}()
-		return bootstrapDevicesWithStatusWatchdog(ctx, ollamaLibDirs, extraEnvs)
+		return bootstrapDevicesWithStatusWatchdog(ctx, lycheeLibDirs, extraEnvs)
 	}
 
 	devices, status, err := runDiscovery(firstAttemptCtx, extraEnvs)
@@ -510,16 +510,16 @@ func bootstrapDevicesWithMetalRetry(firstAttemptCtx, retryParentCtx context.Cont
 		}
 	}
 
-	slog.Info("failure during llama-server GPU discovery", "OLLAMA_LIBRARY_PATH", ollamaLibDirs, "extra_envs", extraEnvs, "error", err, "detail", lastDiscoveryStatusError(status))
+	slog.Info("failure during llama-server GPU discovery", "LYCHEE_LIBRARY_PATH", lycheeLibDirs, "extra_envs", extraEnvs, "error", err, "detail", lastDiscoveryStatusError(status))
 	return devices
 }
 
-func normalizeDiscoveryEnv(ollamaLibDirs []string, extraEnvs map[string]string) map[string]string {
-	return normalizeDiscoveryEnvForGOOS(runtime.GOOS, ollamaLibDirs, extraEnvs)
+func normalizeDiscoveryEnv(lycheeLibDirs []string, extraEnvs map[string]string) map[string]string {
+	return normalizeDiscoveryEnvForGOOS(runtime.GOOS, lycheeLibDirs, extraEnvs)
 }
 
-func normalizeDiscoveryEnvForGOOS(goos string, ollamaLibDirs []string, extraEnvs map[string]string) map[string]string {
-	if goos != "linux" || len(ollamaLibDirs) == 0 || !isROCmLibraryDir(filepath.Base(ollamaLibDirs[len(ollamaLibDirs)-1])) {
+func normalizeDiscoveryEnvForGOOS(goos string, lycheeLibDirs []string, extraEnvs map[string]string) map[string]string {
+	if goos != "linux" || len(lycheeLibDirs) == 0 || !isROCmLibraryDir(filepath.Base(lycheeLibDirs[len(lycheeLibDirs)-1])) {
 		return extraEnvs
 	}
 
@@ -552,19 +552,19 @@ type bootstrapDevicesResult struct {
 	err     error
 }
 
-func bootstrapDevicesWithStatusWatchdog(ctx context.Context, ollamaLibDirs []string, extraEnvs map[string]string) ([]ml.DeviceInfo, *llm.StatusWriter, error) {
-	return runBootstrapDevicesWithStatusWatchdog(ctx, ollamaLibDirs, extraEnvs, llamaServerBootstrapDevicesWithStatus)
+func bootstrapDevicesWithStatusWatchdog(ctx context.Context, lycheeLibDirs []string, extraEnvs map[string]string) ([]ml.DeviceInfo, *llm.StatusWriter, error) {
+	return runBootstrapDevicesWithStatusWatchdog(ctx, lycheeLibDirs, extraEnvs, llamaServerBootstrapDevicesWithStatus)
 }
 
 func runBootstrapDevicesWithStatusWatchdog(
 	ctx context.Context,
-	ollamaLibDirs []string,
+	lycheeLibDirs []string,
 	extraEnvs map[string]string,
 	discover func(context.Context, []string, map[string]string) ([]ml.DeviceInfo, *llm.StatusWriter, error),
 ) ([]ml.DeviceInfo, *llm.StatusWriter, error) {
 	resultCh := make(chan bootstrapDevicesResult, 1)
 	go func() {
-		devices, status, err := discover(ctx, ollamaLibDirs, extraEnvs)
+		devices, status, err := discover(ctx, lycheeLibDirs, extraEnvs)
 		resultCh <- bootstrapDevicesResult{devices: devices, status: status, err: err}
 	}()
 
@@ -572,7 +572,7 @@ func runBootstrapDevicesWithStatusWatchdog(
 	case result := <-resultCh:
 		return result.devices, result.status, result.err
 	case <-ctx.Done():
-		slog.Warn("llama-server GPU discovery watchdog timed out", "OLLAMA_LIBRARY_PATH", ollamaLibDirs, "extra_envs", extraEnvs, "error", ctx.Err())
+		slog.Warn("llama-server GPU discovery watchdog timed out", "LYCHEE_LIBRARY_PATH", lycheeLibDirs, "extra_envs", extraEnvs, "error", ctx.Err())
 		return nil, nil, ctx.Err()
 	}
 }
@@ -726,7 +726,7 @@ func detectIncompatibleLibraries() {
 	if err != nil || basePath == "" {
 		return
 	}
-	if !strings.HasPrefix(basePath, ml.LibOllamaPath) {
+	if !strings.HasPrefix(basePath, ml.LibLycheePath) {
 		slog.Warn("potentially incompatible library detected in PATH", "location", basePath)
 	}
 }

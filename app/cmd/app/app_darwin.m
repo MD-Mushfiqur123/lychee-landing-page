@@ -23,7 +23,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
 
 - (void)application:(NSApplication *)application openURLs:(NSArray<NSURL *> *)urls {
     for (NSURL *url in urls) {
-        if ([url.scheme isEqualToString:@"ollama"]) {
+        if ([url.scheme isEqualToString:@"lychee"]) {
             NSString *path = url.path;
 
             if (path && ([path isEqualToString:@"/connect"] || [url.host isEqualToString:@"connect"])) {
@@ -57,7 +57,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
             stringByAppendingPathComponent:
                 [NSString
                     stringWithFormat:
-                        @"darwin/Ollama.app/Contents/Resources/icon.icns"]];
+                        @"darwin/Lychee.app/Contents/Resources/icon.icns"]];
         NSImage *customIcon = [[NSImage alloc] initWithContentsOfFile:iconPath];
         [NSApp setApplicationIconImage:customIcon];
     }
@@ -65,7 +65,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
     // Create status item and menu
     NSMenu *menu = [[NSMenu alloc] init];
     NSMenuItem *openMenuItem =
-        [[NSMenuItem alloc] initWithTitle:@"Open Ollama"
+        [[NSMenuItem alloc] initWithTitle:@"Open Lychee"
                                    action:@selector(openUI)
                             keyEquivalent:@""];
     [openMenuItem setTarget:self];
@@ -94,7 +94,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    [menu addItemWithTitle:@"Quit Ollama"
+    [menu addItemWithTitle:@"Quit Lychee"
                     action:@selector(quit)
              keyEquivalent:@"q"];
 
@@ -110,7 +110,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
     [self showIcon];
 
     // Application menu
-    NSString *appName = @"Ollama";
+    NSString *appName = @"Lychee";
 
     NSMenu *mainMenu = [[NSMenu alloc] init];
     NSMenuItem *appMenuItem = [[NSMenuItem alloc] initWithTitle:appName
@@ -121,7 +121,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
     [mainMenu addItem:appMenuItem];
 
     [appMenu addItemWithTitle:[NSString stringWithFormat:@"About %@", appName]
-                       action:@selector(aboutOllama)
+                       action:@selector(aboutLychee)
                 keyEquivalent:@""];
     [appMenu addItem:[NSMenuItem separatorItem]];
     [appMenu addItemWithTitle:@"Settings..."
@@ -249,13 +249,13 @@ bool firstTimeRun,startHidden; // Set in run before initialization
     [self showIcon];
 }
 
-- (void)aboutOllama {
+- (void)aboutLychee {
     [[NSApplication sharedApplication] orderFrontStandardAboutPanel:nil];
     [NSApp activateIgnoringOtherApps:YES];
 }
 
 - (void)openHelp:(id)sender {
-    NSURL *url = [NSURL URLWithString:@"https://docs.ollama.com/"];
+    NSURL *url = [NSURL URLWithString:@"https://docs.lychee.com/"];
     [[NSWorkspace sharedWorkspace] openURL:url];
 }
 
@@ -316,7 +316,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
 - (void)showIcon {
     NSAppearance *appearance = self.statusItem.button.effectiveAppearance;
     NSString *appearanceName = (NSString *)(appearance.name);
-    NSString *iconName = @"ollama";
+    NSString *iconName = @"lychee";
     if (self.updateAvailable) {
         iconName = [iconName stringByAppendingString:@"Update"];
     }
@@ -331,7 +331,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
             [[NSFileManager defaultManager] currentDirectoryPath];
         NSString *bundlePath =
             [cwdPath stringByAppendingPathComponent:
-                         [NSString stringWithFormat:@"darwin/Ollama.app"]];
+                         [NSString stringWithFormat:@"darwin/Lychee.app"]];
         bundle = [NSBundle bundleWithPath:bundlePath];
     }
 
@@ -370,10 +370,10 @@ bool firstTimeRun,startHidden; // Set in run before initialization
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)registerSelfAsLoginItem:(BOOL)firstTimeRun {
     appLogInfo(@"using v13+ SMAppService for login registration");
-    // Maps to the file Ollama.app/Contents/Library/LaunchAgents/com.ollama.ollama.plist
-    SMAppService* service = [SMAppService agentServiceWithPlistName:@"com.ollama.ollama.plist"];
+    // Maps to the file Lychee.app/Contents/Library/LaunchAgents/com.lychee.lychee.plist
+    SMAppService* service = [SMAppService agentServiceWithPlistName:@"com.lychee.lychee.plist"];
     if (!service) {
-        appLogInfo(@"SMAppService failed to find service for com.ollama.ollama.plist");
+        appLogInfo(@"SMAppService failed to find service for com.lychee.lychee.plist");
         return;
     }
     SMAppServiceStatus status = [service status];
@@ -403,7 +403,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
     return;
 }
 
-/// Remove ollama from the deprecated Login Items list as we now use LaunchAgents
+/// Remove lychee from the deprecated Login Items list as we now use LaunchAgents
 - (void)unregisterSelfFromLoginItem {
     NSURL *bundleURL = NSBundle.mainBundle.bundleURL;
     NSString *bundlePrefix = [SystemWidePath stringByDeletingPathExtension];
@@ -422,7 +422,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
         if (LSSharedFileListItemResolve((LSSharedFileListItemRef)item, 0,
                                         &itemURL, NULL) == noErr) {
             CFStringRef loginPath = CFURLCopyFileSystemPath(itemURL, kCFURLPOSIXPathStyle);
-            // Compare the prefix to match against "keep existing" flow, e.g. // "/Applications/Ollama.app" vs "/Applications/Ollama 2.app"
+            // Compare the prefix to match against "keep existing" flow, e.g. // "/Applications/Lychee.app" vs "/Applications/Lychee 2.app"
             if (loginPath && [(NSString *)loginPath hasPrefix:bundlePrefix]) {
                 appLogInfo([NSString stringWithFormat:@"removing login item %@", loginPath]);
                 LSSharedFileListItemRemove(loginItems,
@@ -437,7 +437,7 @@ bool firstTimeRun,startHidden; // Set in run before initialization
             CFStringRef displayName = LSSharedFileListItemCopyDisplayName((LSSharedFileListItemRef)item);
             if (displayName) {
                 NSString *name = (__bridge NSString *)displayName;
-                if ([name hasPrefix:@"Ollama"]) {
+                if ([name hasPrefix:@"Lychee"]) {
                     LSSharedFileListItemRemove(loginItems, (LSSharedFileListItemRef)item);
                     appLogInfo([NSString stringWithFormat:@"removing dangling login item %@", displayName]);
                 }
@@ -538,7 +538,7 @@ decidePolicyForNavigationAction:(WKNavigationAction *)action
     Class class = [WKWebView class];
 
     SEL originalSelector = @selector(willOpenMenu:withEvent:);
-    SEL swizzledSelector = @selector(ollama_willOpenMenu:withEvent:);
+    SEL swizzledSelector = @selector(lychee_willOpenMenu:withEvent:);
 
     Method originalMethod = class_getInstanceMethod(class, originalSelector);
     Method swizzledMethod = class_getInstanceMethod(class, swizzledSelector);
@@ -558,9 +558,9 @@ decidePolicyForNavigationAction:(WKNavigationAction *)action
 
 @end
 
-@implementation WKWebView (OllamaContextMenu)
-- (void)ollama_willOpenMenu:(NSMenu *)menu withEvent:(NSEvent *)event {
-    [self ollama_willOpenMenu:menu withEvent:event];
+@implementation WKWebView (LycheeContextMenu)
+- (void)lychee_willOpenMenu:(NSMenu *)menu withEvent:(NSEvent *)event {
+    [self lychee_willOpenMenu:menu withEvent:event];
     NSMutableArray *itemsToRemove = [NSMutableArray array];
     for (NSMenuItem *item in menu.itemArray) {
         if ([item.title containsString:@"Copy Link with Highlight"] ||
@@ -634,7 +634,7 @@ void run(bool ftr, bool sh) {
 
 // killOtherInstances kills all other instances of the app currently
 // running. This way we can ensure that only the most recently started
-// instance of Ollama is running
+// instance of Lychee is running
 void killOtherInstances() {
     pid_t myPid = getpid();
     NSArray *apps = [[NSWorkspace sharedWorkspace] runningApplications];
@@ -648,12 +648,12 @@ void killOtherInstances() {
         }
         
         if ([bundleId isEqualToString:[[NSBundle mainBundle] bundleIdentifier]] ||
-            [bundleId isEqualToString:@"ai.ollama.ollama"] ||
-            [bundleId isEqualToString:@"com.electron.ollama"]) {
+            [bundleId isEqualToString:@"ai.lychee.lychee"] ||
+            [bundleId isEqualToString:@"com.electron.lychee"]) {
             
             pid_t pid = app.processIdentifier;
             if (pid != myPid && pid > 0) {
-                appLogInfo([NSString stringWithFormat:@"terminating other ollama instance %d", pid]);
+                appLogInfo([NSString stringWithFormat:@"terminating other lychee instance %d", pid]);
                 kill(pid, SIGTERM);
             } else if (pid == -1) {
                 appLogInfo([NSString stringWithFormat:@"skipping app with invalid pid: %@", bundleId]);
@@ -719,7 +719,7 @@ bool moveToApplications(const char *src) {
 }
 
 AuthorizationRef getSymlinkAuthorization() {
-    return getAuthorization(@"Ollama is trying to install its command line "
+    return getAuthorization(@"Lychee is trying to install its command line "
                             @"interface (CLI) tool.",
                             @"symlink");
 }
@@ -739,7 +739,7 @@ bool moveToApplicationsWithAuthorization(const char *src) {
         return NO;
     }
 
-    // Remove existing /Applications/Ollama.app (if any)
+    // Remove existing /Applications/Lychee.app (if any)
     //    - We do this via /bin/rm with elevated privileges
     //
     const char *rmTool = "/bin/rm";
@@ -852,7 +852,7 @@ enum AppMove askToMoveToApplications() {
         [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
     if (!evt || [evt eventID] != kAEOpenApplication) {
         // This scenario triggers if we were launched from a double click,
-        // or the CLI spawns the app via open -a Ollama.app
+        // or the CLI spawns the app via open -a Lychee.app
         appLogDebug([NSString
             stringWithFormat:@"launched from double click or open -a"]);
     }
@@ -871,7 +871,7 @@ enum AppMove askToMoveToApplications() {
     NSAlert *alert = [[NSAlert alloc] init];
     [alert setMessageText:@"Move to Applications?"];
     [alert setInformativeText:
-               @"Ollama works best when run from the Applications directory."];
+               @"Lychee works best when run from the Applications directory."];
     [alert addButtonWithTitle:@"Move to Applications"];
     [alert addButtonWithTitle:@"Don't move"];
 
@@ -920,7 +920,7 @@ void launchApp(const char *appPath) {
 }
 
 int installSymlink(const char *cliPath) {
-    NSString *linkPath = @"/usr/local/bin/ollama";
+    NSString *linkPath = @"/usr/local/bin/lychee";
     NSString *dirPath = @"/usr/local/bin";
     NSError *error = nil;
 
@@ -969,7 +969,7 @@ int installSymlink(const char *cliPath) {
     // Create the symlink using the same authorization
     const char *toolPath = "/bin/ln";
     const char *args[] = {"-s", "-F", [resPath UTF8String],
-                          "/usr/local/bin/ollama", NULL};
+                          "/usr/local/bin/lychee", NULL};
     FILE *pipe = NULL;
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -1076,7 +1076,7 @@ void styleWindow(uintptr_t wndPtr) {
     }
 
     if (w.toolbar == nil) {
-        NSToolbar *tb = [[NSToolbar alloc] initWithIdentifier:@"OllamaToolbar"];
+        NSToolbar *tb = [[NSToolbar alloc] initWithIdentifier:@"LycheeToolbar"];
         tb.displayMode            = NSToolbarDisplayModeIconOnly;
         tb.showsBaselineSeparator = NO;
         w.toolbar                 = tb;

@@ -15,12 +15,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/format"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/format"
 )
 
-const modelRecommendationsURL = "https://ollama.com/api/experimental/model-recommendations"
+const modelRecommendationsURL = "https://lychee.com/api/experimental/model-recommendations"
 
 var (
 	modelRecommendationsRefreshInterval     = 4 * time.Hour
@@ -308,7 +308,7 @@ func modelRecommendationsSnapshotPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".ollama", "cache", "model-recommendations.json"), nil
+	return filepath.Join(home, ".lychee", "cache", "model-recommendations.json"), nil
 }
 
 func validateModelRecommendations(recs []api.ModelRecommendation) ([]api.ModelRecommendation, error) {

@@ -8,8 +8,8 @@ import LaunchCommands from "@/components/LaunchCommands";
 import { useEffect, useRef } from "react";
 import { useSettings } from "@/hooks/useSettings";
 
-const launchSidebarRequestedKey = "ollama.launchSidebarRequested";
-const launchSidebarSeenKey = "ollama.launchSidebarSeen";
+const launchSidebarRequestedKey = "lychee.launchSidebarRequested";
+const launchSidebarSeenKey = "lychee.launchSidebarSeen";
 const fallbackSessionState = new Map<string, string>();
 
 function getSessionState() {

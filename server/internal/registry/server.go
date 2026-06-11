@@ -1,4 +1,4 @@
-// Package registry implements an http.Handler for handling local Ollama API
+// Package registry implements an http.Handler for handling local Lychee API
 // model management requests. See [Local] for details.
 package registry
 
@@ -16,18 +16,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ollama/ollama/server/internal/cache/blob"
-	"github.com/ollama/ollama/server/internal/client/ollama"
-	"github.com/ollama/ollama/server/internal/internal/backoff"
+	"github.com/lychee/lychee/server/internal/cache/blob"
+	"github.com/lychee/lychee/server/internal/client/lychee"
+	"github.com/lychee/lychee/server/internal/internal/backoff"
 )
 
-// Local implements an http.Handler for handling local Ollama API model
+// Local implements an http.Handler for handling local Lychee API model
 // management requests, such as pushing, pulling, and deleting models.
 //
 // It can be arranged for all unknown requests to be passed through to a
 // fallback handler, if one is provided.
 type Local struct {
-	Client *ollama.Registry // required
+	Client *lychee.Registry // required
 	Logger *slog.Logger     // required
 
 	// Fallback, if set, is used to handle requests that are not handled by
@@ -39,8 +39,8 @@ type Local struct {
 	Prune func() error // optional
 }
 
-// serverError is like ollama.Error, but with a Status field for the HTTP
-// response code. We want to avoid adding that field to ollama.Error because it
+// serverError is like lychee.Error, but with a Status field for the HTTP
+// response code. We want to avoid adding that field to lychee.Error because it
 // would always be 0 to clients (we don't want to leak the status code in
 // errors), and so it would be confusing to have a field that is always 0.
 type serverError struct {
@@ -134,7 +134,7 @@ func (s *Local) serveHTTP(rec *statusCodeRecorder, r *http.Request) {
 		var e *serverError
 		switch {
 		case errors.As(err, &e):
-		case errors.Is(err, ollama.ErrNameInvalid):
+		case errors.Is(err, lychee.ErrNameInvalid):
 			e = &serverError{400, "bad_request", err.Error()}
 		default:
 			e = errInternalError
@@ -269,7 +269,7 @@ func (s *Local) handlePull(w http.ResponseWriter, r *http.Request) error {
 	enc := json.NewEncoder(w)
 	if !p.stream() {
 		if err := s.Client.Pull(r.Context(), p.model()); err != nil {
-			if errors.Is(err, ollama.ErrModelNotFound) {
+			if errors.Is(err, lychee.ErrModelNotFound) {
 				return errModelNotFound
 			}
 			return err
@@ -298,9 +298,9 @@ func (s *Local) handlePull(w http.ResponseWriter, r *http.Request) error {
 		flushProgress() // flush initial state
 		t.Reset(100 * time.Millisecond)
 	})
-	ctx := ollama.WithTrace(r.Context(), &ollama.Trace{
-		Update: func(l *ollama.Layer, n int64, err error) {
-			if err != nil && !errors.Is(err, ollama.ErrCached) {
+	ctx := lychee.WithTrace(r.Context(), &lychee.Trace{
+		Update: func(l *lychee.Layer, n int64, err error) {
+			if err != nil && !errors.Is(err, lychee.ErrCached) {
 				s.Logger.Error("pulling", "model", p.model(), "error", err)
 				return
 			}
@@ -354,7 +354,7 @@ func (s *Local) handlePull(w http.ResponseWriter, r *http.Request) error {
 		case err := <-done:
 			flushProgress()
 			if err != nil {
-				if errors.Is(err, ollama.ErrModelNotFound) {
+				if errors.Is(err, lychee.ErrModelNotFound) {
 					return &serverError{
 						Status:  404,
 						Code:    "not_found",
@@ -403,7 +403,7 @@ func canRetry(err error) bool {
 	if err == nil {
 		return false
 	}
-	var oe *ollama.Error
+	var oe *lychee.Error
 	if errors.As(err, &oe) {
 		return oe.Temporary()
 	}

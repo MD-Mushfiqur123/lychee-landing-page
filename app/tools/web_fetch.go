@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/auth"
+	"github.com/lychee/lychee/auth"
 )
 
 type WebFetch struct{}
@@ -93,7 +93,7 @@ func performWebFetch(ctx context.Context, targetURL string) (*FetchResponse, err
 		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	crawlURL, err := url.Parse("https://ollama.com/api/web_fetch")
+	crawlURL, err := url.Parse("https://lychee.com/api/web_fetch")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse fetch URL: %w", err)
 	}

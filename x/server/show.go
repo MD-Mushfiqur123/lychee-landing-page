@@ -10,9 +10,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/types/model"
 )
 
 func canonicalQuantType(quantType string) string {
@@ -80,7 +80,7 @@ func buildModelInfo(config modelConfig, totalTensorBytes, tensorCount int64) map
 	// Determine architecture
 	arch := config.ModelType
 	if arch == "" && len(config.Architectures) > 0 {
-		// Convert HuggingFace architecture name to Ollama format
+		// Convert HuggingFace architecture name to Lychee format
 		// e.g., "Gemma3ForCausalLM" -> "gemma3"
 		hfArch := config.Architectures[0]
 		arch = strings.ToLower(hfArch)

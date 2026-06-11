@@ -8,11 +8,11 @@ Use this capability to audit model steps, animate the model *thinking* in a UI, 
 
 ## Supported models
 
-- [Qwen 3](https://ollama.com/library/qwen3)
-- [GPT-OSS](https://ollama.com/library/gpt-oss) *(use `think` levels: `low`, `medium`, `high` — the trace cannot be fully disabled)*
-- [DeepSeek-v3.1](https://ollama.com/library/deepseek-v3.1)
-- [DeepSeek R1](https://ollama.com/library/deepseek-r1)
-- Browse the latest additions under [thinking models](https://ollama.com/search?c=thinking)
+- [Qwen 3](https://lychee.ai/library/qwen3)
+- [GPT-OSS](https://lychee.ai/library/gpt-oss) *(use `think` levels: `low`, `medium`, `high` — the trace cannot be fully disabled)*
+- [DeepSeek-v3.1](https://lychee.ai/library/deepseek-v3.1)
+- [DeepSeek R1](https://lychee.ai/library/deepseek-r1)
+- Browse the latest additions under [thinking models](https://lychee.ai/search?c=thinking)
 
 ## Enable thinking in API calls
 
@@ -38,7 +38,7 @@ The `message.thinking` (chat endpoint) or `thinking` (generate endpoint) field c
   </Tab>
   <Tab title="Python">
     ```python
-    from ollama import chat
+    from lychee import chat
 
     response = chat(
       model='qwen3',
@@ -53,9 +53,9 @@ The `message.thinking` (chat endpoint) or `thinking` (generate endpoint) field c
   </Tab>
   <Tab title="JavaScript">
     ```javascript
-    import ollama from 'ollama'
+    import lychee from 'lychee'
 
-    const response = await ollama.chat({
+    const response = await lychee.chat({
       model: 'deepseek-r1',
       messages: [{ role: 'user', content: 'How many letter r are in strawberry?' }],
       think: true,
@@ -79,7 +79,7 @@ Thinking streams interleave reasoning tokens before answer tokens. Detect the fi
 <Tabs>
   <Tab title="Python">
     ```python
-    from ollama import chat
+    from lychee import chat
 
     stream = chat(
       model='qwen3',
@@ -107,10 +107,10 @@ Thinking streams interleave reasoning tokens before answer tokens. Detect the fi
   </Tab>
   <Tab title="JavaScript">
     ```javascript
-    import ollama from 'ollama'
+    import lychee from 'lychee'
 
     async function main() {
-      const stream = await ollama.chat({
+      const stream = await lychee.chat({
         model: 'qwen3',
         messages: [{ role: 'user', content: 'What is 17 × 23?' }],
         think: true,
@@ -144,10 +144,10 @@ Thinking streams interleave reasoning tokens before answer tokens. Detect the fi
 
 ## CLI quick reference
 
-- Enable thinking for a single run: `ollama run deepseek-r1 --think "Where should I visit in Lisbon?"`
-- Disable thinking: `ollama run deepseek-r1 --think=false "Summarize this article"`
-- Hide the trace while still using a thinking model: `ollama run deepseek-r1 --hidethinking "Is 9.9 bigger or 9.11?"`
+- Enable thinking for a single run: `lychee run deepseek-r1 --think "Where should I visit in Lisbon?"`
+- Disable thinking: `lychee run deepseek-r1 --think=false "Summarize this article"`
+- Hide the trace while still using a thinking model: `lychee run deepseek-r1 --hidethinking "Is 9.9 bigger or 9.11?"`
 - Inside interactive sessions, toggle with `/set think` or `/set nothink`.
-- GPT-OSS only accepts levels: `ollama run gpt-oss --think=low "Draft a headline"` (replace `low` with `medium` or `high` as needed).
+- GPT-OSS only accepts levels: `lychee run gpt-oss --think=low "Draft a headline"` (replace `low` with `medium` or `high` as needed).
 
 <Note>Thinking is enabled by default in the CLI and API for supported models.</Note>

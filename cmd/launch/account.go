@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 const (
 	// DefaultUpgradeURL is the fixed destination for subscription upgrades.
-	DefaultUpgradeURL = "https://ollama.com/upgrade"
+	DefaultUpgradeURL = "https://lychee.com/upgrade"
 
 	accountCheckTimeout = 3 * time.Second
 )

@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/envconfig"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/envconfig"
 )
 
 const defaultGatewayPort = 18789
@@ -50,7 +50,7 @@ func (c *Openclaw) Run(model string, _ []LaunchModel, args []string) error {
 		}
 
 		// Ensure the latest version is installed before onboarding so we get
-		// the newest wizard flags (e.g. --auth-choice ollama).
+		// the newest wizard flags (e.g. --auth-choice lychee).
 		if !openclawFreshInstall {
 			update := exec.Command(bin, "update")
 			update.Env = openclawInstallEnv()
@@ -59,14 +59,14 @@ func (c *Openclaw) Run(model string, _ []LaunchModel, args []string) error {
 			_ = update.Run() // best-effort; continue even if update fails
 		}
 
-		fmt.Fprintf(os.Stderr, "\n%sSetting up OpenClaw with Ollama...%s\n", ansiGreen, ansiReset)
+		fmt.Fprintf(os.Stderr, "\n%sSetting up OpenClaw with Lychee...%s\n", ansiGreen, ansiReset)
 		fmt.Fprintf(os.Stderr, "%s  Model: %s%s\n\n", ansiGray, model, ansiReset)
 
 		onboardArgs := []string{
 			"onboard",
 			"--non-interactive",
 			"--accept-risk",
-			"--auth-choice", "ollama",
+			"--auth-choice", "lychee",
 			"--custom-base-url", envconfig.Host().String(),
 			"--custom-model-id", model,
 			// Launch owns the first real gateway startup immediately after onboarding,
@@ -91,7 +91,7 @@ func (c *Openclaw) Run(model string, _ []LaunchModel, args []string) error {
 		patchDeviceScopes()
 	}
 
-	configureOllamaWebSearch()
+	configureLycheeWebSearch()
 
 	// When extra args are passed through, run exactly what the user asked for
 	// after setup and skip the built-in gateway+TUI convenience flow.
@@ -353,7 +353,7 @@ func printOpenclawReady(bin, token string, port int, firstLaunch bool) {
 }
 
 // openclawEnv returns the current environment with provider API keys cleared
-// so openclaw only uses the Ollama gateway, not keys from the user's shell.
+// so openclaw only uses the Lychee gateway, not keys from the user's shell.
 func openclawEnv() []string {
 	clear := map[string]bool{
 		"ANTHROPIC_API_KEY":     true,
@@ -606,7 +606,7 @@ func ensureOpenclawInstalled() (string, error) {
 		if gitErr != nil {
 			missing = append(missing, "git: https://git-scm.com/")
 		}
-		return "", fmt.Errorf("OpenClaw is not installed and required dependencies are missing\n\nInstall the following first:\n  %s\n\nThen re-run:\n  ollama launch openclaw", strings.Join(missing, "\n  "))
+		return "", fmt.Errorf("OpenClaw is not installed and required dependencies are missing\n\nInstall the following first:\n  %s\n\nThen re-run:\n  lychee launch openclaw", strings.Join(missing, "\n  "))
 	}
 
 	ok, err := ConfirmPrompt("OpenClaw is not installed. Install with npm?")
@@ -673,7 +673,7 @@ func (c *Openclaw) Edit(models []LaunchModel) error {
 		_ = json.Unmarshal(data, &config)
 	}
 
-	// Navigate/create: models.providers.ollama (preserving other providers)
+	// Navigate/create: models.providers.lychee (preserving other providers)
 	modelsSection, _ := config["models"].(map[string]any)
 	if modelsSection == nil {
 		modelsSection = make(map[string]any)
@@ -682,18 +682,18 @@ func (c *Openclaw) Edit(models []LaunchModel) error {
 	if providers == nil {
 		providers = make(map[string]any)
 	}
-	ollama, _ := providers["ollama"].(map[string]any)
-	if ollama == nil {
-		ollama = make(map[string]any)
+	lychee, _ := providers["lychee"].(map[string]any)
+	if lychee == nil {
+		lychee = make(map[string]any)
 	}
 
-	ollama["baseUrl"] = envconfig.Host().String()
+	lychee["baseUrl"] = envconfig.Host().String()
 	// needed to register provider
-	ollama["apiKey"] = "ollama-local"
-	ollama["api"] = "ollama"
+	lychee["apiKey"] = "lychee-local"
+	lychee["api"] = "lychee"
 
 	// Build map of existing models to preserve user customizations
-	existingModels, _ := ollama["models"].([]any)
+	existingModels, _ := lychee["models"].([]any)
 	existingByID := make(map[string]map[string]any)
 	for _, m := range existingModels {
 		if entry, ok := m.(map[string]any); ok {
@@ -716,9 +716,9 @@ func (c *Openclaw) Edit(models []LaunchModel) error {
 		}
 		newModels = append(newModels, entry)
 	}
-	ollama["models"] = newModels
+	lychee["models"] = newModels
 
-	providers["ollama"] = ollama
+	providers["lychee"] = lychee
 	modelsSection["providers"] = providers
 	config["models"] = modelsSection
 
@@ -735,7 +735,7 @@ func (c *Openclaw) Edit(models []LaunchModel) error {
 	if modelConfig == nil {
 		modelConfig = make(map[string]any)
 	}
-	modelConfig["primary"] = "ollama/" + models[0].Name
+	modelConfig["primary"] = "lychee/" + models[0].Name
 	defaults["model"] = modelConfig
 	agents["defaults"] = defaults
 	config["agents"] = agents
@@ -791,13 +791,13 @@ func clearSessionModelOverride(primary string) {
 	_ = os.WriteFile(path, out, 0o600)
 }
 
-// configureOllamaWebSearch keeps launch-managed OpenClaw installs on the
-// bundled Ollama web_search provider. Older launch builds installed an
-// external openclaw-web-search plugin that added custom ollama_web_search and
-// ollama_web_fetch tools. Current OpenClaw versions ship Ollama web_search as
-// the bundled "ollama" plugin instead, so we migrate stale config and ensure
+// configureLycheeWebSearch keeps launch-managed OpenClaw installs on the
+// bundled Lychee web_search provider. Older launch builds installed an
+// external openclaw-web-search plugin that added custom lychee_web_search and
+// lychee_web_fetch tools. Current OpenClaw versions ship Lychee web_search as
+// the bundled "lychee" plugin instead, so we migrate stale config and ensure
 // fresh installs select the bundled provider.
-func configureOllamaWebSearch() {
+func configureLycheeWebSearch() {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return
@@ -847,7 +847,7 @@ func configureOllamaWebSearch() {
 			filteredAlsoAllow = append(filteredAlsoAllow, v)
 			continue
 		}
-		if s == "ollama_web_search" || s == "ollama_web_fetch" {
+		if s == "lychee_web_search" || s == "lychee_web_fetch" {
 			stalePluginConfigured = true
 			continue
 		}
@@ -863,30 +863,30 @@ func configureOllamaWebSearch() {
 		delete(entries, "openclaw-web-search")
 		stalePluginConfigured = true
 	}
-	ollamaEntry, _ := entries["ollama"].(map[string]any)
-	if ollamaEntry == nil {
-		ollamaEntry = make(map[string]any)
+	lycheeEntry, _ := entries["lychee"].(map[string]any)
+	if lycheeEntry == nil {
+		lycheeEntry = make(map[string]any)
 	}
-	ollamaEntry["enabled"] = true
-	entries["ollama"] = ollamaEntry
+	lycheeEntry["enabled"] = true
+	entries["lychee"] = lycheeEntry
 	plugins["entries"] = entries
 
 	if allow, ok := plugins["allow"].([]any); ok {
 		var nextAllow []any
-		hasOllama := false
+		hasLychee := false
 		for _, v := range allow {
 			s, ok := v.(string)
 			if ok && s == "openclaw-web-search" {
 				stalePluginConfigured = true
 				continue
 			}
-			if ok && s == "ollama" {
-				hasOllama = true
+			if ok && s == "lychee" {
+				hasLychee = true
 			}
 			nextAllow = append(nextAllow, v)
 		}
-		if !hasOllama {
-			nextAllow = append(nextAllow, "ollama")
+		if !hasLychee {
+			nextAllow = append(nextAllow, "lychee")
 		}
 		plugins["allow"] = nextAllow
 	}
@@ -904,7 +904,7 @@ func configureOllamaWebSearch() {
 	}
 
 	if stalePluginConfigured || search["provider"] == nil {
-		search["provider"] = "ollama"
+		search["provider"] = "lychee"
 	}
 	if stalePluginConfigured {
 		fetch["enabled"] = true
@@ -976,8 +976,8 @@ func (c *Openclaw) Models() []string {
 
 	modelsSection, _ := config["models"].(map[string]any)
 	providers, _ := modelsSection["providers"].(map[string]any)
-	ollama, _ := providers["ollama"].(map[string]any)
-	modelList, _ := ollama["models"].([]any)
+	lychee, _ := providers["lychee"].(map[string]any)
+	modelList, _ := lychee["models"].([]any)
 
 	var result []string
 	for _, m := range modelList {

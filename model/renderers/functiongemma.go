@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 type FunctionGemmaRenderer struct{}

@@ -1,4 +1,4 @@
-# Ollama API Examples
+# Lychee API Examples
 
 Run the examples in this directory with:
 

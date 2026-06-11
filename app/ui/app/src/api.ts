@@ -12,9 +12,9 @@ import {
   User,
 } from "@/gotypes";
 import { parseJsonlFromResponse } from "./util/jsonl-parsing";
-import { ollamaClient as ollama } from "./lib/ollama-client";
-import type { ModelResponse } from "ollama/browser";
-import { API_BASE, OLLAMA_DOT_COM } from "./lib/config";
+import { lycheeClient as lychee } from "./lib/lychee-client";
+import type { ModelResponse } from "lychee/browser";
+import { API_BASE, LYCHEE_DOT_COM } from "./lib/config";
 
 // Extend Model class with utility methods
 declare module "@/gotypes" {
@@ -57,7 +57,7 @@ export async function fetchUser(): Promise<User | null> {
     const userData: User = await response.json();
 
     if (userData.avatarurl && !userData.avatarurl.startsWith("http")) {
-      userData.avatarurl = `${OLLAMA_DOT_COM}${userData.avatarurl}`;
+      userData.avatarurl = `${LYCHEE_DOT_COM}${userData.avatarurl}`;
     }
 
     return userData;
@@ -115,7 +115,7 @@ export async function getChat(chatId: string): Promise<ChatResponse> {
 
 export async function getModels(query?: string): Promise<Model[]> {
   try {
-    const { models: modelsResponse } = await ollama.list();
+    const { models: modelsResponse } = await lychee.list();
 
     let models: Model[] = modelsResponse
       .filter((m: ModelResponse) => {
@@ -180,7 +180,7 @@ export async function getModelCapabilities(
   modelName: string,
 ): Promise<ModelCapabilitiesResponse> {
   try {
-    const showResponse = await ollama.show({ model: modelName });
+    const showResponse = await lychee.show({ model: modelName });
 
     return new ModelCapabilitiesResponse({
       capabilities: Array.isArray(showResponse.capabilities)

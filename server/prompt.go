@@ -9,10 +9,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/llm"
-	"github.com/ollama/ollama/model/renderers"
-	"github.com/ollama/ollama/template"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/llm"
+	"github.com/lychee/lychee/model/renderers"
+	"github.com/lychee/lychee/template"
 )
 
 type tokenizeFunc func(context.Context, string) ([]int, error)

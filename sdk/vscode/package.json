@@ -1,0 +1,39 @@
+{
+  "name": "lychee-vscode",
+  "displayName": "Lychee",
+  "description": "VS Code integration for the Lychee local LLM engine.",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Programming Languages"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "modelfile",
+        "aliases": ["Modelfile", "modelfile"],
+        "filenames": ["Modelfile"]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "modelfile",
+        "scopeName": "source.modelfile",
+        "path": "./syntaxes/modelfile.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "lychee.runModel",
+        "title": "Lychee: Run Model"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onCommand:lychee.runModel"
+  ]
+}

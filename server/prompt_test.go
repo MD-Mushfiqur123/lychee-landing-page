@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/template"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/template"
+	"github.com/lychee/lychee/types/model"
 )
 
 func testConfigWithRenderer(renderer string) model.ConfigV2 {

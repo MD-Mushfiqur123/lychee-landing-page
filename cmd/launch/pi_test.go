@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/types/model"
 )
 
 func TestPiIntegration(t *testing.T) {
@@ -271,7 +271,7 @@ exit 0
 			http.NotFound(w, r)
 		}))
 		t.Cleanup(srv.Close)
-		t.Setenv("OLLAMA_HOST", srv.URL)
+		t.Setenv("LYCHEE_HOST", srv.URL)
 	}
 
 	setNpmRegistryVersion := func(t *testing.T, version string) {
@@ -293,7 +293,7 @@ exit 0
 
 	seedPiWebSearchPackage := func(t *testing.T, dir, version string) {
 		t.Helper()
-		packagePath := filepath.Join(dir, ".npm-global", "lib", "node_modules", "@ollama", "pi-web-search")
+		packagePath := filepath.Join(dir, ".npm-global", "lib", "node_modules", "@lychee", "pi-web-search")
 		if err := os.MkdirAll(packagePath, 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -913,7 +913,7 @@ func TestPiPaths(t *testing.T) {
 }
 
 func TestPiEdit(t *testing.T) {
-	// Mock Ollama server for createConfig calls during Edit
+	// Mock Lychee server for createConfig calls during Edit
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/show" {
 			fmt.Fprintf(w, `{"capabilities":[],"model_info":{}}`)
@@ -922,7 +922,7 @@ func TestPiEdit(t *testing.T) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	pi := &Pi{}
 	tmpDir := t.TempDir()
@@ -963,34 +963,34 @@ func TestPiEdit(t *testing.T) {
 			t.Error("Config missing providers")
 		}
 
-		ollama, ok := providers["ollama"].(map[string]any)
+		lychee, ok := providers["lychee"].(map[string]any)
 		if !ok {
-			t.Error("Providers missing ollama")
+			t.Error("Providers missing lychee")
 		}
 
-		modelsArray, ok := ollama["models"].([]any)
+		modelsArray, ok := lychee["models"].([]any)
 		if !ok || len(modelsArray) != 2 {
 			t.Errorf("Expected 2 models, got %v", modelsArray)
 		}
 
-		if ollama["baseUrl"] == nil {
+		if lychee["baseUrl"] == nil {
 			t.Error("Missing baseUrl")
 		}
-		if ollama["api"] != "openai-completions" {
-			t.Errorf("Expected api=openai-completions, got %v", ollama["api"])
+		if lychee["api"] != "openai-completions" {
+			t.Errorf("Expected api=openai-completions, got %v", lychee["api"])
 		}
-		if ollama["apiKey"] != "ollama" {
-			t.Errorf("Expected apiKey=ollama, got %v", ollama["apiKey"])
+		if lychee["apiKey"] != "lychee" {
+			t.Errorf("Expected apiKey=lychee, got %v", lychee["apiKey"])
 		}
 	})
 
-	t.Run("updates existing config preserving ollama provider settings", func(t *testing.T) {
+	t.Run("updates existing config preserving lychee provider settings", func(t *testing.T) {
 		cleanup()
 		os.MkdirAll(configDir, 0o755)
 
 		existingConfig := `{
 			"providers": {
-				"ollama": {
+				"lychee": {
 					"baseUrl": "http://custom:8080/v1",
 					"api": "custom-api",
 					"apiKey": "custom-key",
@@ -1011,19 +1011,19 @@ func TestPiEdit(t *testing.T) {
 
 		cfg := readConfig()
 		providers := cfg["providers"].(map[string]any)
-		ollama := providers["ollama"].(map[string]any)
+		lychee := providers["lychee"].(map[string]any)
 
-		if ollama["baseUrl"] != "http://custom:8080/v1" {
-			t.Errorf("Custom baseUrl not preserved, got %v", ollama["baseUrl"])
+		if lychee["baseUrl"] != "http://custom:8080/v1" {
+			t.Errorf("Custom baseUrl not preserved, got %v", lychee["baseUrl"])
 		}
-		if ollama["api"] != "custom-api" {
-			t.Errorf("Custom api not preserved, got %v", ollama["api"])
+		if lychee["api"] != "custom-api" {
+			t.Errorf("Custom api not preserved, got %v", lychee["api"])
 		}
-		if ollama["apiKey"] != "custom-key" {
-			t.Errorf("Custom apiKey not preserved, got %v", ollama["apiKey"])
+		if lychee["apiKey"] != "custom-key" {
+			t.Errorf("Custom apiKey not preserved, got %v", lychee["apiKey"])
 		}
 
-		modelsArray := ollama["models"].([]any)
+		modelsArray := lychee["models"].([]any)
 		if len(modelsArray) != 1 {
 			t.Errorf("Expected 1 model after update, got %d", len(modelsArray))
 		} else {
@@ -1044,10 +1044,10 @@ func TestPiEdit(t *testing.T) {
 
 		existingConfig := `{
 			"providers": {
-				"ollama": {
+				"lychee": {
 					"baseUrl": "http://localhost:11434/v1",
 					"api": "openai-completions",
-					"apiKey": "ollama",
+					"apiKey": "lychee",
 					"models": [
 						{"id": "glm-5:cloud", "_launch": true, "legacyField": "stale"}
 					]
@@ -1064,8 +1064,8 @@ func TestPiEdit(t *testing.T) {
 
 		cfg := readConfig()
 		providers := cfg["providers"].(map[string]any)
-		ollama := providers["ollama"].(map[string]any)
-		modelsArray := ollama["models"].([]any)
+		lychee := providers["lychee"].(map[string]any)
+		modelsArray := lychee["models"].([]any)
 		modelEntry := modelsArray[0].(map[string]any)
 
 		if modelEntry["contextWindow"] != float64(202_752) {
@@ -1087,10 +1087,10 @@ func TestPiEdit(t *testing.T) {
 		// Old models must have _launch marker to be managed by us
 		existingConfig := `{
 			"providers": {
-				"ollama": {
+				"lychee": {
 					"baseUrl": "http://localhost:11434/v1",
 					"api": "openai-completions",
-					"apiKey": "ollama",
+					"apiKey": "lychee",
 					"models": [
 						{"id": "old-model-1", "_launch": true},
 						{"id": "old-model-2", "_launch": true}
@@ -1109,8 +1109,8 @@ func TestPiEdit(t *testing.T) {
 
 		cfg := readConfig()
 		providers := cfg["providers"].(map[string]any)
-		ollama := providers["ollama"].(map[string]any)
-		modelsArray := ollama["models"].([]any)
+		lychee := providers["lychee"].(map[string]any)
+		modelsArray := lychee["models"].([]any)
 
 		if len(modelsArray) != 2 {
 			t.Errorf("Expected 2 models, got %d", len(modelsArray))
@@ -1138,10 +1138,10 @@ func TestPiEdit(t *testing.T) {
 		// Models must have _launch marker to be managed
 		existingConfig := `{
 			"providers": {
-				"ollama": {
+				"lychee": {
 					"baseUrl": "http://localhost:11434/v1",
 					"api": "openai-completions",
-					"apiKey": "ollama",
+					"apiKey": "lychee",
 					"models": [
 						{"id": "keep-model", "_launch": true},
 						{"id": "remove-model", "_launch": true}
@@ -1160,8 +1160,8 @@ func TestPiEdit(t *testing.T) {
 
 		cfg := readConfig()
 		providers := cfg["providers"].(map[string]any)
-		ollama := providers["ollama"].(map[string]any)
-		modelsArray := ollama["models"].([]any)
+		lychee := providers["lychee"].(map[string]any)
+		modelsArray := lychee["models"].([]any)
 
 		if len(modelsArray) != 2 {
 			t.Errorf("Expected 2 models, got %d", len(modelsArray))
@@ -1206,8 +1206,8 @@ func TestPiEdit(t *testing.T) {
 		}
 
 		providers := cfg["providers"].(map[string]any)
-		ollama := providers["ollama"].(map[string]any)
-		modelsArray := ollama["models"].([]any)
+		lychee := providers["lychee"].(map[string]any)
+		modelsArray := lychee["models"].([]any)
 
 		if len(modelsArray) != 1 {
 			t.Errorf("Expected 1 model, got %d", len(modelsArray))
@@ -1219,17 +1219,17 @@ func TestPiEdit(t *testing.T) {
 		cleanup()
 		os.MkdirAll(configDir, 0o755)
 
-		// User has manually configured models in ollama provider (no _launch marker)
+		// User has manually configured models in lychee provider (no _launch marker)
 		existingConfig := `{
 			"providers": {
-				"ollama": {
+				"lychee": {
 					"baseUrl": "http://localhost:11434/v1",
 					"api": "openai-completions",
-					"apiKey": "ollama",
+					"apiKey": "lychee",
 					"models": [
 						{"id": "user-model-1"},
 						{"id": "user-model-2", "customField": "preserved"},
-						{"id": "ollama-managed", "_launch": true}
+						{"id": "lychee-managed", "_launch": true}
 					]
 				}
 			}
@@ -1238,18 +1238,18 @@ func TestPiEdit(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		// Add a new ollama-managed model
-		newModels := []string{"new-ollama-model"}
+		// Add a new lychee-managed model
+		newModels := []string{"new-lychee-model"}
 		if err := pi.Edit(launchModelsFromNames(newModels)); err != nil {
 			t.Fatalf("Edit() error = %v", err)
 		}
 
 		cfg := readConfig()
 		providers := cfg["providers"].(map[string]any)
-		ollama := providers["ollama"].(map[string]any)
-		modelsArray := ollama["models"].([]any)
+		lychee := providers["lychee"].(map[string]any)
+		modelsArray := lychee["models"].([]any)
 
-		// Should have: new-ollama-model (managed) + 2 user models (preserved)
+		// Should have: new-lychee-model (managed) + 2 user models (preserved)
 		if len(modelsArray) != 3 {
 			t.Errorf("Expected 3 models (1 new managed + 2 preserved user models), got %d", len(modelsArray))
 		}
@@ -1262,10 +1262,10 @@ func TestPiEdit(t *testing.T) {
 		}
 
 		// Verify new model has _launch marker
-		if m, ok := modelIDs["new-ollama-model"]; !ok {
-			t.Errorf("new-ollama-model should be present")
+		if m, ok := modelIDs["new-lychee-model"]; !ok {
+			t.Errorf("new-lychee-model should be present")
 		} else if m["_launch"] != true {
-			t.Errorf("new-ollama-model should have _launch marker")
+			t.Errorf("new-lychee-model should have _launch marker")
 		}
 
 		// Verify user models are preserved
@@ -1278,9 +1278,9 @@ func TestPiEdit(t *testing.T) {
 			t.Errorf("user-model-2 customField should be preserved")
 		}
 
-		// Verify old ollama-managed model is removed (not in new list)
-		if _, ok := modelIDs["ollama-managed"]; ok {
-			t.Errorf("ollama-managed should be removed (old ollama model not in new selection)")
+		// Verify old lychee-managed model is removed (not in new list)
+		if _, ok := modelIDs["lychee-managed"]; ok {
+			t.Errorf("lychee-managed should be removed (old lychee model not in new selection)")
 		}
 	})
 
@@ -1315,9 +1315,9 @@ func TestPiEdit(t *testing.T) {
 			t.Fatalf("Failed to parse settings: %v", err)
 		}
 
-		// Verify defaultProvider is set to ollama
-		if settings["defaultProvider"] != "ollama" {
-			t.Errorf("defaultProvider = %v, want ollama", settings["defaultProvider"])
+		// Verify defaultProvider is set to lychee
+		if settings["defaultProvider"] != "lychee" {
+			t.Errorf("defaultProvider = %v, want lychee", settings["defaultProvider"])
 		}
 
 		// Verify defaultModel is set to first model
@@ -1354,8 +1354,8 @@ func TestPiEdit(t *testing.T) {
 			t.Fatalf("Failed to parse settings: %v", err)
 		}
 
-		if settings["defaultProvider"] != "ollama" {
-			t.Errorf("defaultProvider = %v, want ollama", settings["defaultProvider"])
+		if settings["defaultProvider"] != "lychee" {
+			t.Errorf("defaultProvider = %v, want lychee", settings["defaultProvider"])
 		}
 		if settings["defaultModel"] != "qwen3:8b" {
 			t.Errorf("defaultModel = %v, want qwen3:8b", settings["defaultModel"])
@@ -1387,8 +1387,8 @@ func TestPiEdit(t *testing.T) {
 			t.Fatalf("settings.json should be valid after Edit, got parse error: %v", err)
 		}
 
-		if settings["defaultProvider"] != "ollama" {
-			t.Errorf("defaultProvider = %v, want ollama", settings["defaultProvider"])
+		if settings["defaultProvider"] != "lychee" {
+			t.Errorf("defaultProvider = %v, want lychee", settings["defaultProvider"])
 		}
 		if settings["defaultModel"] != "test-model" {
 			t.Errorf("defaultModel = %v, want test-model", settings["defaultModel"])
@@ -1405,7 +1405,7 @@ func TestPiEdit_CreatesDistinctBackupsForEachManagedFile(t *testing.T) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	pi := &Pi{}
 	tmpDir := t.TempDir()
@@ -1420,7 +1420,7 @@ func TestPiEdit_CreatesDistinctBackupsForEachManagedFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	modelsOriginal := fmt.Sprintf(`{"marker":"models-%d","providers":{"ollama":{"models":[]}}}`, os.Getpid())
+	modelsOriginal := fmt.Sprintf(`{"marker":"models-%d","providers":{"lychee":{"models":[]}}}`, os.Getpid())
 	settingsOriginal := fmt.Sprintf(`{"marker":"settings-%d","defaultProvider":"other","defaultModel":"old"}`, os.Getpid())
 	if err := os.WriteFile(modelsPath, []byte(modelsOriginal), 0o644); err != nil {
 		t.Fatal(err)
@@ -1475,7 +1475,7 @@ func TestPiModels(t *testing.T) {
 		}
 		config := `{
 			"providers": {
-				"ollama": {
+				"lychee": {
 					"models": [
 						{"id": "llama3.2"},
 						{"id": "qwen3:8b"}
@@ -1507,7 +1507,7 @@ func TestPiModels(t *testing.T) {
 		}
 		config := `{
 			"providers": {
-				"ollama": {
+				"lychee": {
 					"models": [
 						{"id": "z-model"},
 						{"id": "a-model"},
@@ -1537,7 +1537,7 @@ func TestPiModels(t *testing.T) {
 		}
 		config := `{
 			"providers": {
-				"ollama": {}
+				"lychee": {}
 			}
 		}`
 		configPath := filepath.Join(configDir, "models.json")
@@ -1571,7 +1571,7 @@ func TestPiModels(t *testing.T) {
 	})
 }
 
-func TestIsPiOllamaModel(t *testing.T) {
+func TestIsPiLycheeModel(t *testing.T) {
 	tests := []struct {
 		name string
 		cfg  map[string]any
@@ -1586,8 +1586,8 @@ func TestIsPiOllamaModel(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isPiOllamaModel(tt.cfg); got != tt.want {
-				t.Errorf("isPiOllamaModel(%v) = %v, want %v", tt.cfg, got, tt.want)
+			if got := isPiLycheeModel(tt.cfg); got != tt.want {
+				t.Errorf("isPiLycheeModel(%v) = %v, want %v", tt.cfg, got, tt.want)
 			}
 		})
 	}

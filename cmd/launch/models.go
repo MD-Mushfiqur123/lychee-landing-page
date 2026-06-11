@@ -14,12 +14,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/cmd/config"
-	"github.com/ollama/ollama/format"
-	internalcloud "github.com/ollama/ollama/internal/cloud"
-	"github.com/ollama/ollama/internal/modelref"
-	"github.com/ollama/ollama/progress"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/cmd/config"
+	"github.com/lychee/lychee/format"
+	internalcloud "github.com/lychee/lychee/internal/cloud"
+	"github.com/lychee/lychee/internal/modelref"
+	"github.com/lychee/lychee/progress"
 )
 
 var recommendedModels = []ModelItem{
@@ -275,7 +275,7 @@ func showOrPullWithPolicy(ctx context.Context, client *api.Client, model string,
 	case missingModelAutoPull:
 		return pullMissingModel(ctx, client, model)
 	case missingModelFail:
-		return fmt.Errorf("model %q not found; run 'ollama pull %s' first, or use --yes to auto-pull", model, model)
+		return fmt.Errorf("model %q not found; run 'lychee pull %s' first, or use --yes to auto-pull", model, model)
 	default:
 		return confirmAndPull(ctx, client, model)
 	}

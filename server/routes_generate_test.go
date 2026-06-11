@@ -18,13 +18,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/llm"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/ml"
-	ollamatemplate "github.com/ollama/ollama/template"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/llm"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/ml"
+	lycheetemplate "github.com/lychee/lychee/template"
+	"github.com/lychee/lychee/types/model"
 )
 
 // testPropsMap creates a ToolPropertiesMap from a map (convenience function for tests)
@@ -193,32 +193,32 @@ func createMinimalGGUFModel(t *testing.T, s *Server, name string, kv ggml.KV, tm
 }
 
 func TestChatModeForModel(t *testing.T) {
-	t.Setenv("OLLAMA_GO_TEMPLATE", "")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "")
 	if got := chatModeForModel(&Model{HasChatTemplate: true, HasGoTemplate: true}); got != chatExecutionModeRendered {
 		t.Fatalf("chatModeForModel with default go template env = %v, want rendered", got)
 	}
 
-	t.Setenv("OLLAMA_GO_TEMPLATE", "0")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "0")
 	if got := chatModeForModel(&Model{HasChatTemplate: true, HasGoTemplate: true}); got != chatExecutionModeNative {
 		t.Fatalf("chatModeForModel with go template env disabled = %v, want chat_template route", got)
 	}
 
-	t.Setenv("OLLAMA_GO_TEMPLATE", "1")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "1")
 	if got := chatModeForModel(&Model{HasChatTemplate: true, HasGoTemplate: true}); got != chatExecutionModeRendered {
 		t.Fatalf("chatModeForModel with go template env enabled = %v, want rendered", got)
 	}
 
-	t.Setenv("OLLAMA_GO_TEMPLATE", "1")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "1")
 	if got := chatModeForModel(&Model{HasChatTemplate: true, HasGoTemplate: true, PreferChatTemplate: true}); got != chatExecutionModeRendered {
 		t.Fatalf("chatModeForModel with explicit go template env and chat_template preference = %v, want rendered", got)
 	}
 
-	t.Setenv("OLLAMA_GO_TEMPLATE", "")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "")
 	if got := chatModeForModel(&Model{HasChatTemplate: true, HasGoTemplate: true, PreferChatTemplate: true}); got != chatExecutionModeNative {
 		t.Fatalf("chatModeForModel with default go template env and chat_template preference = %v, want chat_template route", got)
 	}
 
-	t.Setenv("OLLAMA_GO_TEMPLATE", "0")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "0")
 	parserModel := &Model{Config: model.ConfigV2{Parser: "gemma4"}, HasChatTemplate: true}
 	if got := chatModeForModel(parserModel); got != chatExecutionModeRendered {
 		t.Fatalf("chatModeForModel with parser = %v, want rendered", got)
@@ -239,7 +239,7 @@ func TestChatModeForModel(t *testing.T) {
 		t.Fatalf("chatModeForModel with MLX = %v, want rendered", got)
 	}
 
-	harmonyTemplate, err := ollamatemplate.Parse("<|start|><|end|>")
+	harmonyTemplate, err := lycheetemplate.Parse("<|start|><|end|>")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,7 +247,7 @@ func TestChatModeForModel(t *testing.T) {
 		t.Fatalf("chatModeForModel with harmony = %v, want rendered", got)
 	}
 
-	t.Setenv("OLLAMA_GO_TEMPLATE", "")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "")
 	if got := chatModeForModel(&Model{Config: model.ConfigV2{ModelFamily: "unknown"}, HasChatTemplate: true}); got != chatExecutionModeNative {
 		t.Fatalf("chatModeForModel without Go TEMPLATE = %v, want chat_template route", got)
 	}
@@ -265,8 +265,8 @@ func TestChatModeForModel(t *testing.T) {
 }
 
 func TestChatHandlerChatTemplateRoute(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
-	t.Setenv("OLLAMA_GO_TEMPLATE", "")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "")
 	gin.SetMode(gin.TestMode)
 
 	mock := mockRunner{
@@ -316,8 +316,8 @@ func TestChatHandlerChatTemplateRoute(t *testing.T) {
 }
 
 func TestChatHandlerChatTemplateRouteTruncatesMessages(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
-	t.Setenv("OLLAMA_GO_TEMPLATE", "")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "")
 	gin.SetMode(gin.TestMode)
 
 	mock := mockRunner{
@@ -376,8 +376,8 @@ func TestChatHandlerChatTemplateRouteTruncatesMessages(t *testing.T) {
 }
 
 func TestChatHandlerTemplateEnvUsesRenderedRoute(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
-	t.Setenv("OLLAMA_GO_TEMPLATE", "1")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "1")
 	gin.SetMode(gin.TestMode)
 
 	mock := mockRunner{
@@ -412,8 +412,8 @@ func TestChatHandlerTemplateEnvUsesRenderedRoute(t *testing.T) {
 }
 
 func TestChatHandlerHarmonyPreservesStructuralTokens(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
-	t.Setenv("OLLAMA_GO_TEMPLATE", "")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "")
 	gin.SetMode(gin.TestMode)
 
 	mock := mockRunner{
@@ -494,7 +494,7 @@ func TestGenerateChatRemote(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Setenv("OLLAMA_REMOTES", p.Hostname())
+	t.Setenv("LYCHEE_REMOTES", p.Hostname())
 	s := Server{}
 	w := createRequest(t, s.CreateHandler, api.CreateRequest{
 		Model:      "test-cloud",
@@ -546,8 +546,8 @@ func TestGenerateChatRemote(t *testing.T) {
 }
 
 func TestGenerateChat(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
-	t.Setenv("OLLAMA_GO_TEMPLATE", "1")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "1")
 	gin.SetMode(gin.TestMode)
 
 	mock := mockRunner{
@@ -1264,7 +1264,7 @@ func TestGenerateChat(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
 	gin.SetMode(gin.TestMode)
 
 	mock := mockRunner{
@@ -1403,7 +1403,7 @@ func TestGenerate(t *testing.T) {
 			t.Errorf("expected status 400, got %d", w.Code)
 		}
 
-		if diff := cmp.Diff(w.Body.String(), `{"error":"registry.ollama.ai/library/test:latest does not support insert"}`); diff != "" {
+		if diff := cmp.Diff(w.Body.String(), `{"error":"registry.lychee.ai/library/test:latest does not support insert"}`); diff != "" {
 			t.Errorf("mismatch (-got +want):\n%s", diff)
 		}
 	})
@@ -2013,7 +2013,7 @@ func TestChatLogprobs(t *testing.T) {
 	})
 
 	t.Run("returns logprob bytes when requested", func(t *testing.T) {
-		t.Setenv("OLLAMA_GO_TEMPLATE", "1")
+		t.Setenv("LYCHEE_GO_TEMPLATE", "1")
 		gin.SetMode(gin.TestMode)
 
 		mock := &mockRunner{}
@@ -2151,7 +2151,7 @@ func TestChatLogprobs(t *testing.T) {
 }
 
 func TestChatWithPromptEndingInThinkTag(t *testing.T) {
-	t.Setenv("OLLAMA_GO_TEMPLATE", "1")
+	t.Setenv("LYCHEE_GO_TEMPLATE", "1")
 	gin.SetMode(gin.TestMode)
 
 	// Helper to create a standard thinking test setup
@@ -2614,7 +2614,7 @@ func TestChatWithPromptEndingInThinkTag(t *testing.T) {
 // first and only completion call. Previously, format was deferred for all
 // thinking-capable parsers and only re-applied after an end-of-thinking
 // transition — a transition that never fires when thinking is off. See
-// https://github.com/ollama/ollama/issues/15260.
+// https://github.com/lychee/lychee/issues/15260.
 func TestChatFormatWithThinkFalse(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -2983,11 +2983,11 @@ func TestGenerateWithImages(t *testing.T) {
 // TestImageGenerateStreamFalse tests that image generation respects stream=false
 // and returns a single JSON response instead of streaming ndjson.
 func TestImageGenerateStreamFalse(t *testing.T) {
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 
 	mock := mockRunner{}
 	mock.CompletionFn = func(ctx context.Context, r llm.CompletionRequest, fn func(r llm.CompletionResponse)) error {
@@ -3082,11 +3082,11 @@ func TestImageGenerateStreamFalse(t *testing.T) {
 func newImageGenerateTestServer(t *testing.T, mock *mockRunner) Server {
 	t.Helper()
 
-	t.Setenv("OLLAMA_CONTEXT_LENGTH", "4096")
+	t.Setenv("LYCHEE_CONTEXT_LENGTH", "4096")
 	gin.SetMode(gin.TestMode)
 
 	p := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", p)
+	t.Setenv("LYCHEE_MODELS", p)
 
 	n := model.ParseName("test-image")
 	cfg := model.ConfigV2{Capabilities: []string{"image"}}

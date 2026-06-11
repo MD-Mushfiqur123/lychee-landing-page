@@ -25,16 +25,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/format"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/format"
+	"github.com/lychee/lychee/types/model"
 )
 
 var (
 	smol   = "llama3.2:1b"
 	stream = false
 
-	// testModel is set via OLLAMA_TEST_MODEL env var. When set, all tests
+	// testModel is set via LYCHEE_TEST_MODEL env var. When set, all tests
 	// that loop over model lists will test only this model, and smol is
 	// also overridden to use it.
 	testModel string
@@ -44,7 +44,7 @@ var (
 	started = time.Now()
 
 	// Note: add newer models at the top of the list to test them first
-	ollamaEngineChatModels = []string{
+	lycheeEngineChatModels = []string{
 		"nemotron3:33b",
 		// "laguna-xs.2:q4_K_M", // TODO: re-enable when llama.cpp supports laguna.
 		"gemma4",
@@ -314,7 +314,7 @@ func init() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	slog.SetDefault(logger)
 
-	testModel = os.Getenv("OLLAMA_TEST_MODEL")
+	testModel = os.Getenv("LYCHEE_TEST_MODEL")
 	if testModel != "" {
 		slog.Info("test model override", "model", testModel)
 		smol = testModel
@@ -322,7 +322,7 @@ func init() {
 }
 
 // testModels returns the override model as a single-element slice when
-// OLLAMA_TEST_MODEL is set, otherwise returns the provided default list.
+// LYCHEE_TEST_MODEL is set, otherwise returns the provided default list.
 func testModels(defaults []string) []string {
 	if testModel != "" {
 		return []string{testModel}
@@ -334,7 +334,7 @@ func testModels(defaults []string) []string {
 // given capability. If the model is missing locally, it first goes through
 // the normal pull-if-missing path so tests still behave correctly on cold
 // hosts. For local-only models where Show may not return capabilities
-// (e.g. models created via ollama create), this is a best-effort check.
+// (e.g. models created via lychee create), this is a best-effort check.
 func requireCapability(ctx context.Context, t *testing.T, client *api.Client, modelName string, cap model.Capability) {
 	t.Helper()
 
@@ -384,11 +384,11 @@ func FindPort() string {
 
 func GetTestEndpoint() (*api.Client, string) {
 	defaultPort := "11434"
-	ollamaHost := os.Getenv("OLLAMA_HOST")
+	lycheeHost := os.Getenv("LYCHEE_HOST")
 
-	scheme, hostport, ok := strings.Cut(ollamaHost, "://")
+	scheme, hostport, ok := strings.Cut(lycheeHost, "://")
 	if !ok {
-		scheme, hostport = "http", ollamaHost
+		scheme, hostport = "http", lycheeHost
 	}
 
 	// trim trailing slashes
@@ -404,7 +404,7 @@ func GetTestEndpoint() (*api.Client, string) {
 		}
 	}
 
-	if os.Getenv("OLLAMA_TEST_EXISTING") == "" && runtime.GOOS != "windows" && port == defaultPort {
+	if os.Getenv("LYCHEE_TEST_EXISTING") == "" && runtime.GOOS != "windows" && port == defaultPort {
 		port = FindPort()
 	}
 
@@ -427,9 +427,9 @@ var (
 	serverCmd   *exec.Cmd
 )
 
-func startServer(t *testing.T, ctx context.Context, ollamaHost string) error {
+func startServer(t *testing.T, ctx context.Context, lycheeHost string) error {
 	// Make sure the server has been built
-	CLIName, err := filepath.Abs("../ollama")
+	CLIName, err := filepath.Abs("../lychee")
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
@@ -449,16 +449,16 @@ func startServer(t *testing.T, ctx context.Context, ollamaHost string) error {
 	serverDone = make(chan int)
 	serverLog.Reset()
 
-	if tmp := os.Getenv("OLLAMA_HOST"); tmp != ollamaHost {
-		slog.Info("setting env", "OLLAMA_HOST", ollamaHost)
-		t.Setenv("OLLAMA_HOST", ollamaHost)
+	if tmp := os.Getenv("LYCHEE_HOST"); tmp != lycheeHost {
+		slog.Info("setting env", "LYCHEE_HOST", lycheeHost)
+		t.Setenv("LYCHEE_HOST", lycheeHost)
 	}
 
 	serverCmd = exec.Command(CLIName, "serve")
 	serverCmd.Stderr = &serverLog
 	serverCmd.Stdout = &serverLog
 	go func() {
-		slog.Info("starting server", "url", ollamaHost)
+		slog.Info("starting server", "url", lycheeHost)
 		if err := serverCmd.Run(); err != nil {
 			// "signal: killed" expected during normal shutdown
 			if !strings.Contains(err.Error(), "signal") {
@@ -536,7 +536,7 @@ var serverProcMutex sync.Mutex
 func InitServerConnection(ctx context.Context, t *testing.T) (*api.Client, string, func()) {
 	client, testEndpoint := GetTestEndpoint()
 	cleanup := func() {}
-	if os.Getenv("OLLAMA_TEST_EXISTING") == "" && runtime.GOOS != "windows" {
+	if os.Getenv("LYCHEE_TEST_EXISTING") == "" && runtime.GOOS != "windows" {
 		var err error
 		err = startServer(t, ctx, testEndpoint)
 		if err != nil {
@@ -553,7 +553,7 @@ func InitServerConnection(ctx context.Context, t *testing.T) (*api.Client, strin
 			<-serverDone
 			slog.Info("terminate complete")
 
-			if t.Failed() || os.Getenv("OLLAMA_TEST_LOG_SERVER") != "" {
+			if t.Failed() || os.Getenv("LYCHEE_TEST_LOG_SERVER") != "" {
 				slog.Warn("SERVER LOG FOLLOWS")
 				io.Copy(os.Stderr, &serverLog)
 				slog.Warn("END OF SERVER")
@@ -869,20 +869,20 @@ func skipIfMLXUnsupported(t *testing.T, err error) {
 }
 
 // skipIfModelTooLargeForVRAM skips the test when the model's on-disk size
-// is larger than OLLAMA_MAX_VRAM by enough that even partial GPU offload
+// is larger than LYCHEE_MAX_VRAM by enough that even partial GPU offload
 // won't help. Uses the same 0.75x gate as TestPerfModels (model_perf_test.go)
 // so vision/audio tests stay runnable on systems where the model is slightly
 // over VRAM and a portion legitimately spills to CPU. No-op when
-// OLLAMA_MAX_VRAM is unset.
+// LYCHEE_MAX_VRAM is unset.
 func skipIfModelTooLargeForVRAM(ctx context.Context, t *testing.T, client *api.Client, modelName string) {
 	t.Helper()
-	s := os.Getenv("OLLAMA_MAX_VRAM")
+	s := os.Getenv("LYCHEE_MAX_VRAM")
 	if s == "" {
 		return
 	}
 	maxVram, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
-		t.Fatalf("invalid OLLAMA_MAX_VRAM %v", err)
+		t.Fatalf("invalid LYCHEE_MAX_VRAM %v", err)
 	}
 	resp, err := client.List(ctx)
 	if err != nil {
@@ -897,7 +897,7 @@ func skipIfModelTooLargeForVRAM(ctx context.Context, t *testing.T, client *api.C
 
 func skipUnderMinVRAM(t *testing.T, gb uint64) {
 	// TODO use info API in the future
-	if s := os.Getenv("OLLAMA_MAX_VRAM"); s != "" {
+	if s := os.Getenv("LYCHEE_MAX_VRAM"); s != "" {
 		maxVram, err := strconv.ParseUint(s, 10, 64)
 		if err != nil {
 			t.Fatal(err)

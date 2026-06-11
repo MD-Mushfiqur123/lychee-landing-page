@@ -11,17 +11,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/cmd/config"
-	"github.com/ollama/ollama/cmd/internal/fileutil"
+	"github.com/lychee/lychee/cmd/config"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
 )
 
 const (
 	codexAppIntegrationName      = "codex-app"
-	codexAppProfileName          = "ollama-launch-codex-app"
+	codexAppProfileName          = "lychee-launch-codex-app"
 	codexAppBundleID             = "com.openai.codex"
-	codexAppModelCatalogFilename = "ollama-launch-models.json"
-	codexAppRestoreHint          = "To restore your usual Codex profile, run: ollama launch codex-app --restore"
-	codexAppConfigurationSuccess = "Codex App profile changed to Ollama."
+	codexAppModelCatalogFilename = "lychee-launch-models.json"
+	codexAppRestoreHint          = "To restore your usual Codex profile, run: lychee launch codex-app --restore"
+	codexAppConfigurationSuccess = "Codex App profile changed to Lychee."
 	codexAppRestoreSuccess       = "Codex App restored to your usual profile."
 )
 
@@ -46,7 +46,7 @@ var (
 )
 
 // CodexApp configures the desktop Codex app with one launch-selected default
-// model while leaving model discovery and switching to Codex's Ollama provider.
+// model while leaving model discovery and switching to Codex's Lychee provider.
 type CodexApp struct{}
 
 func (c *CodexApp) String() string { return "Codex App" }
@@ -259,7 +259,7 @@ func (c *CodexApp) Run(_ string, _ []LaunchModel, args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("codex-app does not accept extra arguments")
 	}
-	return codexAppLaunchOrRestart("Restart Codex to use Ollama?", nil)
+	return codexAppLaunchOrRestart("Restart Codex to use Lychee?", nil)
 }
 
 func (c *CodexApp) Restore() error {
@@ -459,7 +459,7 @@ func codexAppCatalogEntry(model string, metadata codexAppModelMetadata, priority
 	return map[string]any{
 		"slug":                             model,
 		"display_name":                     model,
-		"description":                      "Ollama local model",
+		"description":                      "Lychee local model",
 		"default_reasoning_level":          nil,
 		"supported_reasoning_levels":       []any{},
 		"shell_type":                       "default",
@@ -695,7 +695,7 @@ func defaultCodexAppOpenApp(args []string) error {
 		cmd := exec.Command("codex", args...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		cmd.Env = append(os.Environ(), "OPENAI_API_KEY=ollama")
+		cmd.Env = append(os.Environ(), "OPENAI_API_KEY=lychee")
 		return cmd.Run()
 	}
 
@@ -710,7 +710,7 @@ func defaultCodexAppOpenApp(args []string) error {
 		if appID := codexAppStartID(); appID != "" {
 			return codexAppOpenStart(appID)
 		}
-		return fmt.Errorf("Codex executable was not found; open Codex manually once and re-run 'ollama launch codex-app'")
+		return fmt.Errorf("Codex executable was not found; open Codex manually once and re-run 'lychee launch codex-app'")
 	case "darwin":
 		if path := codexAppAppPath(); path != "" {
 			cmd := exec.Command("open", path)
@@ -1156,7 +1156,7 @@ func removeCodexAppRestoreState() error {
 func codexAppRestoreStatePath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join(os.TempDir(), "ollama-codex-app-restore.json")
+		return filepath.Join(os.TempDir(), "lychee-codex-app-restore.json")
 	}
-	return filepath.Join(home, ".ollama", "launch", "codex-app-restore.json")
+	return filepath.Join(home, ".lychee", "launch", "codex-app-restore.json")
 }

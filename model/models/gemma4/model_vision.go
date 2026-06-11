@@ -3,10 +3,10 @@ package gemma4
 import (
 	"math"
 
-	"github.com/ollama/ollama/fs"
-	"github.com/ollama/ollama/ml"
-	"github.com/ollama/ollama/ml/nn"
-	"github.com/ollama/ollama/ml/nn/rope"
+	"github.com/lychee/lychee/fs"
+	"github.com/lychee/lychee/ml"
+	"github.com/lychee/lychee/ml/nn"
+	"github.com/lychee/lychee/ml/nn/rope"
 )
 
 const batchSize = 1
@@ -118,7 +118,7 @@ func (m *VisionModel) InitClamp(proj *MultiModalProjector) {
 		proj.Projection.loadClampFromScalars()
 	}
 
-	// Load packed clamp data when present (legacy Ollama format).
+	// Load packed clamp data when present (legacy Lychee format).
 	if m.ClampData == nil {
 		return
 	}

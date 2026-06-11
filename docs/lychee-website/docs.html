@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentation – Lychee</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #888;
+      --accent: #e84393;
+      --accent2: #ff6db3;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --blue: #60a5fa;
+      --purple: #a78bfa;
+      --orange: #fb923c;
+      --radius: 12px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --sidebar-w: 260px;
+      --toc-w: 220px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,10,10,0.9); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+    .nav-logo svg { width: 36px; height: 36px; }
+    .nav-logo span { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-cta {
+      background: var(--text); color: var(--bg) !important;
+      padding: 7px 18px; border-radius: 8px; font-weight: 600;
+      font-size: 0.85rem !important;
+    }
+
+    /* ── DOCS LAYOUT ── */
+    .docs-layout {
+      display: flex;
+      padding-top: 60px;
+      min-height: 100vh;
+    }
+
+    /* ── LEFT SIDEBAR ── */
+    .docs-sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.25rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .docs-sidebar::-webkit-scrollbar { width: 4px; }
+    .docs-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .sidebar-section { margin-bottom: 1.75rem; }
+    .sidebar-section-title {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+      color: var(--muted); text-transform: uppercase; margin-bottom: 0.6rem;
+      padding-left: 10px;
+    }
+    .sidebar-nav { list-style: none; }
+    .sidebar-nav li a {
+      display: block; padding: 6px 10px; border-radius: 7px;
+      color: var(--muted); text-decoration: none; font-size: 0.875rem;
+      transition: all 0.15s;
+    }
+    .sidebar-nav li a:hover { color: var(--text); background: var(--bg2); }
+    .sidebar-nav li a.active { color: var(--accent2); background: rgba(232,67,147,0.08); }
+
+    /* ── MAIN CONTENT ── */
+    .docs-main {
+      flex: 1; min-width: 0;
+      padding: 3rem 2.5rem;
+      max-width: 820px;
+    }
+
+    /* ── RIGHT TOC ── */
+    .docs-toc {
+      width: var(--toc-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      padding: 2rem 1.25rem;
+      border-left: 1px solid var(--border);
+    }
+    .toc-title {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+      color: var(--muted); text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .toc-nav { list-style: none; }
+    .toc-nav li { margin-bottom: 2px; }
+    .toc-nav li a {
+      display: block; padding: 5px 0 5px 12px;
+      font-size: 0.8rem; color: var(--muted); text-decoration: none;
+      border-left: 2px solid transparent; transition: all 0.15s;
+    }
+    .toc-nav li a:hover { color: var(--text); border-left-color: #555; }
+    .toc-nav li a.active { color: var(--accent2); border-left-color: var(--accent); }
+    .toc-nav .toc-sub a { padding-left: 22px; font-size: 0.75rem; }
+
+    /* ── CONTENT STYLES ── */
+    .doc-section { margin-bottom: 4rem; scroll-margin-top: 80px; }
+
+    h1.doc-title {
+      font-size: 2.5rem; font-weight: 800; letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 0.75rem;
+    }
+    .doc-subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 2.5rem; }
+
+    h2.doc-h2 {
+      font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px;
+      margin-bottom: 1.25rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: 80px;
+    }
+    h3.doc-h3 {
+      font-size: 1.1rem; font-weight: 700;
+      margin: 1.5rem 0 0.75rem; scroll-margin-top: 80px;
+    }
+
+    p.doc-p { color: var(--muted); font-size: 0.95rem; margin-bottom: 1rem; line-height: 1.75; }
+    .doc-p a { color: var(--accent2); text-decoration: none; }
+    .doc-p a:hover { text-decoration: underline; }
+
+    /* ── CALLOUT ── */
+    .callout {
+      padding: 1rem 1.25rem; border-radius: 10px;
+      margin-bottom: 1.25rem; display: flex; gap: 12px; align-items: flex-start;
+    }
+    .callout-info { background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.25); }
+    .callout-tip  { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.25); }
+    .callout-warn { background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.25); }
+    .callout-icon { font-size: 1rem; margin-top: 2px; flex-shrink: 0; }
+    .callout-body { font-size: 0.875rem; color: var(--muted); }
+    .callout-body strong { color: var(--text); }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 1.25rem;
+    }
+    .code-header {
+      background: var(--bg3); padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .code-lang { font-size: 0.72rem; font-weight: 600; color: var(--muted); font-family: var(--mono); letter-spacing: 0.5px; }
+    .code-copy-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); padding: 4px 10px; border-radius: 6px;
+      font-size: 0.72rem; cursor: pointer; font-family: var(--font);
+      transition: all 0.2s;
+    }
+    .code-copy-btn:hover { border-color: var(--accent); color: var(--accent2); }
+    .code-copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    pre.doc-pre {
+      padding: 1.25rem 1.5rem;
+      font-family: var(--mono); font-size: 0.82rem; line-height: 1.75;
+      overflow-x: auto; margin: 0;
+    }
+
+    .kw { color: #ff79c6; }
+    .fn { color: #50fa7b; }
+    .str { color: #f1fa8c; }
+    .cm { color: #6272a4; }
+    .var { color: #bd93f9; }
+    .num { color: #ffb86c; }
+    .op  { color: #ff79c6; }
+
+    /* inline code */
+    code.inline {
+      background: var(--bg3); border: 1px solid var(--border);
+      padding: 2px 7px; border-radius: 5px;
+      font-family: var(--mono); font-size: 0.82em; color: var(--green);
+    }
+
+    /* ── TABS ── */
+    .platform-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+    .ptab {
+      padding: 10px 22px; font-size: 0.82rem; font-weight: 600;
+      color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+      background: none; border-top: none; border-left: none; border-right: none;
+      font-family: var(--font); transition: all 0.2s;
+    }
+    .ptab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .ptab:hover:not(.active) { color: #aaa; }
+    .ptab-panel { display: none; }
+    .ptab-panel.active { display: block; }
+
+    /* ── TABLE ── */
+    .doc-table-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+    table.doc-table {
+      width: 100%; border-collapse: collapse; font-size: 0.875rem;
+    }
+    table.doc-table th {
+      text-align: left; padding: 10px 14px;
+      background: var(--bg3); border-bottom: 1px solid var(--border);
+      font-size: 0.78rem; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    table.doc-table td {
+      padding: 11px 14px; border-bottom: 1px solid var(--border);
+      vertical-align: top; color: var(--muted);
+    }
+    table.doc-table tr:last-child td { border-bottom: none; }
+    table.doc-table td:first-child { font-family: var(--mono); font-size: 0.8rem; color: var(--green); }
+    table.doc-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* ── METHOD BADGES ── */
+    .method {
+      display: inline-block; padding: 2px 8px; border-radius: 5px;
+      font-size: 0.7rem; font-weight: 700; font-family: var(--mono); margin-right: 8px;
+    }
+    .method-post { background: rgba(74,222,128,0.15); color: var(--green); }
+    .method-get  { background: rgba(96,165,250,0.15); color: var(--blue); }
+    .method-del  { background: rgba(248,113,113,0.15); color: #f87171; }
+
+    /* ── MODELFILE ── */
+    .modelfile-table td:first-child { color: var(--purple); }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb {
+      font-size: 0.8rem; color: var(--muted); margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .breadcrumb a { color: var(--muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--text); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 3rem 2rem; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1.5rem;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; }
+    .footer-links { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--muted); font-size: 0.8rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) { .docs-toc { display: none; } }
+    @media (max-width: 760px) {
+      .docs-sidebar { display: none; }
+      .docs-main { padding: 2rem 1.25rem; }
+      .nav-links { display: none; }
+    }
+  #read-progress { position:fixed;top:60px;left:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;z-index:99;transition:width .1s linear; }
+  </style>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div id="read-progress"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <svg viewBox="0 0 200 200" fill="none"><defs><filter id="d-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="d-bump"><feGaussianBlur stdDeviation="0.5"/></filter><radialGradient id="d-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF8DC7"/><stop offset="40%" stop-color="#E84393"/><stop offset="78%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient><radialGradient id="d-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#C93578"/><stop offset="55%" stop-color="#A01E5F"/><stop offset="100%" stop-color="#6A1238"/></radialGradient><radialGradient id="d-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#901850"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient><radialGradient id="d-spec" cx="34%" cy="27%" r="28%"><stop offset="0%" stop-color="rgba(255,255,255,0.72)"/><stop offset="65%" stop-color="rgba(255,255,255,0.12)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><linearGradient id="d-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="55%" stop-color="#4CAF35"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient><linearGradient id="d-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient><radialGradient id="d-bglow" cx="50%" cy="55%" r="50%"><stop offset="0%" stop-color="rgba(232,67,147,0.2)"/><stop offset="100%" stop-color="rgba(232,67,147,0)"/></radialGradient><clipPath id="d-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath></defs><ellipse cx="100" cy="108" rx="78" ry="70" fill="url(#d-bglow)"/><ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#d-top)" filter="url(#d-glow)"/><path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#d-top)" opacity="0.88"/><path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#d-right)" opacity="0.92"/><path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#d-right)" opacity="0.82"/><path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#d-bot)" opacity="0.88"/><path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#d-bot)" opacity="0.78"/><g opacity="0.5" clip-path="url(#d-clip)"><circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#d-bump)"/><circle cx="100" cy="70" r="4.5" fill="#FF6DB3" filter="url(#d-bump)"/><circle cx="128" cy="78" r="4" fill="#D44A8A" filter="url(#d-bump)"/><circle cx="60" cy="92" r="4" fill="#E84393" filter="url(#d-bump)"/><circle cx="86" cy="84" r="5" fill="#FF6DB3" filter="url(#d-bump)"/><circle cx="114" cy="84" r="4.5" fill="#D44A8A" filter="url(#d-bump)"/><circle cx="140" cy="92" r="4" fill="#B83070" filter="url(#d-bump)"/><circle cx="70" cy="97" r="5" fill="#FF6DB3" filter="url(#d-bump)"/><circle cx="100" cy="90" r="5" fill="#FF6DB3" filter="url(#d-bump)"/><circle cx="128" cy="97" r="5" fill="#C94080" filter="url(#d-bump)"/><circle cx="86" cy="105" r="5" fill="#FF6DB3" filter="url(#d-bump)"/><circle cx="100" cy="103" r="5" fill="#FF85BB" filter="url(#d-bump)"/><circle cx="114" cy="105" r="5" fill="#E84393" filter="url(#d-bump)"/></g><ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#d-spec)" opacity="0.88"/><ellipse cx="75" cy="77" rx="3.5" ry="2.5" fill="white" opacity="0.55"/><path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#d-stem)" stroke-width="3.5" stroke-linecap="round" fill="none"/><ellipse cx="99" cy="64" rx="5" ry="3.5" fill="#3D7A25"/><path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#d-leaf)"/><path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#d-leaf)" opacity="0.88"/><path d="M99,44 Q92,28 86,18 Q94,24 100,36 Q102,40 100,46 Z" fill="#3D9A28" opacity="0.72"/></svg>
+    <span>Lychee</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="models.html">Models</a></li>
+    <li><a href="docs.html" class="active">Docs</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="https://github.com/lychee/lychee" target="_blank"><img src="https://cdn.simpleicons.org/github/888888" width="14" height="14" alt="" style="vertical-align:middle;margin-right:4px">GitHub</a></li>
+    <li><a href="download.html" class="nav-cta">Download</a></li>
+  </ul>
+</nav>
+
+<div class="docs-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="docs-sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+      <ul class="sidebar-nav">
+        <li><a href="#quickstart" class="active">Quick Start</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#running-models">Running Models</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Reference</div>
+      <ul class="sidebar-nav">
+        <li><a href="#api">API Reference</a></li>
+        <li><a href="#cli">CLI Reference</a></li>
+        <li><a href="#env-vars">Environment Variables</a></li>
+        <li><a href="#modelfile">Modelfile</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Exclusive Commands</div>
+      <ul class="sidebar-nav">
+        <li><a href="#cmd-embed">lychee embed</a></li>
+        <li><a href="#cmd-scan">lychee scan</a></li>
+        <li><a href="#cmd-compare">lychee compare</a></li>
+        <li><a href="#cmd-stats">lychee stats</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Advanced</div>
+      <ul class="sidebar-nav">
+        <li><a href="#integrations">Integrations</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+        <li><a href="#gpu-setup">GPU Setup</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="docs-main">
+    <div style="margin-bottom:2rem;position:relative">
+      <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none"></i>
+      <input type="text" id="docs-search" placeholder="Search documentation..." style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 12px 10px 38px;color:var(--text);font-family:var(--font);font-size:.9rem;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'" oninput="docsSearch(this.value)">
+      <div id="docs-results" style="position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:.5rem;z-index:50;display:none;max-height:320px;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)"></div>
+    </div>
+    <div class="breadcrumb">
+      <a href="index.html">Lychee</a>
+      <span>/</span>
+      <span>Documentation</span>
+    </div>
+
+    <h1 class="doc-title">Documentation</h1>
+    <p class="doc-subtitle">Everything you need to get Lychee up and running — from installation to advanced configuration.</p>
+
+    <!-- QUICK START -->
+    <div class="doc-section" id="quickstart">
+      <h2 class="doc-h2">Quick Start</h2>
+      <p class="doc-p">Get up and running with Lychee in under a minute. The fastest way is a single install command:</p>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body"><strong>Tip:</strong> Lychee requires macOS 11+, Ubuntu 20.04+, or Windows 10/11. GPU acceleration is automatic when available.</div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'curl -fsSL https://lychee.ai/install.sh | sh')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Install Lychee</span>
+<span class="fn">curl</span> -fsSL https://lychee.ai/install.sh | sh
+
+<span class="cm"># Pull a model</span>
+lychee pull llama3.1:8b
+
+<span class="cm"># Start chatting</span>
+lychee run llama3.1:8b</pre>
+      </div>
+
+      <p class="doc-p">That's it. Lychee will download and start the model. You can now chat in the terminal, open the app UI, or use the REST API at <code class="inline">http://localhost:11434</code>.</p>
+    </div>
+
+    <!-- INSTALLATION -->
+    <div class="doc-section" id="installation">
+      <h2 class="doc-h2">Installation</h2>
+      <p class="doc-p">Choose your platform below for detailed installation instructions.</p>
+
+      <div class="platform-tabs">
+        <button class="ptab active" onclick="switchPlatform(event,'mac')">macOS</button>
+        <button class="ptab" onclick="switchPlatform(event,'linux')">Linux</button>
+        <button class="ptab" onclick="switchPlatform(event,'win')">Windows</button>
+        <button class="ptab" onclick="switchPlatform(event,'docker')">Docker</button>
+      </div>
+
+      <div id="ptab-mac" class="ptab-panel active">
+        <div class="code-block" style="border-top:none;border-radius:0 0 var(--radius) var(--radius)">
+          <pre class="doc-pre"><span class="cm"># Option 1: Download the macOS app (Apple Silicon + Intel)</span>
+<span class="cm"># Visit: https://lychee.ai/download</span>
+
+<span class="cm"># Option 2: Install via Homebrew</span>
+brew install lychee
+
+<span class="cm"># Option 3: Install script</span>
+<span class="fn">curl</span> -fsSL https://lychee.ai/install.sh | sh</pre>
+        </div>
+        <p class="doc-p">On Apple Silicon Macs, Lychee uses Metal GPU acceleration automatically for maximum performance. No setup required.</p>
+      </div>
+
+      <div id="ptab-linux" class="ptab-panel">
+        <div class="code-block" style="border-top:none;border-radius:0 0 var(--radius) var(--radius)">
+          <pre class="doc-pre"><span class="cm"># Install script (recommended)</span>
+<span class="fn">curl</span> -fsSL https://lychee.ai/install.sh | sh
+
+<span class="cm"># Or install manually</span>
+<span class="fn">wget</span> https://lychee.ai/releases/latest/linux-amd64/lychee
+chmod +x lychee
+<span class="fn">sudo</span> mv lychee /usr/local/bin/
+
+<span class="cm"># Enable as a system service</span>
+<span class="fn">sudo</span> systemctl enable lychee
+<span class="fn">sudo</span> systemctl start lychee</pre>
+        </div>
+        <div class="callout callout-info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-body"><strong>NVIDIA GPU:</strong> Install <a href="#">CUDA 11.8+</a> for GPU acceleration. AMD GPU: ROCm 5.6+ is supported on Linux.</div>
+        </div>
+      </div>
+
+      <div id="ptab-win" class="ptab-panel">
+        <div class="code-block" style="border-top:none;border-radius:0 0 var(--radius) var(--radius)">
+          <pre class="doc-pre"><span class="cm"># Option 1: Download Windows installer (.exe)</span>
+<span class="cm"># Visit: https://lychee.ai/download#windows</span>
+
+<span class="cm"># Option 2: winget</span>
+winget install Lychee.Lychee
+
+<span class="cm"># Option 3: Scoop</span>
+scoop install lychee
+
+<span class="cm"># Verify installation</span>
+lychee --version</pre>
+        </div>
+        <p class="doc-p">Windows requires WSL2 or native installation. NVIDIA CUDA and AMD ROCm are supported. Run PowerShell as Administrator for the first install.</p>
+      </div>
+
+      <div id="ptab-docker" class="ptab-panel">
+        <div class="code-block" style="border-top:none;border-radius:0 0 var(--radius) var(--radius)">
+          <pre class="doc-pre"><span class="cm"># CPU only</span>
+docker pull lychee/lychee:latest
+docker run -d -v lychee:/root/.lychee -p 11434:11434 --name lychee lychee/lychee
+
+<span class="cm"># NVIDIA GPU</span>
+docker run -d --gpus=all -v lychee:/root/.lychee \
+  -p 11434:11434 --name lychee lychee/lychee
+
+<span class="cm"># Test the API</span>
+<span class="fn">curl</span> http://localhost:11434/api/tags</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- RUNNING MODELS -->
+    <div class="doc-section" id="running-models">
+      <h2 class="doc-h2">Running Models</h2>
+
+      <h3 class="doc-h3">Pull a model</h3>
+      <p class="doc-p">Download a model from the Lychee registry. The download happens in the background with resume support.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'lychee pull llama3.1:8b')">Copy</button></div>
+        <pre class="doc-pre">lychee pull llama3.1:8b
+
+<span class="cm"># Pull a specific quantization</span>
+lychee pull llama3.1:8b-q4_0
+
+<span class="cm"># Pull from HuggingFace directly</span>
+lychee hf pull bartowski/Meta-Llama-3.1-8B-Instruct-GGUF</pre>
+      </div>
+
+      <h3 class="doc-h3">Run a model</h3>
+      <p class="doc-p">Start an interactive chat session in your terminal.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'lychee run llama3.1:8b')">Copy</button></div>
+        <pre class="doc-pre">lychee run llama3.1:8b
+
+<span class="cm"># Pass a prompt directly (one-shot)</span>
+lychee run llama3.1:8b "Explain quantum entanglement"
+
+<span class="cm"># Pipe input</span>
+<span class="fn">cat</span> document.txt | lychee run llama3.1:8b "Summarize this:"</pre>
+      </div>
+
+      <h3 class="doc-h3">List local models</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'lychee list')">Copy</button></div>
+        <pre class="doc-pre">lychee list
+
+<span class="cm"># Output:</span>
+<span class="str">NAME                   ID            SIZE    MODIFIED</span>
+<span class="str">llama3.1:8b            c0bfb5bfc64f  4.7 GB  2 days ago</span>
+<span class="str">qwen2.5-coder:7b       5feb0b7c02e7  4.7 GB  5 days ago</span>
+<span class="str">deepseek-r1:14b        7d0c9dcd9b87  9.0 GB  1 week ago</span></pre>
+      </div>
+    </div>
+
+    <!-- API REFERENCE -->
+    <div class="doc-section" id="api">
+      <h2 class="doc-h2">API Reference</h2>
+      <p class="doc-p">Lychee runs a local REST API on <code class="inline">http://localhost:11434</code>. It is fully compatible with the OpenAI API spec, so any OpenAI SDK works out of the box by setting <code class="inline">base_url</code>.</p>
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-body"><strong>OpenAI compatibility:</strong> Use <code class="inline">/v1/chat/completions</code>, <code class="inline">/v1/embeddings</code>, and <code class="inline">/v1/models</code> endpoints with any OpenAI SDK. Set <code class="inline">OPENAI_BASE_URL=http://localhost:11434/v1</code> and <code class="inline">OPENAI_API_KEY=lychee</code>.</div>
+      </div>
+
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Endpoint</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td>/api/generate</td>
+              <td style="color:var(--text)">Generate a completion for the given prompt</td>
+            </tr>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td>/api/chat</td>
+              <td style="color:var(--text)">Generate a chat completion with message history</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td>/api/tags</td>
+              <td style="color:var(--text)">List all locally installed models</td>
+            </tr>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td>/api/pull</td>
+              <td style="color:var(--text)">Pull a model from the Lychee registry</td>
+            </tr>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td>/api/push</td>
+              <td style="color:var(--text)">Push a model to the Lychee registry</td>
+            </tr>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td>/api/embeddings</td>
+              <td style="color:var(--text)">Generate embeddings for the given input</td>
+            </tr>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td>/api/create</td>
+              <td style="color:var(--text)">Create a model from a Modelfile</td>
+            </tr>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td>/api/copy</td>
+              <td style="color:var(--text)">Copy a model to a new name</td>
+            </tr>
+            <tr>
+              <td><span class="method method-del">DELETE</span></td>
+              <td>/api/delete</td>
+              <td style="color:var(--text)">Delete a local model</td>
+            </tr>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td>/api/show</td>
+              <td style="color:var(--text)">Show information about a model</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td>/api/ps</td>
+              <td style="color:var(--text)">List currently loaded models in memory</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td>/api/version</td>
+              <td style="color:var(--text)">Get the Lychee server version</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">Example: Chat Completion</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">CURL</span><button class="code-copy-btn" onclick="copyBlock(this, 'curl http://localhost:11434/api/chat -d \'{ &quot;model&quot;: &quot;llama3.1:8b&quot;, &quot;messages&quot;: [{ &quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello!&quot; }] }\'')">Copy</button></div>
+        <pre class="doc-pre"><span class="fn">curl</span> http://localhost:<span class="num">11434</span>/api/chat \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{
+    "model": "llama3.1:8b",
+    "messages": [
+      { "role": "system", "content": "You are a helpful assistant." },
+      { "role": "user", "content": "Why is the sky blue?" }
+    ],
+    "stream": true
+  }'</span></pre>
+      </div>
+
+      <h3 class="doc-h3">Example: Generate Embeddings</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">CURL</span><button class="code-copy-btn" onclick="copyBlock(this,'curl http://localhost:11434/api/embeddings -d ...')">Copy</button></div>
+        <pre class="doc-pre"><span class="fn">curl</span> http://localhost:<span class="num">11434</span>/api/embeddings \
+  -d <span class="str">'{
+    "model": "nomic-embed-text",
+    "prompt": "The quick brown fox jumps over the lazy dog"
+  }'</span></pre>
+      </div>
+    </div>
+
+    <!-- CLI REFERENCE -->
+    <div class="doc-section" id="cli">
+      <h2 class="doc-h2">CLI Reference</h2>
+      <p class="doc-p">All available Lychee commands. Run <code class="inline">lychee help</code> or <code class="inline">lychee &lt;command&gt; --help</code> for detailed options.</p>
+
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Command</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>lychee serve</td><td style="color:var(--text)">Start the Lychee server (background service)</td></tr>
+            <tr><td>lychee run &lt;model&gt;</td><td style="color:var(--text)">Run a model in interactive chat mode</td></tr>
+            <tr><td>lychee pull &lt;model&gt;</td><td style="color:var(--text)">Pull a model from the registry</td></tr>
+            <tr><td>lychee push &lt;model&gt;</td><td style="color:var(--text)">Push a model to the registry</td></tr>
+            <tr><td>lychee list</td><td style="color:var(--text)">List locally installed models</td></tr>
+            <tr><td>lychee ps</td><td style="color:var(--text)">Show running models loaded in memory</td></tr>
+            <tr><td>lychee show &lt;model&gt;</td><td style="color:var(--text)">Show model information and Modelfile</td></tr>
+            <tr><td>lychee cp &lt;src&gt; &lt;dst&gt;</td><td style="color:var(--text)">Copy a model to a new name</td></tr>
+            <tr><td>lychee rm &lt;model&gt;</td><td style="color:var(--text)">Remove a local model</td></tr>
+            <tr><td>lychee create &lt;name&gt;</td><td style="color:var(--text)">Create a model from a Modelfile</td></tr>
+            <tr><td>lychee hf pull &lt;repo&gt;</td><td style="color:var(--text)">Pull a GGUF model from HuggingFace Hub</td></tr>
+            <tr><td>lychee stop &lt;model&gt;</td><td style="color:var(--text)">Stop a running model and free memory</td></tr>
+            <tr><td style="color:var(--accent2)">lychee embed [text...]</td><td style="color:var(--text)">Generate vector embeddings — text, JSON, or CSV output</td></tr>
+            <tr><td style="color:var(--accent2)">lychee scan</td><td style="color:var(--text)">Detect hardware and recommend compatible models</td></tr>
+            <tr><td style="color:var(--accent2)">lychee compare &lt;m1&gt; &lt;m2&gt;</td><td style="color:var(--text)">Run two models on the same prompt and compare side-by-side</td></tr>
+            <tr><td style="color:var(--accent2)">lychee stats</td><td style="color:var(--text)">Live dashboard of running models: VRAM, tok/s, context</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EXCLUSIVE COMMANDS -->
+    <div class="doc-section" id="cmd-embed">
+      <h2 class="doc-h2">lychee embed</h2>
+      <p class="doc-p">Generate vector embeddings for one or more text inputs. Outputs to text, JSON, or CSV. Reads from stdin when no arguments are given — perfect for piping into RAG pipelines.</p>
+
+      <div class="callout callout-tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body"><strong>Requires:</strong> an embedding model loaded locally. Pull <code class="inline">nomic-embed-text</code> (the default) with <code class="inline">lychee pull nomic-embed-text</code>.</div>
+      </div>
+
+      <h3 class="doc-h3">Usage</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre">lychee embed [text...] [flags]
+
+<span class="cm">Flags:</span>
+  <span class="kw">-m</span>, <span class="kw">--model</span>     <span class="str">nomic-embed-text</span>   Embedding model to use
+  <span class="kw">-o</span>, <span class="kw">--output</span>    <span class="str">text</span>               Output format: text, json, csv
+      <span class="kw">--truncate</span>  <span class="str">true</span>               Truncate input if over context length</pre>
+      </div>
+
+      <h3 class="doc-h3">Examples</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Embed a single string</span>
+lychee embed <span class="str">"hello world"</span>
+
+<span class="cm"># Embed multiple inputs</span>
+lychee embed <span class="str">"cat"</span> <span class="str">"dog"</span> <span class="str">"fish"</span>
+
+<span class="cm"># JSON output for downstream processing</span>
+lychee embed <span class="str">"semantic search query"</span> <span class="kw">--output</span> json
+
+<span class="cm"># Pipe a file</span>
+<span class="fn">cat</span> document.txt | lychee embed <span class="kw">--model</span> nomic-embed-text
+
+<span class="cm"># Use a custom model</span>
+lychee embed <span class="str">"hello"</span> <span class="kw">--model</span> mxbai-embed-large <span class="kw">--output</span> csv</pre>
+      </div>
+
+      <h3 class="doc-h3">JSON Output Schema</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">JSON</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre">{
+  <span class="str">"model"</span>: <span class="str">"nomic-embed-text"</span>,
+  <span class="str">"embeddings"</span>: [
+    [<span class="num">-0.0142</span>, <span class="num">0.0478</span>, <span class="num">-0.0215</span>, <span class="num">...</span>]  <span class="cm">// 768 floats for nomic-embed-text</span>
+  ]
+}</pre>
+      </div>
+    </div>
+
+    <div class="doc-section" id="cmd-scan">
+      <h2 class="doc-h2">lychee scan</h2>
+      <p class="doc-p">Detect your hardware — CPU, RAM, GPU, VRAM — and get a ranked list of models that fit and will run well. Saves you from guessing which model to pull.</p>
+
+      <h3 class="doc-h3">Usage</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'lychee scan')">Copy</button></div>
+        <pre class="doc-pre">lychee scan [flags]
+
+<span class="cm">Flags:</span>
+  <span class="kw">--json</span>   Output as JSON (for scripting)</pre>
+      </div>
+
+      <h3 class="doc-h3">Example Output</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">OUTPUT</span><button class="code-copy-btn" onclick="copyBlock(this,'lychee scan')">Copy</button></div>
+        <pre class="doc-pre">  <span class="cm">Scanning system hardware...</span>
+
+  Platform:           linux/amd64 (<span class="num">16</span> CPUs)
+  System RAM:         <span class="num">32.0</span> GB
+
+  Recommended models for your hardware:
+
+  MODEL                        SIZE       FITS     NOTES
+  ────────────────────────────────────────────────────────────────────────
+  qwen3:0.6b                   400.0 MB   ✓        any hardware, fastest
+  llama3.2:1b                  800.0 MB   ✓        edge device / low RAM
+  qwen3:1.7b                   1.1 GB     ✓        good quality, very fast
+  llama3.2:3b                  2.0 GB     ✓        great balance
+  mistral:7b                   4.4 GB     ✓        workhorse model
+  llama3.1:8b                  4.9 GB     ✓        best 8B model
+  phi4:14b                     8.6 GB     ✓        Microsoft, very capable
+  qwen3:32b                    20.4 GB    ✓        top open model
+  llama3.3:70b                 43.0 GB    ✗        frontier quality
+
+  Pull any model with:  lychee hf pull &lt;repo&gt;</pre>
+      </div>
+    </div>
+
+    <div class="doc-section" id="cmd-compare">
+      <h2 class="doc-h2">lychee compare</h2>
+      <p class="doc-p">Run two models on the same prompt simultaneously and display a side-by-side comparison of their outputs, speed, and response length. Useful for picking the right model for a specific task.</p>
+
+      <h3 class="doc-h3">Usage</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre">lychee compare &lt;model1&gt; &lt;model2&gt; [flags]
+
+<span class="cm">Flags:</span>
+  <span class="kw">-p</span>, <span class="kw">--prompt</span>        Custom prompt (default: three laws of robotics)
+      <span class="kw">--system</span>         System message for both models
+      <span class="kw">--max-tokens</span>     Max tokens per response (default: 512)
+      <span class="kw">--side-by-side</span>   Wide-terminal side-by-side layout</pre>
+      </div>
+
+      <h3 class="doc-h3">Examples</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Compare two models with the default prompt</span>
+lychee compare llama3.2:3b mistral:7b
+
+<span class="cm"># Use a custom prompt</span>
+lychee compare llama3.1:8b qwen3:8b \
+  <span class="kw">--prompt</span> <span class="str">"Explain transformer attention in one paragraph"</span>
+
+<span class="cm"># With a system message</span>
+lychee compare phi4:14b deepseek-r1:14b \
+  <span class="kw">--system</span> <span class="str">"You are a concise technical writer"</span> \
+  <span class="kw">--prompt</span> <span class="str">"What is gradient descent?"</span></pre>
+      </div>
+
+      <h3 class="doc-h3">Summary Output</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">OUTPUT</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre">  ── Summary ───────────────────────────────────────────────────
+  Metric               llama3.2:3b   mistral:7b    Winner
+  ──────────────────────────────────────────────────────────────
+  Speed                <span class="num">38.2</span> tok/s    <span class="num">22.1</span> tok/s    llama3.2:3b (faster)
+  Response length      <span class="num">412</span> chars     <span class="num">587</span> chars     mistral:7b (longer)</pre>
+      </div>
+    </div>
+
+    <div class="doc-section" id="cmd-stats">
+      <h2 class="doc-h2">lychee stats</h2>
+      <p class="doc-p">A live dashboard that shows all models currently loaded in memory. Refreshes every second (configurable). Press <code class="inline">Ctrl+C</code> to exit.</p>
+
+      <h3 class="doc-h3">Usage</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'lychee stats')">Copy</button></div>
+        <pre class="doc-pre">lychee stats [flags]
+
+<span class="cm">Flags:</span>
+  <span class="kw">--interval</span>   Refresh interval in seconds (default: 1)</pre>
+      </div>
+
+      <h3 class="doc-h3">Example Output</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">OUTPUT</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre">  Lychee Stats  [14:22:07]  Ctrl+C to exit
+  ────────────────────────────────────────────────────────────────────────────
+  MODEL                        VRAM       RAM        CTX        EXPIRES
+  ────────────────────────────────────────────────────────────────────────────
+  llama3.1:8b                  4.7 GB     ─          8k         4m32s
+  nomic-embed-text             274.0 MB   ─          ─          2m18s</pre>
+      </div>
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-body">The dashboard refreshes in-place using ANSI escape codes. Works in any modern terminal on macOS, Linux, and Windows Terminal.</div>
+      </div>
+    </div>
+
+    <!-- ENV VARS -->
+    <div class="doc-section" id="env-vars">
+      <h2 class="doc-h2">Environment Variables</h2>
+      <p class="doc-p">Configure Lychee behavior through environment variables. These can be set in your shell profile or passed directly when starting the server.</p>
+
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Variable</th><th>Default</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>LYCHEE_HOST</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">127.0.0.1:11434</td>
+              <td style="color:var(--text)">Host and port for the Lychee server. Set to <code class="inline">0.0.0.0:11434</code> to expose on the network.</td>
+            </tr>
+            <tr>
+              <td>LYCHEE_MODELS</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">~/.lychee/models</td>
+              <td style="color:var(--text)">Directory where downloaded models are stored.</td>
+            </tr>
+            <tr>
+              <td>LYCHEE_DEBUG</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">false</td>
+              <td style="color:var(--text)">Enable verbose debug logging. Useful for troubleshooting.</td>
+            </tr>
+            <tr>
+              <td>LYCHEE_HF_TOKEN</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">—</td>
+              <td style="color:var(--text)">HuggingFace access token for downloading gated/private models.</td>
+            </tr>
+            <tr>
+              <td>LYCHEE_KEEP_ALIVE</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">5m</td>
+              <td style="color:var(--text)">How long to keep models loaded in memory after last use. Set to <code class="inline">-1</code> to keep forever.</td>
+            </tr>
+            <tr>
+              <td>LYCHEE_NUM_PARALLEL</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">1</td>
+              <td style="color:var(--text)">Number of parallel inference requests. Increase for multi-user server deployments.</td>
+            </tr>
+            <tr>
+              <td>LYCHEE_MAX_LOADED_MODELS</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">3</td>
+              <td style="color:var(--text)">Maximum number of models to keep loaded in memory simultaneously.</td>
+            </tr>
+            <tr>
+              <td>LYCHEE_FLASH_ATTENTION</td>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.8rem">false</td>
+              <td style="color:var(--text)">Enable Flash Attention for faster inference (requires compatible GPU).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MODELFILE -->
+    <div class="doc-section" id="modelfile">
+      <h2 class="doc-h2">Modelfile</h2>
+      <p class="doc-p">A Modelfile lets you create custom models with specific system prompts, parameters, and templates. Think of it like a Dockerfile for AI models.</p>
+
+      <h3 class="doc-h3">Syntax Reference</h3>
+      <div class="doc-table-wrap">
+        <table class="doc-table modelfile-table">
+          <thead>
+            <tr><th>Instruction</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>FROM</td><td style="color:var(--text)">Base model to build on (required). Can be a local model or registry reference.</td></tr>
+            <tr><td>SYSTEM</td><td style="color:var(--text)">System prompt injected at the start of every conversation.</td></tr>
+            <tr><td>PARAMETER</td><td style="color:var(--text)">Set model parameters: temperature, top_p, top_k, num_ctx, num_predict, repeat_penalty.</td></tr>
+            <tr><td>TEMPLATE</td><td style="color:var(--text)">Custom prompt template (Go template syntax). Overrides the default chat template.</td></tr>
+            <tr><td>MESSAGE</td><td style="color:var(--text)">Add example few-shot messages (user/assistant pairs) to the context.</td></tr>
+            <tr><td>ADAPTER</td><td style="color:var(--text)">Apply a LoRA adapter file to the base model.</td></tr>
+            <tr><td>LICENSE</td><td style="color:var(--text)">Specify the model license for distribution.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">Example Modelfile</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">MODELFILE</span><button class="code-copy-btn" onclick="copyBlock(this,'FROM llama3.1:8b\nSYSTEM ...')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Build from any base model</span>
+<span class="kw">FROM</span> llama3.1:8b
+
+<span class="cm"># Set a custom system prompt</span>
+<span class="kw">SYSTEM</span> <span class="str">"""
+You are Aria, a helpful senior software engineer at Lychee.
+You write clean, well-documented code and explain your reasoning.
+Always use best practices and consider edge cases.
+"""</span>
+
+<span class="cm"># Tune model parameters</span>
+<span class="kw">PARAMETER</span> temperature <span class="num">0.7</span>
+<span class="kw">PARAMETER</span> top_p <span class="num">0.9</span>
+<span class="kw">PARAMETER</span> num_ctx <span class="num">8192</span>
+<span class="kw">PARAMETER</span> repeat_penalty <span class="num">1.1</span>
+
+<span class="cm"># Add few-shot example</span>
+<span class="kw">MESSAGE</span> user "How do I reverse a string in Python?"
+<span class="kw">MESSAGE</span> assistant "You can use slicing: `s[::-1]`. For clarity in production code, consider `''.join(reversed(s))`."</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'lychee create aria -f ./Modelfile\nlychee run aria')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Create the custom model</span>
+lychee create aria -f ./Modelfile
+
+<span class="cm"># Run it</span>
+lychee run aria</pre>
+      </div>
+    </div>
+
+    <!-- INTEGRATIONS -->
+    <div class="doc-section" id="integrations">
+      <h2 class="doc-h2">Integrations</h2>
+      <p class="doc-p">Lychee works with many popular tools via its OpenAI-compatible API. Set your base URL and a dummy API key:</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy-btn" onclick="copyBlock(this,'from openai import OpenAI...')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Using OpenAI Python SDK with Lychee</span>
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+
+<span class="var">client</span> = OpenAI(
+    base_url=<span class="str">"http://localhost:11434/v1"</span>,
+    api_key=<span class="str">"lychee"</span>,  <span class="cm"># required but not used</span>
+)
+
+<span class="var">response</span> = <span class="var">client</span>.chat.completions.<span class="fn">create</span>(
+    model=<span class="str">"llama3.1:8b"</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"Hello!"</span>}]
+)
+<span class="fn">print</span>(<span class="var">response</span>.choices[<span class="num">0</span>].message.content)</pre>
+      </div>
+
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Tool</th><th>Setup</th></tr></thead>
+          <tbody>
+            <tr><td>LangChain</td><td style="color:var(--text)"><code class="inline">ChatOllama(model="llama3.1:8b", base_url="http://localhost:11434")</code></td></tr>
+            <tr><td>LlamaIndex</td><td style="color:var(--text)"><code class="inline">Ollama(model="llama3.1:8b", base_url="http://localhost:11434")</code></td></tr>
+            <tr><td>Continue (VS Code)</td><td style="color:var(--text)">Select "Lychee" in the Continue config panel — zero configuration needed</td></tr>
+            <tr><td>Open WebUI</td><td style="color:var(--text)">Set Lychee API URL to <code class="inline">http://localhost:11434</code> in Open WebUI settings</td></tr>
+            <tr><td>Cline</td><td style="color:var(--text)">Select "Ollama (Local)" provider, set base URL to <code class="inline">http://localhost:11434</code></td></tr>
+            <tr><td>AnythingLLM</td><td style="color:var(--text)">Choose "Ollama" as LLM provider and set the host URL</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CONFIGURATION -->
+    <div class="doc-section" id="configuration">
+      <h2 class="doc-h2">Configuration</h2>
+      <p class="doc-p">Lychee stores its configuration and models in <code class="inline">~/.lychee</code> on all platforms.</p>
+
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Path</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>~/.lychee/models/</td><td style="color:var(--text)">Downloaded model blobs and manifests</td></tr>
+            <tr><td>~/.lychee/config.json</td><td style="color:var(--text)">Server configuration (overridden by env vars)</td></tr>
+            <tr><td>~/.lychee/logs/</td><td style="color:var(--text)">Server and model inference logs</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GPU SETUP -->
+    <div class="doc-section" id="gpu-setup">
+      <h2 class="doc-h2">GPU Setup</h2>
+      <p class="doc-p">GPU acceleration is detected and enabled automatically. Here's what's supported:</p>
+
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Hardware</th><th>Driver/SDK Required</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Apple Silicon (M1/M2/M3/M4)</td><td style="color:var(--text)">macOS 11+ (built-in Metal)</td><td style="color:var(--text)">Automatic, best performance on Mac</td></tr>
+            <tr><td>NVIDIA GeForce / RTX</td><td style="color:var(--text)">CUDA 11.8+ drivers</td><td style="color:var(--text)">Install latest Game Ready or Studio drivers</td></tr>
+            <tr><td>AMD Radeon (Linux)</td><td style="color:var(--text)">ROCm 5.6+</td><td style="color:var(--text)">Supported on RDNA2+ GPUs</td></tr>
+            <tr><td>Intel Arc / UHD (experimental)</td><td style="color:var(--text)">Intel GPU plugin</td><td style="color:var(--text)">Beta support, set <code class="inline">LYCHEE_INTEL_GPU=true</code></td></tr>
+            <tr><td>CPU (fallback)</td><td style="color:var(--text)">None</td><td style="color:var(--text)">Works on any machine, slower inference</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body"><strong>VRAM:</strong> Ensure you have enough VRAM for the model. A 7B Q4 model needs ~4GB, a 13B needs ~8GB, a 70B needs ~40GB. Use <code class="inline">lychee ps</code> to check current GPU memory usage.</div>
+      </div>
+    </div>
+
+    <!-- TROUBLESHOOTING -->
+    <div class="doc-section" id="troubleshooting">
+      <h2 class="doc-h2">Troubleshooting</h2>
+      <p class="doc-p">Common issues and how to fix them.</p>
+
+      <h3 class="doc-h3">Server not running</h3>
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body"><strong>Error:</strong> <code class="inline">dial tcp 127.0.0.1:11434: connect: connection refused</code></div>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Start the server manually</span>
+lychee serve
+
+<span class="cm"># Or enable it as a system service (Linux)</span>
+<span class="fn">sudo</span> systemctl enable --now lychee
+
+<span class="cm"># Check if it's running</span>
+<span class="fn">curl</span> http://localhost:<span class="num">11434</span>/api/version</pre>
+      </div>
+
+      <h3 class="doc-h3">Model not found</h3>
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body"><strong>Error:</strong> <code class="inline">model "xyz" not found, try pulling it first</code></div>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Pull the model first</span>
+lychee pull llama3.1:8b
+
+<span class="cm"># Or pull from HuggingFace</span>
+lychee hf pull bartowski/Meta-Llama-3.1-8B-Instruct-GGUF
+
+<span class="cm"># List what you already have</span>
+lychee list</pre>
+      </div>
+
+      <h3 class="doc-h3">Out of VRAM / slow inference</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Check which models are loaded and how much VRAM they use</span>
+lychee stats
+
+<span class="cm"># Unload a model from memory</span>
+lychee stop llama3.1:8b
+
+<span class="cm"># Use a smaller quantization (less VRAM)</span>
+lychee hf pull bartowski/Llama-3.1-8B-Instruct-GGUF <span class="kw">--quant</span> q3_k_m
+
+<span class="cm"># Scan your hardware to find models that fit</span>
+lychee scan</pre>
+      </div>
+
+      <h3 class="doc-h3">Download stuck or corrupt</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Lychee downloads are resumable — just re-run to continue</span>
+lychee hf pull bartowski/Meta-Llama-3.1-8B-Instruct-GGUF
+
+<span class="cm"># If a file is corrupt, delete the .part file and retry</span>
+<span class="fn">rm</span> ~/.lychee/models/hf-models/**/*.part
+lychee hf pull bartowski/Meta-Llama-3.1-8B-Instruct-GGUF</pre>
+      </div>
+
+      <h3 class="doc-h3">GPU not detected</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">BASH</span><button class="code-copy-btn" onclick="copyBlock(this,'')">Copy</button></div>
+        <pre class="doc-pre"><span class="cm"># Enable debug logging to see GPU detection</span>
+<span class="kw">LYCHEE_DEBUG</span>=<span class="num">1</span> lychee serve
+
+<span class="cm"># NVIDIA: ensure drivers and CUDA are installed</span>
+nvidia-smi
+
+<span class="cm"># AMD Linux: verify ROCm</span>
+rocminfo | <span class="fn">grep</span> <span class="str">"Agent Type"</span>
+
+<span class="cm"># Intel Arc: enable beta GPU support</span>
+<span class="kw">LYCHEE_INTEL_GPU</span>=<span class="num">1</span> lychee serve</pre>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="doc-section" id="faq">
+      <h2 class="doc-h2">FAQ</h2>
+
+      <details style="border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem;cursor:pointer">
+        <summary style="font-weight:600;font-size:.95rem;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center">
+          Is Lychee free?
+          <span style="color:var(--muted);font-size:1.2rem">+</span>
+        </summary>
+        <p style="margin-top:.85rem;color:var(--muted);font-size:.9rem;line-height:1.65">Yes. Lychee is free, open source (MIT license), and always will be. The models you download are also free — no subscriptions, no API keys, no usage limits.</p>
+      </details>
+
+      <details style="border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem;cursor:pointer">
+        <summary style="font-weight:600;font-size:.95rem;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center">
+          Do I need a GPU?
+          <span style="color:var(--muted);font-size:1.2rem">+</span>
+        </summary>
+        <p style="margin-top:.85rem;color:var(--muted);font-size:.9rem;line-height:1.65">No. Lychee runs on CPU-only machines. GPU acceleration is automatic when available and makes inference significantly faster — but small models (1-3B) run fine on modern CPUs. Run <code class="inline">lychee scan</code> to see what fits your hardware.</p>
+      </details>
+
+      <details style="border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem;cursor:pointer">
+        <summary style="font-weight:600;font-size:.95rem;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center">
+          Can I use Lychee with my existing OpenAI code?
+          <span style="color:var(--muted);font-size:1.2rem">+</span>
+        </summary>
+        <p style="margin-top:.85rem;color:var(--muted);font-size:.9rem;line-height:1.65">Yes. Lychee exposes an OpenAI-compatible API at <code class="inline">http://localhost:11434/v1</code>. Point any OpenAI SDK to that base URL with any dummy API key and it works. No code changes needed beyond swapping the base URL.</p>
+      </details>
+
+      <details style="border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem;cursor:pointer">
+        <summary style="font-weight:600;font-size:.95rem;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center">
+          Where are models stored?
+          <span style="color:var(--muted);font-size:1.2rem">+</span>
+        </summary>
+        <p style="margin-top:.85rem;color:var(--muted);font-size:.9rem;line-height:1.65">Models are stored in <code class="inline">~/.lychee/models/</code> by default on all platforms. Override this with the <code class="inline">LYCHEE_MODELS</code> environment variable to point to a different drive or directory.</p>
+      </details>
+
+      <details style="border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem;cursor:pointer">
+        <summary style="font-weight:600;font-size:.95rem;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center">
+          How is Lychee different from Ollama?
+          <span style="color:var(--muted);font-size:1.2rem">+</span>
+        </summary>
+        <p style="margin-top:.85rem;color:var(--muted);font-size:.9rem;line-height:1.65">Lychee adds direct HuggingFace pulls with resumable downloads and SHA256 verification, a 275+ model catalog, and four exclusive power-user commands: <code class="inline">lychee embed</code>, <code class="inline">lychee scan</code>, <code class="inline">lychee compare</code>, and <code class="inline">lychee stats</code>. The core inference engine is the same.</p>
+      </details>
+
+      <details style="border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem;cursor:pointer">
+        <summary style="font-weight:600;font-size:.95rem;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center">
+          What model format does Lychee use?
+          <span style="color:var(--muted);font-size:1.2rem">+</span>
+        </summary>
+        <p style="margin-top:.85rem;color:var(--muted);font-size:.9rem;line-height:1.65">Lychee uses GGUF format models for local inference via llama.cpp. When pulling from HuggingFace, only <code class="inline">.gguf</code> files are downloaded. GGUF supports Q2–Q8 quantizations and FP16/BF16 for high-precision inference.</p>
+      </details>
+
+      <details style="border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem;cursor:pointer">
+        <summary style="font-weight:600;font-size:.95rem;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center">
+          Can I run multiple models at the same time?
+          <span style="color:var(--muted);font-size:1.2rem">+</span>
+        </summary>
+        <p style="margin-top:.85rem;color:var(--muted);font-size:.9rem;line-height:1.65">Yes. Set <code class="inline">LYCHEE_MAX_LOADED_MODELS</code> (default: 3) to keep multiple models in memory simultaneously. Use <code class="inline">lychee stats</code> to monitor VRAM usage across all loaded models.</p>
+      </details>
+    </div>
+
+    <!-- NEXT / PREV -->
+    <div style="display:flex;justify-content:space-between;padding-top:3rem;border-top:1px solid var(--border);margin-top:2rem;gap:1rem;flex-wrap:wrap;">
+      <a href="download.html" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 20px;text-decoration:none;color:var(--text);transition:border-color 0.2s;font-size:0.9rem;" onmouseover="this.style.borderColor='#555'" onmouseout="this.style.borderColor='var(--border)'">
+        ← Download Lychee
+      </a>
+      <a href="models.html" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 20px;text-decoration:none;color:var(--text);transition:border-color 0.2s;font-size:0.9rem;" onmouseover="this.style.borderColor='#555'" onmouseout="this.style.borderColor='var(--border)'">
+        Browse Model Library →
+      </a>
+    </div>
+
+    <div style="text-align:center;padding:2rem;border-top:1px solid var(--border)">
+      <a href="https://github.com/lychee/lychee/tree/main/docs" target="_blank" style="display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:.85rem;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'"><img src="https://cdn.simpleicons.org/github/888888" width="14" height="14" alt=""> Edit this page on GitHub</a>
+    </div>
+  </main>
+
+  <!-- RIGHT TOC -->
+  <aside class="docs-toc">
+    <div class="toc-title">On This Page</div>
+    <ul class="toc-nav">
+      <li><a href="#quickstart">Quick Start</a></li>
+      <li><a href="#installation">Installation</a></li>
+      <li class="toc-sub"><a href="#installation">macOS</a></li>
+      <li class="toc-sub"><a href="#installation">Linux</a></li>
+      <li class="toc-sub"><a href="#installation">Windows</a></li>
+      <li><a href="#running-models">Running Models</a></li>
+      <li><a href="#api">API Reference</a></li>
+      <li class="toc-sub"><a href="#api">Endpoints</a></li>
+      <li class="toc-sub"><a href="#api">Examples</a></li>
+      <li><a href="#cli">CLI Reference</a></li>
+      <li><a href="#env-vars">Environment Variables</a></li>
+      <li><a href="#modelfile">Modelfile</a></li>
+      <li><a href="#cmd-embed">lychee embed</a></li>
+      <li><a href="#cmd-scan">lychee scan</a></li>
+      <li><a href="#cmd-compare">lychee compare</a></li>
+      <li><a href="#cmd-stats">lychee stats</a></li>
+      <li><a href="#integrations">Integrations</a></li>
+      <li><a href="#configuration">Configuration</a></li>
+      <li><a href="#gpu-setup">GPU Setup</a></li>
+      <li><a href="#troubleshooting">Troubleshooting</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </aside>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="28" height="28" viewBox="0 0 200 200" fill="none"><defs><filter id="df-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="df-bump"><feGaussianBlur stdDeviation="0.5"/></filter><radialGradient id="df-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF8DC7"/><stop offset="40%" stop-color="#E84393"/><stop offset="78%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient><radialGradient id="df-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#C93578"/><stop offset="55%" stop-color="#A01E5F"/><stop offset="100%" stop-color="#6A1238"/></radialGradient><radialGradient id="df-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#901850"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient><radialGradient id="df-spec" cx="34%" cy="27%" r="28%"><stop offset="0%" stop-color="rgba(255,255,255,0.72)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><linearGradient id="df-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient><linearGradient id="df-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient><clipPath id="df-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath></defs><ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#df-top)" filter="url(#df-glow)"/><path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#df-top)" opacity="0.88"/><path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#df-right)" opacity="0.92"/><path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#df-right)" opacity="0.82"/><path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#df-bot)" opacity="0.88"/><path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#df-bot)" opacity="0.78"/><g opacity="0.5" clip-path="url(#df-clip)"><circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#df-bump)"/><circle cx="100" cy="70" r="4.5" fill="#FF6DB3" filter="url(#df-bump)"/><circle cx="100" cy="90" r="5" fill="#FF6DB3" filter="url(#df-bump)"/><circle cx="86" cy="84" r="5" fill="#FF6DB3" filter="url(#df-bump)"/><circle cx="114" cy="84" r="4.5" fill="#D44A8A" filter="url(#df-bump)"/></g><ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#df-spec)" opacity="0.88"/><ellipse cx="75" cy="77" rx="3.5" ry="2.5" fill="white" opacity="0.55"/><path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#df-stem)" stroke-width="3.5" stroke-linecap="round" fill="none"/><ellipse cx="99" cy="64" rx="5" ry="3.5" fill="#3D7A25"/><path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#df-leaf)"/><path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#df-leaf)" opacity="0.88"/></svg>
+    Lychee
+  </div>
+  <div class="footer-links">
+    <a href="docs.html">Docs</a>
+    <a href="blog.html">Blog</a>
+    <a href="https://github.com/lychee/lychee" target="_blank">GitHub</a>
+    <a href="#">Discord</a>
+    <a href="models.html">Models</a>
+  </div>
+  <div class="footer-copy">© 2025 Lychee. Open source.</div>
+</footer>
+
+<script>
+  // Platform tabs
+  function switchPlatform(e, id) {
+    document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.ptab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById('ptab-' + id).classList.add('active');
+  }
+
+  // Copy code block
+  function copyBlock(btn, text) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre ? pre.textContent.trim() : text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Sidebar active link highlight on scroll
+  const sections = document.querySelectorAll('.doc-section');
+  const sideLinks = document.querySelectorAll('.sidebar-nav a');
+  const tocLinks = document.querySelectorAll('.toc-nav a');
+
+  function updateActiveLink() {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = '#' + s.id;
+    });
+    sideLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+    tocLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === current);
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveLink, { passive: true });
+  updateActiveLink();
+
+  // Reading progress bar
+  window.addEventListener('scroll', () => {
+    const d = document.documentElement;
+    const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+    document.getElementById('read-progress').style.width = pct + '%';
+  });
+
+  // Docs search
+  function docsSearch(q) {
+    const res = document.getElementById('docs-results');
+    if (!q || q.length < 2) { res.style.display = 'none'; return; }
+    const headings = document.querySelectorAll('h2[id], h3[id]');
+    const matches = [];
+    headings.forEach(h => {
+      if (h.textContent.toLowerCase().includes(q.toLowerCase())) {
+        matches.push({ id: h.id, text: h.textContent, tag: h.tagName });
+      }
+    });
+    if (matches.length === 0) {
+      res.innerHTML = '<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem">No results found</div>';
+    } else {
+      res.innerHTML = matches.slice(0, 8).map(m =>
+        `<a href="#${m.id}" onclick="document.getElementById('docs-results').style.display='none';document.getElementById('docs-search').value=''" style="display:flex;align-items:center;gap:10px;padding:.65rem 1rem;border-radius:6px;text-decoration:none;color:var(--text);font-size:.85rem;transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='none'"><i data-lucide="${m.tag === 'H2' ? 'file-text' : 'hash'}" style="width:14px;height:14px;color:var(--muted);flex-shrink:0"></i>${m.text}</a>`
+      ).join('');
+      lucide.createIcons({ nodes: [res] });
+    }
+    res.style.display = 'block';
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#docs-search') && !e.target.closest('#docs-results'))
+      document.getElementById('docs-results').style.display = 'none';
+  });
+
+  // Copy buttons on all <pre> blocks
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre:not(.has-copy)').forEach(pre => {
+      pre.classList.add('has-copy');
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative';
+      pre.parentNode.insertBefore(wrap, pre);
+      wrap.appendChild(pre);
+      const btn = document.createElement('button');
+      btn.innerHTML = '<i data-lucide="copy" style="width:13px;height:13px"></i>';
+      btn.style.cssText = 'position:absolute;top:.6rem;right:.6rem;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;cursor:pointer;color:var(--muted);display:flex;align-items:center;transition:all .2s';
+      btn.title = 'Copy code';
+      btn.onmouseover = () => { btn.style.borderColor = '#555'; btn.style.color = 'var(--text)'; };
+      btn.onmouseout = () => { btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--muted)'; };
+      btn.onclick = () => {
+        navigator.clipboard.writeText(pre.textContent);
+        btn.innerHTML = '<i data-lucide="check" style="width:13px;height:13px;color:var(--green)"></i>';
+        lucide.createIcons({ nodes: [btn] });
+        setTimeout(() => {
+          btn.innerHTML = '<i data-lucide="copy" style="width:13px;height:13px"></i>';
+          lucide.createIcons({ nodes: [btn] });
+        }, 1800);
+      };
+      wrap.appendChild(btn);
+      lucide.createIcons({ nodes: [btn] });
+    });
+  });
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

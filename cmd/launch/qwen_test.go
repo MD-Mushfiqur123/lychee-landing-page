@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ollama/ollama/cmd/config"
-	"github.com/ollama/ollama/cmd/internal/fileutil"
+	"github.com/lychee/lychee/cmd/config"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
 )
 
 func setQwenTestHome(t *testing.T, home string) {
@@ -40,8 +40,8 @@ func TestQwenConfigure(t *testing.T) {
 	}
 
 	envCfg := cfg["env"].(map[string]any)
-	if envCfg[qwenOllamaEnvKey] != "ollama" {
-		t.Fatalf("expected env[%q] to be ollama, got %v", qwenOllamaEnvKey, envCfg[qwenOllamaEnvKey])
+	if envCfg[qwenLycheeEnvKey] != "lychee" {
+		t.Fatalf("expected env[%q] to be lychee, got %v", qwenLycheeEnvKey, envCfg[qwenLycheeEnvKey])
 	}
 
 	modelCfg := cfg["model"].(map[string]any)
@@ -68,14 +68,14 @@ func TestQwenConfigure(t *testing.T) {
 	if provider["id"] != "gemma4" {
 		t.Fatalf("expected provider id gemma4, got %v", provider["id"])
 	}
-	if provider["name"] != "gemma4 (Ollama)" {
-		t.Fatalf("expected provider name %q, got %v", "gemma4 (Ollama)", provider["name"])
+	if provider["name"] != "gemma4 (Lychee)" {
+		t.Fatalf("expected provider name %q, got %v", "gemma4 (Lychee)", provider["name"])
 	}
 	if provider["baseUrl"] != qwenBaseURL() {
 		t.Fatalf("expected provider baseUrl %q, got %v", qwenBaseURL(), provider["baseUrl"])
 	}
-	if provider["envKey"] != qwenOllamaEnvKey {
-		t.Fatalf("expected provider envKey %q, got %v", qwenOllamaEnvKey, provider["envKey"])
+	if provider["envKey"] != qwenLycheeEnvKey {
+		t.Fatalf("expected provider envKey %q, got %v", qwenLycheeEnvKey, provider["envKey"])
 	}
 }
 
@@ -125,14 +125,14 @@ func TestQwenConfigureMergesWithExistingSettings(t *testing.T) {
   "theme": "dark",
   "env": {
     "OPENROUTER_API_KEY": "openrouter-key",
-    "OLLAMA_API_KEY": "old-ollama-key"
+    "LYCHEE_API_KEY": "old-lychee-key"
   },
   "modelProviders": {
     "openai": [
       {
-        "id": "old-ollama",
-        "name": "old-ollama (Ollama)",
-        "envKey": "OLLAMA_API_KEY",
+        "id": "old-lychee",
+        "name": "old-lychee (Lychee)",
+        "envKey": "LYCHEE_API_KEY",
         "baseUrl": "` + qwenBaseURL() + `"
       },
       {
@@ -143,9 +143,9 @@ func TestQwenConfigureMergesWithExistingSettings(t *testing.T) {
         "customField": "preserved"
       },
       {
-        "id": "remote-ollama",
-        "name": "Remote Ollama",
-        "envKey": "OLLAMA_API_KEY",
+        "id": "remote-lychee",
+        "name": "Remote Lychee",
+        "envKey": "LYCHEE_API_KEY",
         "baseUrl": "http://10.0.0.20:11434/v1"
       }
     ],
@@ -165,7 +165,7 @@ func TestQwenConfigureMergesWithExistingSettings(t *testing.T) {
     "trustedFolders": ["/tmp/project"]
   },
   "model": {
-    "name": "old-ollama",
+    "name": "old-lychee",
     "generationConfig": {
       "temperature": 0.2
     }
@@ -196,8 +196,8 @@ func TestQwenConfigureMergesWithExistingSettings(t *testing.T) {
 	if envCfg["OPENROUTER_API_KEY"] != "openrouter-key" {
 		t.Fatalf("expected OPENROUTER_API_KEY to be preserved, got %v", envCfg["OPENROUTER_API_KEY"])
 	}
-	if envCfg[qwenOllamaEnvKey] != "ollama" {
-		t.Fatalf("expected %s to be updated, got %v", qwenOllamaEnvKey, envCfg[qwenOllamaEnvKey])
+	if envCfg[qwenLycheeEnvKey] != "lychee" {
+		t.Fatalf("expected %s to be updated, got %v", qwenLycheeEnvKey, envCfg[qwenLycheeEnvKey])
 	}
 
 	modelProviders := cfg["modelProviders"].(map[string]any)
@@ -207,11 +207,11 @@ func TestQwenConfigureMergesWithExistingSettings(t *testing.T) {
 	}
 	openai := modelProviders["openai"].([]any)
 	if len(openai) != 3 {
-		t.Fatalf("expected new Ollama provider plus preserved OpenRouter and remote Ollama providers, got %v", openai)
+		t.Fatalf("expected new Lychee provider plus preserved OpenRouter and remote Lychee providers, got %v", openai)
 	}
-	ollamaProvider := openai[0].(map[string]any)
-	if ollamaProvider["id"] != "gemma4" {
-		t.Fatalf("expected Ollama provider to update to gemma4, got %v", ollamaProvider["id"])
+	lycheeProvider := openai[0].(map[string]any)
+	if lycheeProvider["id"] != "gemma4" {
+		t.Fatalf("expected Lychee provider to update to gemma4, got %v", lycheeProvider["id"])
 	}
 	openRouterProvider := openai[1].(map[string]any)
 	if openRouterProvider["id"] != "openrouter/model" {
@@ -220,9 +220,9 @@ func TestQwenConfigureMergesWithExistingSettings(t *testing.T) {
 	if openRouterProvider["customField"] != "preserved" {
 		t.Fatalf("expected OpenRouter custom field to be preserved, got %v", openRouterProvider["customField"])
 	}
-	remoteOllamaProvider := openai[2].(map[string]any)
-	if remoteOllamaProvider["id"] != "remote-ollama" {
-		t.Fatalf("expected remote Ollama provider to be preserved, got %v", remoteOllamaProvider["id"])
+	remoteLycheeProvider := openai[2].(map[string]any)
+	if remoteLycheeProvider["id"] != "remote-lychee" {
+		t.Fatalf("expected remote Lychee provider to be preserved, got %v", remoteLycheeProvider["id"])
 	}
 
 	security := cfg["security"].(map[string]any)
@@ -395,7 +395,7 @@ func TestQwenLaunchEnv(t *testing.T) {
 	t.Setenv("OPENAI_MODEL", "")
 
 	env := qwenLaunchEnv("llama3.2")
-	if !slices.Contains(env, "OPENAI_API_KEY=ollama") {
+	if !slices.Contains(env, "OPENAI_API_KEY=lychee") {
 		t.Fatalf("expected OPENAI_API_KEY override, got %v", env)
 	}
 	if !slices.Contains(env, "OPENAI_BASE_URL="+qwenBaseURL()) {
@@ -412,7 +412,7 @@ func TestQwenLaunchEnvOverridesExistingOpenAIEnv(t *testing.T) {
 	t.Setenv("OPENAI_MODEL", "gpt-4.1")
 
 	env := qwenLaunchEnv("llama3.2")
-	if !slices.Contains(env, "OPENAI_API_KEY=ollama") {
+	if !slices.Contains(env, "OPENAI_API_KEY=lychee") {
 		t.Fatalf("expected OPENAI_API_KEY override, got %v", env)
 	}
 	if !slices.Contains(env, "OPENAI_BASE_URL="+qwenBaseURL()) {

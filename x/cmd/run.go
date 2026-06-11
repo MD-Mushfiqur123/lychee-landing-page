@@ -18,14 +18,14 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"github.com/ollama/ollama/api"
-	internalcloud "github.com/ollama/ollama/internal/cloud"
-	"github.com/ollama/ollama/internal/modelref"
-	"github.com/ollama/ollama/progress"
-	"github.com/ollama/ollama/readline"
-	"github.com/ollama/ollama/types/model"
-	"github.com/ollama/ollama/x/agent"
-	"github.com/ollama/ollama/x/tools"
+	"github.com/lychee/lychee/api"
+	internalcloud "github.com/lychee/lychee/internal/cloud"
+	"github.com/lychee/lychee/internal/modelref"
+	"github.com/lychee/lychee/progress"
+	"github.com/lychee/lychee/readline"
+	"github.com/lychee/lychee/types/model"
+	"github.com/lychee/lychee/x/agent"
+	"github.com/lychee/lychee/x/agent/tools"
 )
 
 // Tool output capping constants
@@ -47,10 +47,10 @@ func isLocalModel(modelName string) bool {
 	return !modelref.HasExplicitCloudSource(modelName)
 }
 
-// isLocalServer checks if connecting to a local Ollama server.
+// isLocalServer checks if connecting to a local Lychee server.
 // TODO: Could also check other indicators of local vs cloud server
 func isLocalServer() bool {
-	host := os.Getenv("OLLAMA_HOST")
+	host := os.Getenv("LYCHEE_HOST")
 	if host == "" {
 		return true // Default is localhost:11434
 	}
@@ -94,8 +94,8 @@ func truncateToolOutput(output, modelName string) string {
 	return output
 }
 
-// waitForOllamaSignin shows the signin URL and polls until authentication completes.
-func waitForOllamaSignin(ctx context.Context) error {
+// waitForLycheeSignin shows the signin URL and polls until authentication completes.
+func waitForLycheeSignin(ctx context.Context) error {
 	client, err := api.ClientFromEnvironment()
 	if err != nil {
 		return err
@@ -288,15 +288,15 @@ func Chat(ctx context.Context, opts RunOptions) (*api.Message, error) {
 			if errors.As(err, &authErr) {
 				p.StopAndClear()
 				fmt.Fprintf(os.Stderr, "\033[1mauth required:\033[0m cloud model requires authentication\n")
-				result, promptErr := agent.PromptYesNo("Sign in to Ollama?")
+				result, promptErr := agent.PromptYesNo("Sign in to Lychee?")
 				if promptErr == nil && result {
-					if signinErr := waitForOllamaSignin(ctx); signinErr == nil {
+					if signinErr := waitForLycheeSignin(ctx); signinErr == nil {
 						// Retry the chat request
 						fmt.Fprintf(os.Stderr, "\033[90mretrying...\033[0m\n")
 						continue // Retry the loop
 					}
 				}
-				return nil, fmt.Errorf("authentication required - run 'ollama signin' to authenticate")
+				return nil, fmt.Errorf("authentication required - run 'lychee signin' to authenticate")
 			}
 
 			// Check for 500 errors (often tool parsing failures) - inform the model
@@ -439,10 +439,10 @@ func Chat(ctx context.Context, opts RunOptions) (*api.Message, error) {
 				if errors.Is(err, tools.ErrWebSearchAuthRequired) {
 					// Prompt user to sign in
 					fmt.Fprintf(os.Stderr, "\033[1mauth required:\033[0m web search requires authentication\n")
-					result, promptErr := agent.PromptYesNo("Sign in to Ollama?")
+					result, promptErr := agent.PromptYesNo("Sign in to Lychee?")
 					if promptErr == nil && result {
 						// Get signin URL and wait for auth completion
-						if signinErr := waitForOllamaSignin(ctx); signinErr == nil {
+						if signinErr := waitForLycheeSignin(ctx); signinErr == nil {
 							// Retry the web search
 							fmt.Fprintf(os.Stderr, "\033[90mretrying web search...\033[0m\n")
 							toolResult, err = toolRegistry.Execute(call)
@@ -705,13 +705,13 @@ func GenerateInteractive(cmd *cobra.Command, modelName string, wordWrap bool, op
 
 		if toolRegistry.Has("bash") {
 			fmt.Fprintln(os.Stderr)
-			fmt.Fprintln(os.Stderr, "This experimental version of Ollama has the \033[1mbash\033[0m tool enabled.")
+			fmt.Fprintln(os.Stderr, "This experimental version of Lychee has the \033[1mbash\033[0m tool enabled.")
 			fmt.Fprintln(os.Stderr, "Models can read files on your computer, or run commands (after you allow them).")
 			fmt.Fprintln(os.Stderr)
 		}
 
 		if toolRegistry.Has("web_search") || toolRegistry.Has("web_fetch") {
-			fmt.Fprintln(os.Stderr, "The \033[1mWeb Search\033[0m and \033[1mWeb Fetch\033[0m tools are enabled. Models can search and fetch web content via ollama.com.")
+			fmt.Fprintln(os.Stderr, "The \033[1mWeb Search\033[0m and \033[1mWeb Fetch\033[0m tools are enabled. Models can search and fetch web content locally.")
 			fmt.Fprintln(os.Stderr)
 		}
 
@@ -879,7 +879,7 @@ func GenerateInteractive(cmd *cobra.Command, modelName string, wordWrap bool, op
 			if len(args) > 1 {
 				client, err := api.ClientFromEnvironment()
 				if err != nil {
-					fmt.Println("error: couldn't connect to ollama server")
+					fmt.Println("error: couldn't connect to lychee server")
 					continue
 				}
 				req := &api.ShowRequest{
@@ -976,7 +976,7 @@ func GenerateInteractive(cmd *cobra.Command, modelName string, wordWrap bool, op
 			client, err := api.ClientFromEnvironment()
 			if err != nil {
 				p.StopAndClear()
-				fmt.Println("error: couldn't connect to ollama server")
+				fmt.Println("error: couldn't connect to lychee server")
 				continue
 			}
 
@@ -1028,7 +1028,7 @@ func GenerateInteractive(cmd *cobra.Command, modelName string, wordWrap bool, op
 			}
 			client, err := api.ClientFromEnvironment()
 			if err != nil {
-				fmt.Println("error: couldn't connect to ollama server")
+				fmt.Println("error: couldn't connect to lychee server")
 				continue
 			}
 			req := &api.CreateRequest{

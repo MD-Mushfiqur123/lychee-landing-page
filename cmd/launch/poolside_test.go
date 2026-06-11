@@ -33,7 +33,7 @@ func TestPoolsideArgs(t *testing.T) {
 	}
 }
 
-func TestPoolsideRunSetsOllamaEnv(t *testing.T) {
+func TestPoolsideRunSetsLycheeEnv(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("uses POSIX shell fake binary")
 	}
@@ -48,7 +48,7 @@ func TestPoolsideRunSetsOllamaEnv(t *testing.T) {
 	}
 
 	t.Setenv("PATH", tmpDir)
-	t.Setenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+	t.Setenv("LYCHEE_HOST", "http://127.0.0.1:11434")
 
 	p := &Poolside{}
 	if err := p.Run("qwen3.5", nil, []string{"session"}); err != nil {
@@ -64,7 +64,7 @@ func TestPoolsideRunSetsOllamaEnv(t *testing.T) {
 	if !strings.Contains(got, "base=http://127.0.0.1:11434/v1") {
 		t.Fatalf("expected Poolside base URL override in log, got:\n%s", got)
 	}
-	if !strings.Contains(got, "key=ollama") {
+	if !strings.Contains(got, "key=lychee") {
 		t.Fatalf("expected Poolside API key override in log, got:\n%s", got)
 	}
 	if !strings.Contains(got, "args=-m qwen3.5 session") {

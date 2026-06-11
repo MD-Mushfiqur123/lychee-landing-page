@@ -76,8 +76,8 @@ ENV VULKAN_SDK=/usr/local
 #
 # llama-server stages — rebuild when LLAMA_CPP_VERSION, llama/server/, or llama/compat/ changes.
 #
-# CPU stage: llama-server + ggml-base + ggml-cpu variants → lib/ollama/
-# GPU stages: GPU backend .so only → lib/ollama/<variant>/
+# CPU stage: llama-server + ggml-base + ggml-cpu variants → lib/lychee/
+# GPU stages: GPU backend .so only → lib/lychee/<variant>/
 #
 
 FROM cpu-deps AS llama-server-cpu
@@ -93,11 +93,11 @@ RUN --mount=type=cache,target=/root/.ccache \
             /usr/lib64/libomp.so* \
             /opt/rh/gcc-toolset-11/root/usr/lib64/libgomp.so* \
             /opt/rh/gcc-toolset-11/root/usr/lib64/libomp.so*; do \
-                [ -e "$lib" ] && cp -a "$lib" dist/lib/ollama/ || true; \
+                [ -e "$lib" ] && cp -a "$lib" dist/lib/lychee/ || true; \
             done
 
 FROM scratch AS publish-llama-server-cpu
-COPY --from=llama-server-cpu dist/lib/ollama /lib/ollama/
+COPY --from=llama-server-cpu dist/lib/lychee /lib/lychee/
 
 FROM cuda-12-deps AS llama-server-cuda_v12
 COPY LLAMA_CPP_VERSION .
@@ -109,7 +109,7 @@ RUN --mount=type=cache,target=/root/.ccache \
         && cmake --install build/llama-server-cuda_v12 --component llama-server --strip
 
 FROM scratch AS publish-llama-server-cuda_v12
-COPY --from=llama-server-cuda_v12 dist/lib/ollama /lib/ollama/
+COPY --from=llama-server-cuda_v12 dist/lib/lychee /lib/lychee/
 
 FROM cuda-13-deps AS llama-server-cuda_v13
 COPY LLAMA_CPP_VERSION .
@@ -121,7 +121,7 @@ RUN --mount=type=cache,target=/root/.ccache \
         && cmake --install build/llama-server-cuda_v13 --component llama-server --strip
 
 FROM scratch AS publish-llama-server-cuda_v13
-COPY --from=llama-server-cuda_v13 dist/lib/ollama /lib/ollama/
+COPY --from=llama-server-cuda_v13 dist/lib/lychee /lib/lychee/
 
 FROM rocm-7-deps AS llama-server-rocm_v7_2
 ENV CC=clang CXX=clang++
@@ -132,10 +132,10 @@ RUN --mount=type=cache,target=/root/.ccache \
     cmake -S llama/server --preset rocm_v7_2_linux \
         && cmake --build build/llama-server-rocm_v7_2 -- -l $(nproc) \
         && cmake --install build/llama-server-rocm_v7_2 --component llama-server --strip
-RUN rm -f dist/lib/ollama/rocm_v7_2/rocblas/library/*gfx90[06]*
+RUN rm -f dist/lib/lychee/rocm_v7_2/rocblas/library/*gfx90[06]*
 
 FROM scratch AS publish-llama-server-rocm_v7_2
-COPY --from=llama-server-rocm_v7_2 dist/lib/ollama /lib/ollama/
+COPY --from=llama-server-rocm_v7_2 dist/lib/lychee /lib/lychee/
 
 FROM vulkan-deps AS llama-server-vulkan
 COPY LLAMA_CPP_VERSION .
@@ -147,7 +147,7 @@ RUN --mount=type=cache,target=/root/.ccache \
         && cmake --install build/llama-server-vulkan --component llama-server --strip
 
 FROM scratch AS publish-llama-server-vulkan
-COPY --from=llama-server-vulkan dist/lib/ollama /lib/ollama/
+COPY --from=llama-server-vulkan dist/lib/lychee /lib/lychee/
 
 #
 # JetPack stages — self-contained with their own base images
@@ -171,7 +171,7 @@ RUN --mount=type=cache,target=/root/.ccache \
         && cmake --install build/llama-server-cuda_jetpack5 --component llama-server --strip
 
 FROM scratch AS publish-llama-server-cuda_jetpack5
-COPY --from=jetpack-5 dist/lib/ollama /lib/ollama/
+COPY --from=jetpack-5 dist/lib/lychee /lib/lychee/
 
 FROM --platform=linux/arm64 nvcr.io/nvidia/l4t-jetpack:${JETPACK6VERSION} AS jetpack-6
 ARG CMAKEVERSION
@@ -191,7 +191,7 @@ RUN --mount=type=cache,target=/root/.ccache \
         && cmake --install build/llama-server-cuda_jetpack6 --component llama-server --strip
 
 FROM scratch AS publish-llama-server-cuda_jetpack6
-COPY --from=jetpack-6 dist/lib/ollama /lib/ollama/
+COPY --from=jetpack-6 dist/lib/lychee /lib/lychee/
 
 #
 # MLX stage
@@ -199,8 +199,8 @@ COPY --from=jetpack-6 dist/lib/ollama /lib/ollama/
 
 FROM base AS mlx
 ARG CUDA13VERSION=13.0
-ARG OLLAMA_MLX_BUILD_JOBS=
-ARG OLLAMA_MLX_NVCC_THREADS=2
+ARG LYCHEE_MLX_BUILD_JOBS=
+ARG LYCHEE_MLX_NVCC_THREADS=2
 ARG MLX_CUDA_RAM_MB=
 RUN dnf install -y cuda-toolkit-${CUDA13VERSION//./-} \
     && dnf install -y openblas-devel lapack-devel \
@@ -210,7 +210,7 @@ ENV PATH=/usr/local/cuda-13/bin:$PATH
 ENV BLAS_INCLUDE_DIRS=/usr/include/openblas
 ENV LAPACK_INCLUDE_DIRS=/usr/include/openblas
 ENV CGO_LDFLAGS="-L/usr/local/cuda-13/lib64 -L/usr/local/cuda-13/targets/x86_64-linux/lib/stubs"
-WORKDIR /go/src/github.com/ollama/ollama
+WORKDIR /go/src/github.com/lychee/lychee
 COPY CMakeLists.txt CMakePresets.json .
 COPY cmake cmake
 COPY x/imagegen/mlx x/imagegen/mlx
@@ -223,23 +223,23 @@ RUN --mount=type=cache,target=/root/.ccache \
     --mount=type=bind,from=local-mlx,target=/tmp/local-mlx \
     --mount=type=bind,from=local-mlx-c,target=/tmp/local-mlx-c \
     if [ -f /tmp/local-mlx/CMakeLists.txt ]; then \
-        export OLLAMA_MLX_SOURCE=/tmp/local-mlx; \
+        export LYCHEE_MLX_SOURCE=/tmp/local-mlx; \
     fi \
     && if [ -f /tmp/local-mlx-c/CMakeLists.txt ]; then \
-        export OLLAMA_MLX_C_SOURCE=/tmp/local-mlx-c; \
+        export LYCHEE_MLX_C_SOURCE=/tmp/local-mlx-c; \
     fi \
-    && cmake -S . -B build/mlx_cuda_v13 -DOLLAMA_MLX_BACKENDS=cuda_v13 -DBLAS_INCLUDE_DIRS=/usr/include/openblas -DLAPACK_INCLUDE_DIRS=/usr/include/openblas -DCMAKE_CUDA_FLAGS="-t ${OLLAMA_MLX_NVCC_THREADS}" ${MLX_CUDA_RAM_MB:+-DMLX_CUDA_RAM_MB=${MLX_CUDA_RAM_MB}} -DOLLAMA_PAYLOAD_INSTALL_PREFIX=/go/src/github.com/ollama/ollama/dist \
-        && cmake --build build/mlx_cuda_v13 --target ollama-mlx-cuda_v13 -- -l $(nproc) ${OLLAMA_MLX_BUILD_JOBS:+-j ${OLLAMA_MLX_BUILD_JOBS}}
+    && cmake -S . -B build/mlx_cuda_v13 -DLYCHEE_MLX_BACKENDS=cuda_v13 -DBLAS_INCLUDE_DIRS=/usr/include/openblas -DLAPACK_INCLUDE_DIRS=/usr/include/openblas -DCMAKE_CUDA_FLAGS="-t ${LYCHEE_MLX_NVCC_THREADS}" ${MLX_CUDA_RAM_MB:+-DMLX_CUDA_RAM_MB=${MLX_CUDA_RAM_MB}} -DLYCHEE_PAYLOAD_INSTALL_PREFIX=/go/src/github.com/lychee/lychee/dist \
+        && cmake --build build/mlx_cuda_v13 --target lychee-mlx-cuda_v13 -- -l $(nproc) ${LYCHEE_MLX_BUILD_JOBS:+-j ${LYCHEE_MLX_BUILD_JOBS}}
 
 FROM scratch AS publish-mlx
-COPY --from=mlx /go/src/github.com/ollama/ollama/dist/lib/ollama /lib/ollama/
+COPY --from=mlx /go/src/github.com/lychee/lychee/dist/lib/lychee /lib/lychee/
 
 #
 # Go build
 #
 
 FROM base AS build
-WORKDIR /go/src/github.com/ollama/ollama
+WORKDIR /go/src/github.com/lychee/lychee
 COPY go.mod go.sum .
 RUN curl -fsSL https://golang.org/dl/go$(awk '/^go/ { print $2 }' go.mod).linux-$(case $(uname -m) in x86_64) echo amd64 ;; aarch64) echo arm64 ;; esac).tar.gz | tar xz -C /usr/local
 ENV PATH=/usr/local/go/bin:$PATH
@@ -252,45 +252,45 @@ ARG CGO_CXXFLAGS
 ENV CGO_CFLAGS="${CGO_CFLAGS}"
 ENV CGO_CXXFLAGS="${CGO_CXXFLAGS}"
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    go build -trimpath -buildmode=pie -o /bin/ollama .
+    go build -trimpath -buildmode=pie -o /bin/lychee .
 
 FROM scratch AS publish-go
-COPY --from=build /bin/ollama /bin/ollama
+COPY --from=build /bin/lychee /bin/lychee
 
 #
 # Assembly stages — combine llama-server variants + GPU runtime libs
 #
 
 FROM --platform=linux/amd64 scratch AS amd64
-COPY --from=llama-server-cpu      dist/lib/ollama /lib/ollama/
-COPY --from=llama-server-cuda_v12 dist/lib/ollama /lib/ollama/
-COPY --from=llama-server-cuda_v13 dist/lib/ollama /lib/ollama/
-COPY --from=llama-server-vulkan   dist/lib/ollama /lib/ollama/
-COPY --from=mlx     /go/src/github.com/ollama/ollama/dist/lib/ollama /lib/ollama/
+COPY --from=llama-server-cpu      dist/lib/lychee /lib/lychee/
+COPY --from=llama-server-cuda_v12 dist/lib/lychee /lib/lychee/
+COPY --from=llama-server-cuda_v13 dist/lib/lychee /lib/lychee/
+COPY --from=llama-server-vulkan   dist/lib/lychee /lib/lychee/
+COPY --from=mlx     /go/src/github.com/lychee/lychee/dist/lib/lychee /lib/lychee/
 
 FROM --platform=linux/arm64 scratch AS arm64
-COPY --from=llama-server-cpu dist/lib/ollama /lib/ollama/
-COPY --from=llama-server-cuda_v12 dist/lib/ollama /lib/ollama/
-COPY --from=llama-server-cuda_v13 dist/lib/ollama /lib/ollama/
-COPY --from=jetpack-5 dist/lib/ollama/ /lib/ollama/
-COPY --from=jetpack-6 dist/lib/ollama/ /lib/ollama/
+COPY --from=llama-server-cpu dist/lib/lychee /lib/lychee/
+COPY --from=llama-server-cuda_v12 dist/lib/lychee /lib/lychee/
+COPY --from=llama-server-cuda_v13 dist/lib/lychee /lib/lychee/
+COPY --from=jetpack-5 dist/lib/lychee/ /lib/lychee/
+COPY --from=jetpack-6 dist/lib/lychee/ /lib/lychee/
 
 FROM scratch AS rocm
-COPY --from=llama-server-cpu  dist/lib/ollama /lib/ollama
-COPY --from=llama-server-rocm_v7_2 dist/lib/ollama /lib/ollama
+COPY --from=llama-server-cpu  dist/lib/lychee /lib/lychee
+COPY --from=llama-server-rocm_v7_2 dist/lib/lychee /lib/lychee
 
 FROM --platform=linux/amd64 scratch AS amd64-archive
-COPY --from=amd64 /lib/ollama /lib/ollama/
-COPY --from=llama-server-rocm_v7_2 dist/lib/ollama /lib/ollama/
+COPY --from=amd64 /lib/lychee /lib/lychee/
+COPY --from=llama-server-rocm_v7_2 dist/lib/lychee /lib/lychee/
 
 FROM --platform=linux/arm64 scratch AS arm64-archive
-COPY --from=arm64 /lib/ollama /lib/ollama/
+COPY --from=arm64 /lib/lychee /lib/lychee/
 
 FROM ${TARGETARCH}-archive AS archive
-COPY --from=build /bin/ollama /bin/ollama
+COPY --from=build /bin/lychee /bin/lychee
 
 FROM ${FLAVOR} AS image-archive
-COPY --from=build /bin/ollama /bin/ollama
+COPY --from=build /bin/lychee /bin/lychee
 
 FROM ubuntu:24.04
 ARG APT_MIRROR=http://archive.ubuntu.com/ubuntu
@@ -309,11 +309,11 @@ RUN sed -i \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=image-archive /bin /usr/bin
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-COPY --from=image-archive /lib/ollama /usr/lib/ollama
+COPY --from=image-archive /lib/lychee /usr/lib/lychee
 ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 ENV NVIDIA_VISIBLE_DEVICES=all
-ENV OLLAMA_HOST=0.0.0.0:11434
+ENV LYCHEE_HOST=0.0.0.0:11434
 EXPOSE 11434
-ENTRYPOINT ["/bin/ollama"]
+ENTRYPOINT ["/bin/lychee"]
 CMD ["serve"]

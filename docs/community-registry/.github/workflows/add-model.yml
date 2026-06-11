@@ -1,0 +1,103 @@
+name: Auto-merge Community Submission
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  merge-submission:
+    if: contains(github.event.issue.labels.*.name, 'model-card')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout registry repo
+        uses: actions/checkout@v4
+
+      - name: Parse Issue Form
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body;
+            
+            // Basic markdown form parser for GitHub Issue Forms
+            function getFieldValue(label) {
+              const regex = new RegExp('### ' + label + '\\s*\\n\\n([^#\\n]+(?:\\n[^#\\n]+)*)', 'i');
+              const match = body.match(regex);
+              return match ? match[1].trim() : '';
+            }
+
+            const name = getFieldValue('Model Name');
+            const author = getFieldValue('Author Handle');
+            const description = getFieldValue('Description');
+            const url = getFieldValue('Repository URL');
+
+            if (!name || !author || !url) {
+              core.setFailed('Missing required fields in submission');
+              return;
+            }
+
+            core.setOutput('name', name);
+            core.setOutput('author', author);
+            core.setOutput('description', description);
+            core.setOutput('url', url);
+
+      - name: Update registry.json
+        run: |
+          node -e '
+            const fs = require("fs");
+            const registryPath = "models/registry.json";
+            const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+            
+            const newModel = {
+              name: process.env.MODEL_NAME,
+              author: process.env.MODEL_AUTHOR,
+              description: process.env.MODEL_DESC,
+              url: process.env.MODEL_URL,
+              upvotes: 0,
+              submitted_at: new Date().toISOString()
+            };
+            
+            // Check if model already exists
+            const exists = registry.some(m => m.name.toLowerCase() === newModel.name.toLowerCase());
+            if (exists) {
+              console.log("Model already exists in registry. Skipping append.");
+              process.exit(0);
+            }
+            
+            registry.push(newModel);
+            fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + "\n", "utf8");
+          '
+        env:
+          MODEL_NAME: ${{ steps.parse.outputs.name }}
+          MODEL_AUTHOR: ${{ steps.parse.outputs.author }}
+          MODEL_DESC: ${{ steps.parse.outputs.description }}
+          MODEL_URL: ${{ steps.parse.outputs.url }}
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "Lychee Bot"
+          git config --global user.email "bot@lychee.ai"
+          git add models/registry.json
+          git commit -m "Add community model: ${{ steps.parse.outputs.name }}"
+          git push origin main || echo "No changes to push"
+
+      - name: Comment & Close Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🎉 Thank you! Your community model **${{ steps.parse.outputs.name }}** has been successfully approved and merged into the registry!\n\nTo view it, run:\n\`lychee community list\``
+            });
+            github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed'
+            });

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "llama3-coder-super",
+    "author": "dev_mind",
+    "description": "Fine-tuned Llama 3 for extreme quality python completions.",
+    "url": "https://huggingface.co/dev_mind/llama3-coder-super",
+    "upvotes": 42,
+    "submitted_at": "2026-06-08T13:00:00Z"
+  },
+  {
+    "name": "qwen-3b-uncensored",
+    "author": "mika_l",
+    "description": "Uncensored assistant model with dynamic context scaling.",
+    "url": "https://huggingface.co/mika_l/qwen-3b-uncensored",
+    "upvotes": 28,
+    "submitted_at": "2026-06-03T09:30:00Z"
+  }
+]

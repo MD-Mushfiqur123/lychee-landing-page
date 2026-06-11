@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ollama/ollama/x/create"
-	"github.com/ollama/ollama/x/mlxrunner/mlx"
-	"github.com/ollama/ollama/x/mlxrunner/model"
+	"github.com/lychee/lychee/x/create"
+	"github.com/lychee/lychee/x/mlxrunner/mlx"
+	"github.com/lychee/lychee/x/mlxrunner/model"
 )
 
 // loadAndQuantizeArray writes a safetensors reader to a temp file, loads it with MLX,
@@ -509,7 +509,7 @@ func QuantizeSupported() bool {
 
 // ensureTempDir creates the temp directory for quantization if it doesn't exist
 func ensureTempDir() string {
-	tmpDir := filepath.Join(os.TempDir(), "ollama-quantize")
+	tmpDir := filepath.Join(os.TempDir(), "lychee-quantize")
 	os.MkdirAll(tmpDir, 0o755)
 	return tmpDir
 }

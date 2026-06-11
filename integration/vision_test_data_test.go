@@ -4,7 +4,7 @@ package integration
 
 // imageEncodingDocs is a 400x250 PNG of four cartoon llamas at a desk.
 // One is on a laptop wearing glasses, one writing, one reading, one sleeping.
-// The header text reads "Ollama's documentation".
+// The header text reads "Lychee's documentation".
 const imageEncodingDocs = `iVBORw0KGgoAAAANSUhEUgAAAZAAAAD6CAYAAACPpxFEAAAKtmlDQ1BJQ0MgUHJvZmlsZQAASImVlwdQk9kWx+/3pYeElhCKlNA70gkgJYQWQEE62AhJgEAI
 MQUFO7K4ghUVEVQWdFVAwUYRO6LYFsWGfUEWEWVdLNhQeR8wBHffvPfmnZk75zfnO/fcc+98d+Z/ASCbcMRiIawKQKZIJokM8qPHJyTScS8BDDQBHlAAicOV
 ipkREWEAsUn/d/twD0Bj/rbtWK1///5fTY3Hl3IBgCIQTuZJuZkIHwfI8lyxRAYACmFgvEgmHuP7CFMlSIMID45x6jijx+pQkyeYOp4THclC2AIAPInDkaQC
@@ -383,9 +383,9 @@ yEUu0pztbKtys2RR9bUiUBGoCFQE5oTAL3/5y+ab3/xmc9JJJzWf+cxnmq9+9atzKXmuDGQuNaqFVAQq
 VBGoCFQElgKBykCWoptqJSsCFYGKwOIhUBnI4vVJrVFFoCJQEVgKBCoDWYpuqpWsCFQEKgKLh0BlIIvXJ7VGFYGKQEVgKRDYOWr5q6Woaa1kRaAiUBGoCCwU
 Av8fgwPy24mbuF8AAAAASUVORK5CYII=
 `
-// imageEncodingOllamaHome is a 415x293 JPEG of the ollama.com homepage.
+// imageEncodingLycheeHome is a 415x293 JPEG of the lychee.com homepage.
 // Shows a cartoon llama character with text "Start building with open models".
-const imageEncodingOllamaHome = `/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxO
+const imageEncodingLycheeHome = `/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxO
 UlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09P
 T09PT09PT0//wAARCAElAZ8DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUF
 BAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVW

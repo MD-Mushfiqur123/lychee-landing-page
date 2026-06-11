@@ -3,9 +3,9 @@ package launch
 import (
 	"testing"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/format"
-	modelpkg "github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/format"
+	modelpkg "github.com/lychee/lychee/types/model"
 )
 
 func TestBuildModelList_UsesInventoryMetadataForInstalledModels(t *testing.T) {

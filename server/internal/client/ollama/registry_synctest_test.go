@@ -1,6 +1,6 @@
 // TODO: go:build goexperiment.synctest
 
-package ollama
+package lychee
 
 import (
 	"context"

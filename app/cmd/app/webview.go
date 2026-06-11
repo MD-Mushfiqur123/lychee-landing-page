@@ -19,9 +19,9 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/ollama/ollama/app/dialog"
-	"github.com/ollama/ollama/app/store"
-	"github.com/ollama/ollama/app/webview"
+	"github.com/lychee/lychee/app/dialog"
+	"github.com/lychee/lychee/app/store"
+	"github.com/lychee/lychee/app/webview"
 )
 
 type Webview struct {
@@ -54,7 +54,7 @@ func (w *Webview) Run(path string) unsafe.Pointer {
 		wv := webview.New(debug)
 		// start the window hidden
 		hideWindow(wv.Window())
-		wv.SetTitle("Ollama")
+		wv.SetTitle("Lychee")
 
 		// TODO (jmorganca): this isn't working yet since it needs to be set
 		// on the first page load, ideally in an interstitial page like `/token`
@@ -188,7 +188,7 @@ func (w *Webview) Run(path string) unsafe.Pointer {
 		}
 
 		init += `
-			window.OLLAMA_WEBSEARCH = true;
+			window.LYCHEE_WEBSEARCH = true;
 		`
 
 		wv.Init(init)

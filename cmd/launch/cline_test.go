@@ -111,23 +111,23 @@ func TestClineEdit(t *testing.T) {
 		if config["actModeApiProvider"] != clineLaunchProvider {
 			t.Errorf("actModeApiProvider = %v, want %s", config["actModeApiProvider"], clineLaunchProvider)
 		}
-		if config["actModeOllamaModelId"] != "kimi-k2.5:cloud" {
-			t.Errorf("actModeOllamaModelId = %v, want kimi-k2.5:cloud", config["actModeOllamaModelId"])
+		if config["actModeModelId"] != "kimi-k2.5:cloud" {
+			t.Errorf("actModeModelId = %v, want kimi-k2.5:cloud", config["actModeModelId"])
 		}
-		if config["actModeOllamaBaseUrl"] != "http://127.0.0.1:11434" {
-			t.Errorf("actModeOllamaBaseUrl = %v, want http://127.0.0.1:11434", config["actModeOllamaBaseUrl"])
+		if config["actModeBaseUrl"] != "http://127.0.0.1:11434" {
+			t.Errorf("actModeBaseUrl = %v, want http://127.0.0.1:11434", config["actModeBaseUrl"])
 		}
 		if config["planModeApiProvider"] != clineLaunchProvider {
 			t.Errorf("planModeApiProvider = %v, want %s", config["planModeApiProvider"], clineLaunchProvider)
 		}
-		if config["planModeOllamaModelId"] != "kimi-k2.5:cloud" {
-			t.Errorf("planModeOllamaModelId = %v, want kimi-k2.5:cloud", config["planModeOllamaModelId"])
+		if config["planModeModelId"] != "kimi-k2.5:cloud" {
+			t.Errorf("planModeModelId = %v, want kimi-k2.5:cloud", config["planModeModelId"])
 		}
-		if config["planModeOllamaBaseUrl"] != "http://127.0.0.1:11434" {
-			t.Errorf("planModeOllamaBaseUrl = %v, want http://127.0.0.1:11434", config["planModeOllamaBaseUrl"])
+		if config["planModeBaseUrl"] != "http://127.0.0.1:11434" {
+			t.Errorf("planModeBaseUrl = %v, want http://127.0.0.1:11434", config["planModeBaseUrl"])
 		}
-		if config["ollamaBaseUrl"] != "http://127.0.0.1:11434" {
-			t.Errorf("ollamaBaseUrl = %v, want http://127.0.0.1:11434", config["ollamaBaseUrl"])
+		if config["lycheeBaseUrl"] != "http://127.0.0.1:11434" {
+			t.Errorf("lycheeBaseUrl = %v, want http://127.0.0.1:11434", config["lycheeBaseUrl"])
 		}
 		if config["welcomeViewCompleted"] != true {
 			t.Errorf("welcomeViewCompleted = %v, want true", config["welcomeViewCompleted"])
@@ -147,7 +147,7 @@ func TestClineEdit(t *testing.T) {
 			t.Errorf("settings.model = %v, want kimi-k2.5:cloud", settings["model"])
 		}
 		if _, ok := settings["apiKey"]; ok {
-			t.Errorf("settings.apiKey = %v, want omitted for local Ollama", settings["apiKey"])
+			t.Errorf("settings.apiKey = %v, want omitted for local Lychee", settings["apiKey"])
 		}
 		if settings["baseUrl"] != "http://127.0.0.1:11434/v1" {
 			t.Errorf("settings.baseUrl = %v, want http://127.0.0.1:11434/v1", settings["baseUrl"])
@@ -190,8 +190,8 @@ func TestClineEdit(t *testing.T) {
 		if config["customSetting"] != "keep-me" {
 			t.Errorf("customSetting was not preserved")
 		}
-		if config["actModeOllamaModelId"] != "glm-5:cloud" {
-			t.Errorf("actModeOllamaModelId = %v, want glm-5:cloud", config["actModeOllamaModelId"])
+		if config["actModeModelId"] != "glm-5:cloud" {
+			t.Errorf("actModeModelId = %v, want glm-5:cloud", config["actModeModelId"])
 		}
 
 		providersConfig := readProvidersConfig()
@@ -208,7 +208,7 @@ func TestClineEdit(t *testing.T) {
 			t.Errorf("settings.timeout = %v, want 30000", settings["timeout"])
 		}
 		if _, ok := settings["apiKey"]; ok {
-			t.Errorf("settings.apiKey = %v, want omitted for local Ollama", settings["apiKey"])
+			t.Errorf("settings.apiKey = %v, want omitted for local Lychee", settings["apiKey"])
 		}
 		if settings["model"] != "glm-5:cloud" {
 			t.Errorf("settings.model = %v, want glm-5:cloud", settings["model"])
@@ -275,11 +275,11 @@ func TestClineEdit(t *testing.T) {
 		}
 
 		config := readConfig()
-		if config["actModeOllamaModelId"] != "glm-5:cloud" {
-			t.Errorf("actModeOllamaModelId = %v, want glm-5:cloud", config["actModeOllamaModelId"])
+		if config["actModeModelId"] != "glm-5:cloud" {
+			t.Errorf("actModeModelId = %v, want glm-5:cloud", config["actModeModelId"])
 		}
-		if config["planModeOllamaModelId"] != "glm-5:cloud" {
-			t.Errorf("planModeOllamaModelId = %v, want glm-5:cloud", config["planModeOllamaModelId"])
+		if config["planModeModelId"] != "glm-5:cloud" {
+			t.Errorf("planModeModelId = %v, want glm-5:cloud", config["planModeModelId"])
 		}
 	})
 
@@ -303,8 +303,8 @@ func TestClineEdit(t *testing.T) {
 		}
 
 		config := readConfig()
-		if config["actModeOllamaModelId"] != "kimi-k2.5:cloud" {
-			t.Errorf("actModeOllamaModelId = %v, want kimi-k2.5:cloud (first model)", config["actModeOllamaModelId"])
+		if config["actModeModelId"] != "kimi-k2.5:cloud" {
+			t.Errorf("actModeModelId = %v, want kimi-k2.5:cloud (first model)", config["actModeModelId"])
 		}
 	})
 }
@@ -324,11 +324,11 @@ func TestClineModels(t *testing.T) {
 		}
 	})
 
-	t.Run("returns nil when provider is not ollama", func(t *testing.T) {
+	t.Run("returns nil when provider is not lychee", func(t *testing.T) {
 		os.MkdirAll(configDir, 0o755)
 		config := map[string]any{
 			"actModeApiProvider":   "anthropic",
-			"actModeOllamaModelId": "some-model",
+			"actModeModelId": "some-model",
 		}
 		data, _ := json.Marshal(config)
 		os.WriteFile(configPath, data, 0o644)
@@ -338,11 +338,11 @@ func TestClineModels(t *testing.T) {
 		}
 	})
 
-	t.Run("returns model when ollama is configured", func(t *testing.T) {
+	t.Run("returns model when lychee is configured", func(t *testing.T) {
 		os.MkdirAll(configDir, 0o755)
 		config := map[string]any{
-			"actModeApiProvider":   "ollama",
-			"actModeOllamaModelId": "kimi-k2.5:cloud",
+			"actModeApiProvider":   "lychee",
+			"actModeModelId": "kimi-k2.5:cloud",
 		}
 		data, _ := json.Marshal(config)
 		os.WriteFile(configPath, data, 0o644)
@@ -374,13 +374,13 @@ func TestClineModels(t *testing.T) {
 		}
 	})
 
-	t.Run("ignores stale CLI provider config when ollama is not active", func(t *testing.T) {
+	t.Run("ignores stale CLI provider config when lychee is not active", func(t *testing.T) {
 		os.RemoveAll(filepath.Join(tmpDir, ".cline"))
 		os.MkdirAll(configDir, 0o755)
 		os.MkdirAll(filepath.Dir(providersPath), 0o755)
 		legacyConfig := map[string]any{
 			"actModeApiProvider":   "anthropic",
-			"actModeOllamaModelId": "legacy-ollama-model",
+			"actModeModelId": "legacy-lychee-model",
 		}
 		data, _ := json.Marshal(legacyConfig)
 		os.WriteFile(configPath, data, 0o644)
@@ -389,7 +389,7 @@ func TestClineModels(t *testing.T) {
 			"providers": map[string]any{
 				clineLaunchProvider: map[string]any{
 					"settings": map[string]any{
-						"model": "stale-ollama-model",
+						"model": "stale-lychee-model",
 					},
 				},
 			},

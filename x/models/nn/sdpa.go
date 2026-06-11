@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"math"
 
-	"github.com/ollama/ollama/x/mlxrunner/batch"
-	"github.com/ollama/ollama/x/mlxrunner/mlx"
+	"github.com/lychee/lychee/x/mlxrunner/batch"
+	"github.com/lychee/lychee/x/mlxrunner/mlx"
 )
 
 // SDPAOption configures a call to ScaledDotProductAttention.

@@ -14,7 +14,7 @@ import (
 	"testing"
 
 	"github.com/d4l3k/go-bfloat16"
-	st "github.com/ollama/ollama/x/safetensors"
+	st "github.com/lychee/lychee/x/safetensors"
 )
 
 func TestIsTensorModelDir(t *testing.T) {
@@ -388,7 +388,7 @@ func TestCreateSafetensorsModel(t *testing.T) {
 		layer := LayerInfo{
 			Digest:    "sha256:tensor_" + name,
 			Size:      int64(len(data)),
-			MediaType: "application/vnd.ollama.image.tensor",
+			MediaType: "application/vnd.lychee.image.tensor",
 			Name:      name,
 		}
 		createdLayers = append(createdLayers, layer)
@@ -485,7 +485,7 @@ func TestCreateDraftSafetensorsLayersPrefixesTensorsAndConfigs(t *testing.T) {
 		if quantize != "" {
 			t.Fatalf("draft quantize = %q, want empty", quantize)
 		}
-		return []LayerInfo{{Digest: "sha256:tensor_" + name, Size: int64(len(data)), MediaType: "application/vnd.ollama.image.tensor", Name: name}}, nil
+		return []LayerInfo{{Digest: "sha256:tensor_" + name, Size: int64(len(data)), MediaType: "application/vnd.lychee.image.tensor", Name: name}}, nil
 	}
 
 	layers, err := CreateDraftSafetensorsLayers(dir, "draft.", "draft", "", createLayer, createTensorLayer, func(string) {})
@@ -498,7 +498,7 @@ func TestCreateDraftSafetensorsLayersPrefixesTensorsAndConfigs(t *testing.T) {
 	}
 	var hasDraftConfig bool
 	for _, layer := range layers {
-		if layer.Name == "draft/config.json" && layer.MediaType == "application/vnd.ollama.image.json" {
+		if layer.Name == "draft/config.json" && layer.MediaType == "application/vnd.lychee.image.json" {
 			hasDraftConfig = true
 		}
 	}
@@ -535,7 +535,7 @@ func TestCreateDraftSafetensorsLayersQuantizesEligibleTensors(t *testing.T) {
 			return nil, err
 		}
 		quantizeByName[name] = quantize
-		return []LayerInfo{{Digest: "sha256:tensor_" + name, Size: int64(len(data)), MediaType: "application/vnd.ollama.image.tensor", Name: name}}, nil
+		return []LayerInfo{{Digest: "sha256:tensor_" + name, Size: int64(len(data)), MediaType: "application/vnd.lychee.image.tensor", Name: name}}, nil
 	}
 
 	if _, err := CreateDraftSafetensorsLayers(dir, "draft.", "draft", "MXFP8", createLayer, createTensorLayer, func(string) {}); err != nil {
@@ -704,7 +704,7 @@ func TestCreateSafetensorsModel_PacksPrequantizedTensorTriplets(t *testing.T) {
 		if err != nil {
 			return LayerInfo{}, err
 		}
-		if mediaType == "application/vnd.ollama.image.tensor" && name == "linear.weight" {
+		if mediaType == "application/vnd.lychee.image.tensor" && name == "linear.weight" {
 			var headerSize uint64
 			if err := binary.Read(bytes.NewReader(data[:8]), binary.LittleEndian, &headerSize); err != nil {
 				return LayerInfo{}, err
@@ -722,7 +722,7 @@ func TestCreateSafetensorsModel_PacksPrequantizedTensorTriplets(t *testing.T) {
 			return nil, err
 		}
 		createTensorLayerNames = append(createTensorLayerNames, name)
-		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error {
@@ -812,7 +812,7 @@ func TestCreateSafetensorsModel_HFFP8AutoConvertsToMXFP8(t *testing.T) {
 		}
 		quantizeByName[name] = quantize
 		headerNamesByName[name] = readSafetensorsHeaderNames(t, data)
-		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
@@ -907,7 +907,7 @@ func TestCreateSafetensorsModel_CompressedTensorsFP8WeightScale(t *testing.T) {
 		}
 		quantizeByName[name] = quantize
 		headerNamesByName[name] = readSafetensorsHeaderNames(t, data)
-		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
 
@@ -976,7 +976,7 @@ func TestCreateSafetensorsModel_HFFP8SourceCanConvertToNVFP4(t *testing.T) {
 		}
 		quantizeByName[name] = quantize
 		headerNamesByName[name] = readSafetensorsHeaderNames(t, data)
-		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
 
@@ -1121,7 +1121,7 @@ func TestCreateSafetensorsModel_PackedNVFP4PreservesSourceLayout(t *testing.T) {
 		if err != nil {
 			return LayerInfo{}, err
 		}
-		if mediaType == "application/vnd.ollama.image.tensor" {
+		if mediaType == "application/vnd.lychee.image.tensor" {
 			if len(data) < 8 {
 				return LayerInfo{}, io.ErrUnexpectedEOF
 			}
@@ -1143,7 +1143,7 @@ func TestCreateSafetensorsModel_PackedNVFP4PreservesSourceLayout(t *testing.T) {
 			return nil, err
 		}
 		tensorLayerNames = append(tensorLayerNames, name)
-		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
 	progressFn := func(status string) { statusMessages = append(statusMessages, status) }
@@ -1241,7 +1241,7 @@ func TestCreateSafetensorsModel_PackedNVFP4CrossShardCompanions(t *testing.T) {
 		if err != nil {
 			return LayerInfo{}, err
 		}
-		if mediaType == "application/vnd.ollama.image.tensor" {
+		if mediaType == "application/vnd.lychee.image.tensor" {
 			var headerSize uint64
 			if err := binary.Read(bytes.NewReader(data[:8]), binary.LittleEndian, &headerSize); err != nil {
 				return LayerInfo{}, err
@@ -1259,7 +1259,7 @@ func TestCreateSafetensorsModel_PackedNVFP4CrossShardCompanions(t *testing.T) {
 			return nil, err
 		}
 		tensorLayerNames = append(tensorLayerNames, name)
-		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
 
@@ -1323,7 +1323,7 @@ func TestCreateSafetensorsModel_PackedNVFP4StacksExperts(t *testing.T) {
 		if err != nil {
 			return LayerInfo{}, err
 		}
-		if mediaType == "application/vnd.ollama.image.tensor" {
+		if mediaType == "application/vnd.lychee.image.tensor" {
 			var headerSize uint64
 			if err := binary.Read(bytes.NewReader(data[:8]), binary.LittleEndian, &headerSize); err != nil {
 				return LayerInfo{}, err
@@ -1341,7 +1341,7 @@ func TestCreateSafetensorsModel_PackedNVFP4StacksExperts(t *testing.T) {
 		if _, err := io.ReadAll(r); err != nil {
 			return nil, err
 		}
-		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
 	packedCreator := func(groupName string, tensors []PackedTensorInput) (LayerInfo, error) {
@@ -1444,13 +1444,13 @@ func TestCreateSafetensorsModel_HFFP8PacksExperts(t *testing.T) {
 		if _, err := io.ReadAll(r); err != nil {
 			return nil, err
 		}
-		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 
 	createPackedLayer := func(groupName string, tensors []PackedTensorInput) (LayerInfo, error) {
 		packedLayerNames = append(packedLayerNames, groupName)
 		packedLayerTensors = append(packedLayerTensors, tensors)
-		return LayerInfo{Name: groupName, Digest: "sha256:packed_" + groupName, MediaType: "application/vnd.ollama.image.tensor"}, nil
+		return LayerInfo{Name: groupName, Digest: "sha256:packed_" + groupName, MediaType: "application/vnd.lychee.image.tensor"}, nil
 	}
 
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
@@ -1559,7 +1559,7 @@ func TestCreateSafetensorsModel_Qwen35Transforms(t *testing.T) {
 			quantize: quantize,
 			raw:      readSingleTensorRaw(t, data),
 		}
-		return []LayerInfo{{Name: name, Digest: "sha256:" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error {
@@ -1701,7 +1701,7 @@ func TestCreateSafetensorsModel_Qwen35DirectNonAffineKeepsSensitiveWeightsBF16(t
 			createTensorLayer := func(r io.Reader, name, dtype string, shape []int32, quantizeType string) ([]LayerInfo, error) {
 				_, _ = io.ReadAll(r)
 				tensorCalls[name] = tensorCall{quantize: quantizeType}
-				return []LayerInfo{{Name: name, Digest: "sha256:" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+				return []LayerInfo{{Name: name, Digest: "sha256:" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 			}
 
 			createPackedLayer := func(groupName string, tensors []PackedTensorInput) (LayerInfo, error) {
@@ -1713,7 +1713,7 @@ func TestCreateSafetensorsModel_Qwen35DirectNonAffineKeepsSensitiveWeightsBF16(t
 					})
 				}
 				packedCalls[groupName] = group
-				return LayerInfo{Name: groupName, Digest: "sha256:" + groupName, MediaType: "application/vnd.ollama.image.tensor"}, nil
+				return LayerInfo{Name: groupName, Digest: "sha256:" + groupName, MediaType: "application/vnd.lychee.image.tensor"}, nil
 			}
 
 			writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error {
@@ -1763,22 +1763,22 @@ func TestResolveManifestPath(t *testing.T) {
 		{
 			name:      "simple model name",
 			modelName: "llama2",
-			wantParts: []string{"registry.ollama.ai", "library", "llama2", "latest"},
+			wantParts: []string{"registry.lychee.ai", "library", "llama2", "latest"},
 		},
 		{
 			name:      "model name with tag",
 			modelName: "llama2:7b",
-			wantParts: []string{"registry.ollama.ai", "library", "llama2", "7b"},
+			wantParts: []string{"registry.lychee.ai", "library", "llama2", "7b"},
 		},
 		{
 			name:      "model name with namespace",
 			modelName: "myuser/mymodel",
-			wantParts: []string{"registry.ollama.ai", "myuser", "mymodel", "latest"},
+			wantParts: []string{"registry.lychee.ai", "myuser", "mymodel", "latest"},
 		},
 		{
 			name:      "model name with namespace and tag",
 			modelName: "myuser/mymodel:v1",
-			wantParts: []string{"registry.ollama.ai", "myuser", "mymodel", "v1"},
+			wantParts: []string{"registry.lychee.ai", "myuser", "mymodel", "v1"},
 		},
 		{
 			name:      "fully qualified model name",
@@ -1804,7 +1804,7 @@ func TestLayerInfo(t *testing.T) {
 	layer := LayerInfo{
 		Digest:    "sha256:abc123",
 		Size:      1024,
-		MediaType: "application/vnd.ollama.image.tensor",
+		MediaType: "application/vnd.lychee.image.tensor",
 		Name:      "model.weight",
 	}
 
@@ -1814,8 +1814,8 @@ func TestLayerInfo(t *testing.T) {
 	if layer.Size != 1024 {
 		t.Errorf("Size = %d, want %d", layer.Size, 1024)
 	}
-	if layer.MediaType != "application/vnd.ollama.image.tensor" {
-		t.Errorf("MediaType = %q, want %q", layer.MediaType, "application/vnd.ollama.image.tensor")
+	if layer.MediaType != "application/vnd.lychee.image.tensor" {
+		t.Errorf("MediaType = %q, want %q", layer.MediaType, "application/vnd.lychee.image.tensor")
 	}
 	if layer.Name != "model.weight" {
 		t.Errorf("Name = %q, want %q", layer.Name, "model.weight")
@@ -1847,7 +1847,7 @@ func TestManifest(t *testing.T) {
 		},
 		Layers: []ManifestLayer{
 			{
-				MediaType: "application/vnd.ollama.image.tensor",
+				MediaType: "application/vnd.lychee.image.tensor",
 				Digest:    "sha256:layer1",
 				Size:      1000,
 				Name:      "weight.bin",
@@ -2237,7 +2237,7 @@ func TestCreateSafetensorsModel_Qwen35NVFP4PacksSwitchMLPExperts(t *testing.T) {
 	createTensorLayer := func(r io.Reader, name, dtype string, shape []int32, quantize string) ([]LayerInfo, error) {
 		_, _ = io.ReadAll(r)
 		tensorCalls[name] = tensorCall{quantize: quantize}
-		return []LayerInfo{{Name: name, Digest: "sha256:" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+		return []LayerInfo{{Name: name, Digest: "sha256:" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 	}
 
 	createPackedLayer := func(groupName string, tensors []PackedTensorInput) (LayerInfo, error) {
@@ -2251,7 +2251,7 @@ func TestCreateSafetensorsModel_Qwen35NVFP4PacksSwitchMLPExperts(t *testing.T) {
 			})
 		}
 		packedCalls[groupName] = group
-		return LayerInfo{Name: groupName, Digest: "sha256:" + groupName, MediaType: "application/vnd.ollama.image.tensor"}, nil
+		return LayerInfo{Name: groupName, Digest: "sha256:" + groupName, MediaType: "application/vnd.lychee.image.tensor"}, nil
 	}
 
 	writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error {

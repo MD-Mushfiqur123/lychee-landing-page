@@ -16,7 +16,7 @@ const LAUNCH_COMMANDS: LaunchCommand[] = [
   {
     id: "claude",
     name: "Claude Code",
-    command: "ollama launch claude",
+    command: "lychee launch claude",
     description: "Anthropic's coding tool with subagents",
     icon: "/launch-icons/claude-code.svg",
     iconClassName: "h-7 w-7",
@@ -24,7 +24,7 @@ const LAUNCH_COMMANDS: LaunchCommand[] = [
   {
     id: "codex-app",
     name: "Codex App",
-    command: "ollama launch codex-app",
+    command: "lychee launch codex-app",
     description: "An AI agent you can delegate real work to, by OpenAI",
     icon: "/launch-icons/codex-app.png",
     iconClassName: "h-full w-full",
@@ -32,7 +32,7 @@ const LAUNCH_COMMANDS: LaunchCommand[] = [
   {
     id: "hermes",
     name: "Hermes Agent",
-    command: "ollama launch hermes",
+    command: "lychee launch hermes",
     description: "Self-improving AI agent built by Nous Research",
     icon: "/launch-icons/hermes-agent.svg",
     iconClassName: "h-7 w-7",
@@ -40,14 +40,14 @@ const LAUNCH_COMMANDS: LaunchCommand[] = [
   {
     id: "openclaw",
     name: "OpenClaw",
-    command: "ollama launch openclaw",
+    command: "lychee launch openclaw",
     description: "Personal AI with 100+ skills",
     icon: "/launch-icons/openclaw.svg",
   },
   {
     id: "opencode",
     name: "OpenCode",
-    command: "ollama launch opencode",
+    command: "lychee launch opencode",
     description: "Anomaly's open-source coding agent",
     icon: "/launch-icons/opencode.svg",
     iconClassName: "h-7 w-7 rounded",
@@ -55,7 +55,7 @@ const LAUNCH_COMMANDS: LaunchCommand[] = [
   {
     id: "codex",
     name: "Codex",
-    command: "ollama launch codex",
+    command: "lychee launch codex",
     description: "OpenAI's open-source coding agent",
     icon: "/launch-icons/codex.svg",
     darkIcon: "/launch-icons/codex-dark.svg",
@@ -64,7 +64,7 @@ const LAUNCH_COMMANDS: LaunchCommand[] = [
   {
     id: "copilot",
     name: "Copilot CLI",
-    command: "ollama launch copilot",
+    command: "lychee launch copilot",
     description: "GitHub's AI coding agent for the terminal",
     icon: "/launch-icons/copilot.svg",
     darkIcon: "/launch-icons/copilot-dark.svg",
@@ -73,14 +73,14 @@ const LAUNCH_COMMANDS: LaunchCommand[] = [
   {
     id: "droid",
     name: "Droid",
-    command: "ollama launch droid",
+    command: "lychee launch droid",
     description: "Factory's coding agent across terminal and IDEs",
     icon: "/launch-icons/droid.svg",
   },
   {
     id: "pi",
     name: "Pi",
-    command: "ollama launch pi",
+    command: "lychee launch pi",
     description: "Minimal AI agent toolkit with plugin support",
     icon: "/launch-icons/pi.svg",
     darkIcon: "/launch-icons/pi-dark.svg",

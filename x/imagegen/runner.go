@@ -13,9 +13,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/x/imagegen/mlx"
-	"github.com/ollama/ollama/x/internal/mlxthread"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/x/imagegen/mlx"
+	"github.com/lychee/lychee/x/internal/mlxthread"
 )
 
 // Execute is the entry point for the unified MLX runner subprocess.

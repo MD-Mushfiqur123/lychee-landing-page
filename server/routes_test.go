@@ -24,21 +24,21 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-cmp/cmp"
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/openai"
-	"github.com/ollama/ollama/server/internal/client/ollama"
-	"github.com/ollama/ollama/types/model"
-	"github.com/ollama/ollama/version"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/openai"
+	"github.com/lychee/lychee/server/internal/client/lychee"
+	"github.com/lychee/lychee/types/model"
+	"github.com/lychee/lychee/version"
 )
 
 func createTestFile(t *testing.T, name string) (string, string) {
 	t.Helper()
 
-	modelDir := os.Getenv("OLLAMA_MODELS")
+	modelDir := os.Getenv("LYCHEE_MODELS")
 	if modelDir == "" {
-		t.Fatalf("OLLAMA_MODELS not specified")
+		t.Fatalf("LYCHEE_MODELS not specified")
 	}
 
 	f, err := os.CreateTemp(t.TempDir(), name)
@@ -94,7 +94,7 @@ var panicOnRoundTrip = &http.Client{Transport: &panicTransport{}}
 
 func TestRoutes(t *testing.T) {
 	modelsDir := t.TempDir()
-	t.Setenv("OLLAMA_MODELS", modelsDir)
+	t.Setenv("LYCHEE_MODELS", modelsDir)
 
 	type testCase struct {
 		Name     string
@@ -113,7 +113,7 @@ func TestRoutes(t *testing.T) {
 	createTestModel := func(t *testing.T, name string) {
 		t.Helper()
 
-		_, digest := createTestFile(t, "ollama-model")
+		_, digest := createTestFile(t, "lychee-model")
 
 		fn := func(resp api.ProgressResponse) {
 			t.Logf("Status: %s", resp.Status)
@@ -350,7 +350,7 @@ func TestRoutes(t *testing.T) {
 			Method: http.MethodPost,
 			Path:   "/api/create",
 			Setup: func(t *testing.T, req *http.Request) {
-				_, digest := createTestFile(t, "ollama-model")
+				_, digest := createTestFile(t, "lychee-model")
 				stream := false
 				createReq := api.CreateRequest{
 					Name:   "t-bone",
@@ -506,13 +506,13 @@ func TestRoutes(t *testing.T) {
 		},
 	}
 
-	rc := &ollama.Registry{
+	rc := &lychee.Registry{
 		// This is a temporary measure to allow us to move forward,
-		// surfacing any code contacting ollama.com we do not intended
+		// surfacing any code contacting lychee.com we do not intended
 		// to.
 		//
 		// Currently, this only handles DELETE /api/delete, which
-		// should not make any contact with the ollama.com registry, so
+		// should not make any contact with the lychee.com registry, so
 		// be clear about that.
 		//
 		// Tests that do need to contact the registry here, will be
@@ -555,7 +555,7 @@ func TestRoutes(t *testing.T) {
 }
 
 func TestGetModelInfo_SafetensorsUsesStoredFileType(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	cfgData, err := json.Marshal(model.ConfigV2{
 		ModelFormat:  "safetensors",
@@ -587,13 +587,13 @@ func TestGetModelInfo_SafetensorsUsesStoredFileType(t *testing.T) {
 }
 
 func TestGetModelInfoRepairsUnknownGGUFFileType(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	_, digest := createBinFile(t, ggml.KV{
 		"general.architecture": "llama",
 		"general.file_type":    uint32(ggml.FileTypeQ4_K_M),
 	}, nil)
-	modelLayer, err := manifest.NewLayerFromLayer(digest, "application/vnd.ollama.image.model", "")
+	modelLayer, err := manifest.NewLayerFromLayer(digest, "application/vnd.lychee.image.model", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -623,7 +623,7 @@ func TestGetModelInfoRepairsUnknownGGUFFileType(t *testing.T) {
 }
 
 func TestGetModelInfo_SafetensorsModelfileUsesShortName(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	cfgData, err := json.Marshal(model.ConfigV2{
 		ModelFormat:  "safetensors",
@@ -670,7 +670,7 @@ func casingShuffle(s string) string {
 }
 
 func TestManifestCaseSensitivity(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	r := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -700,7 +700,7 @@ func TestManifestCaseSensitivity(t *testing.T) {
 	checkManifestList := func() {
 		t.Helper()
 
-		mandir := filepath.Join(os.Getenv("OLLAMA_MODELS"), "manifests/")
+		mandir := filepath.Join(os.Getenv("LYCHEE_MODELS"), "manifests/")
 		var entries []string
 		t.Logf("dir entries:")
 		fsys := os.DirFS(mandir)
@@ -797,7 +797,7 @@ func TestManifestCaseSensitivity(t *testing.T) {
 }
 
 func TestShow(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	var s Server
 
@@ -832,8 +832,8 @@ func TestShow(t *testing.T) {
 }
 
 func TestShowTemplateUsesSelectedRuntimeTemplate(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
-	t.Setenv("OLLAMA_GO_TEMPLATE", "")
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_GO_TEMPLATE", "")
 
 	chatTemplate := "{% if tools %}{{ tools }}{% endif %}{% set content = (content.split('</think>')|last) %}"
 	goTemplate := "{{ range .Messages }}{{ if .Thinking }}<think>{{ .Thinking }}</think>{{ end }}{{ .Content }}{{ end }}"
@@ -859,14 +859,14 @@ func TestShowTemplateUsesSelectedRuntimeTemplate(t *testing.T) {
 }
 
 func TestShowCopilotUserAgentOverwritesExistingBasename(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	var s Server
 
 	w := createRequest(t, s.CreateHandler, api.CreateRequest{
 		Model:      "show-model",
 		From:       "bob",
-		RemoteHost: "https://ollama.com",
+		RemoteHost: "https://lychee.com",
 		Info: map[string]any{
 			"model_family": "gptoss",
 			"base_name":    "upstream-base-name",
@@ -920,14 +920,14 @@ func TestShowCopilotUserAgentOverwritesExistingBasename(t *testing.T) {
 }
 
 func TestShowCopilotUserAgentSetsBasenameWhenModelInfoIsEmpty(t *testing.T) {
-	t.Setenv("OLLAMA_MODELS", t.TempDir())
+	t.Setenv("LYCHEE_MODELS", t.TempDir())
 
 	var s Server
 
 	w := createRequest(t, s.CreateHandler, api.CreateRequest{
 		Model:      "show-remote",
 		From:       "bob",
-		RemoteHost: "https://ollama.com",
+		RemoteHost: "https://lychee.com",
 		Stream:     &stream,
 	})
 	if w.Code != http.StatusOK {
@@ -1107,7 +1107,7 @@ func TestFilterThinkTags(t *testing.T) {
 				{Role: "user", Content: "What is the answer?"},
 			},
 			model: &Model{
-				Name:      "registry.ollama.ai/library/deepseek-r1:latest",
+				Name:      "registry.lychee.ai/library/deepseek-r1:latest",
 				ShortName: "deepseek-r1:7b",
 				Config:    model.ConfigV2{},
 			},

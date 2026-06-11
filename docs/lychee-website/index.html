@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lychee – Run AI Models Locally</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #888;
+      --accent: #e84393;
+      --accent2: #ff6db3;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --blue: #60a5fa;
+      --purple: #a78bfa;
+      --radius: 12px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-logo svg { width: 36px; height: 36px; }
+
+    .nav-logo span {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--text);
+      color: var(--bg) !important;
+      padding: 7px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem !important;
+      transition: opacity 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 2rem 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,67,147,0.15) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -60%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(232,67,147,0.1);
+      border: 1px solid rgba(232,67,147,0.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      color: var(--accent2);
+      margin-bottom: 2rem;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* Lychee 3D logo */
+    .hero-logo {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      filter: drop-shadow(0 0 40px rgba(232,67,147,0.4));
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 800;
+      letter-spacing: -3px;
+      line-height: 1;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .btn-primary {
+      background: var(--text);
+      color: var(--bg);
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,255,255,0.15); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover { border-color: #555; background: rgba(255,255,255,0.05); }
+
+    /* ── TERMINAL ── */
+    .terminal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: left;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .terminal-bar {
+      background: var(--bg3);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .terminal-body {
+      padding: 20px;
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      line-height: 1.8;
+    }
+
+    .t-prompt { color: var(--green); }
+    .t-cmd { color: var(--text); }
+    .t-output { color: var(--muted); }
+    .t-accent { color: var(--accent2); }
+    .t-cursor {
+      display: inline-block;
+      width: 9px; height: 1.1em;
+      background: var(--text);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      margin-left: 2px;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ── STATS ── */
+    .stats {
+      padding: 4rem 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+    /* ── SECTIONS ── */
+    section { padding: 6rem 2rem; }
+
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: #444; transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+    }
+    .feature-icon i { width:22px;height:22px; }
+    [data-lucide] { width:22px;height:22px;stroke-width:2; }
+
+    .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feature-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+
+    /* ── MODELS ── */
+    .models-section { background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 50%, var(--bg) 100%); }
+
+    .models-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+
+    .model-chip {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: block;
+    }
+    .model-chip:hover { border-color: var(--accent); background: rgba(232,67,147,0.05); }
+
+    .model-chip-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+    .model-chip-meta { color: var(--muted); font-size: 0.75rem; }
+    .model-chip-tag {
+      display: inline-block;
+      background: rgba(96,165,250,0.15);
+      color: var(--blue);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 100px;
+      margin-top: 6px;
+      letter-spacing: 0.3px;
+    }
+    .tag-code { background: rgba(74,222,128,0.12); color: var(--green); }
+    .tag-vision { background: rgba(167,139,250,0.12); color: var(--purple); }
+    .tag-reasoning { background: rgba(250,204,21,0.12); color: var(--yellow); }
+
+    .models-count {
+      text-align: center;
+      margin-top: 2.5rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .models-count a { color: var(--accent2); text-decoration: none; }
+    .models-count a:hover { text-decoration: underline; }
+
+    /* ── CODE TABS ── */
+    .code-section { display: flex; gap: 4rem; align-items: flex-start; flex-wrap: wrap; }
+    .code-text { flex: 1; min-width: 280px; }
+    .code-block-wrap { flex: 1; min-width: 320px; }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      border-radius: 0;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: var(--mono);
+      letter-spacing: 0.3px;
+    }
+    .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .tab:hover:not(.active) { color: #aaa; }
+
+    .code-panel {
+      display: none;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      overflow: hidden;
+    }
+    .code-panel.active { display: block; }
+
+    pre {
+      padding: 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+
+    .kw { color: #ff79c6; }
+    .fn { color: #50fa7b; }
+    .str { color: #f1fa8c; }
+    .cm { color: #6272a4; }
+    .var { color: #bd93f9; }
+    .num { color: #ffb86c; }
+    .op { color: #ff79c6; }
+    .py-kw { color: #ff79c6; }
+    .py-fn { color: #50fa7b; }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      margin-top: 4rem;
+      position: relative;
+    }
+
+    .step {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .step-num {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #ff6db3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 auto 1.2rem;
+      box-shadow: 0 4px 20px rgba(232,67,147,0.4);
+    }
+
+    .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .step p { color: var(--muted); font-size: 0.875rem; line-height: 1.6; }
+
+    .step-cmd {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      color: var(--green);
+      margin-top: 0.75rem;
+      display: inline-block;
+    }
+
+    /* ── INTEGRATIONS ── */
+    .integrations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+
+    .integration-chip {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: default;
+    }
+    .integration-chip:hover { border-color: #555; background: var(--bg3); transform: translateY(-2px); }
+    .integration-chip .int-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .integration-chip .int-name { font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+
+    /* ── CTA ── */
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(232,67,147,0.08) 0%, transparent 60%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cta-section h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 1rem;
+    }
+    .cta-section p { color: var(--muted); font-size: 1.1rem; margin-bottom: 2.5rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy { color: var(--muted); font-size: 0.8rem; }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .stats { gap: 2rem; }
+      footer { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+
+    .bench-bar-wrap { display:flex;flex-direction:column;gap:1.2rem;margin-top:2rem; }
+    .bench-row { display:grid;grid-template-columns:140px 1fr 50px;align-items:center;gap:1rem; }
+    .bench-label { font-size:.85rem;color:var(--muted);text-align:right; }
+    .bench-bar-bg { background:var(--bg3);border-radius:100px;height:10px;overflow:hidden; }
+    .bench-bar { height:100%;border-radius:100px;transition:width 1.5s cubic-bezier(.22,1,.36,1); }
+    .bench-score { font-size:.8rem;font-weight:700;font-family:var(--mono); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="nav-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="nav-bump"><feGaussianBlur stdDeviation="0.5"/></filter>
+        <radialGradient id="nav-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF8DC7"/><stop offset="40%" stop-color="#E84393"/><stop offset="78%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient>
+        <radialGradient id="nav-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#C93578"/><stop offset="55%" stop-color="#A01E5F"/><stop offset="100%" stop-color="#6A1238"/></radialGradient>
+        <radialGradient id="nav-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#901850"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient>
+        <radialGradient id="nav-spec" cx="34%" cy="27%" r="28%"><stop offset="0%" stop-color="rgba(255,255,255,0.72)"/><stop offset="65%" stop-color="rgba(255,255,255,0.12)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+        <linearGradient id="nav-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="55%" stop-color="#4CAF35"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient>
+        <linearGradient id="nav-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient>
+        <radialGradient id="nav-bglow" cx="50%" cy="55%" r="50%"><stop offset="0%" stop-color="rgba(232,67,147,0.2)"/><stop offset="100%" stop-color="rgba(232,67,147,0)"/></radialGradient>
+        <clipPath id="nav-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath>
+      </defs>
+      <ellipse cx="100" cy="132" rx="60" ry="14" fill="rgba(0,0,0,0.3)"/>
+      <ellipse cx="100" cy="108" rx="78" ry="70" fill="url(#nav-bglow)"/>
+      <ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#nav-top)" filter="url(#nav-glow)"/>
+      <path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#nav-top)" opacity="0.88"/>
+      <path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#nav-right)" opacity="0.92"/>
+      <path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#nav-right)" opacity="0.82"/>
+      <path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#nav-bot)" opacity="0.88"/>
+      <path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#nav-bot)" opacity="0.78"/>
+      <g opacity="0.5" clip-path="url(#nav-clip)">
+        <circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#nav-bump)"/><circle cx="88" cy="72" r="4" fill="#FF85BB" filter="url(#nav-bump)"/><circle cx="104" cy="70" r="4.5" fill="#FF6DB3" filter="url(#nav-bump)"/><circle cx="120" cy="74" r="4" fill="#D44A8A" filter="url(#nav-bump)"/>
+        <circle cx="60" cy="92" r="4" fill="#E84393" filter="url(#nav-bump)"/><circle cx="76" cy="85" r="5" fill="#FF6DB3" filter="url(#nav-bump)"/><circle cx="92" cy="81" r="4.5" fill="#FF85BB" filter="url(#nav-bump)"/><circle cx="108" cy="80" r="5" fill="#FF6DB3" filter="url(#nav-bump)"/><circle cx="124" cy="84" r="4.5" fill="#D44A8A" filter="url(#nav-bump)"/><circle cx="138" cy="91" r="4" fill="#B83070" filter="url(#nav-bump)"/>
+        <circle cx="56" cy="104" r="4.5" fill="#E84393" filter="url(#nav-bump)"/><circle cx="70" cy="97" r="5" fill="#FF6DB3" filter="url(#nav-bump)"/><circle cx="86" cy="92" r="4.5" fill="#FF85BB" filter="url(#nav-bump)"/><circle cx="100" cy="90" r="5" fill="#FF6DB3" filter="url(#nav-bump)"/><circle cx="114" cy="92" r="4.5" fill="#E84393" filter="url(#nav-bump)"/><circle cx="128" cy="97" r="5" fill="#C94080" filter="url(#nav-bump)"/><circle cx="142" cy="105" r="4.5" fill="#A02868" filter="url(#nav-bump)"/>
+        <circle cx="58" cy="117" r="4" fill="#D44A8A" filter="url(#nav-bump)"/><circle cx="72" cy="110" r="4.5" fill="#E84393" filter="url(#nav-bump)"/><circle cx="86" cy="105" r="5" fill="#FF6DB3" filter="url(#nav-bump)"/><circle cx="100" cy="103" r="5" fill="#FF85BB" filter="url(#nav-bump)"/><circle cx="114" cy="105" r="5" fill="#E84393" filter="url(#nav-bump)"/><circle cx="128" cy="110" r="4.5" fill="#C94080" filter="url(#nav-bump)"/><circle cx="140" cy="118" r="4" fill="#902060" filter="url(#nav-bump)"/>
+        <circle cx="68" cy="129" r="4" fill="#C41E6B" filter="url(#nav-bump)"/><circle cx="82" cy="123" r="4.5" fill="#D44A8A" filter="url(#nav-bump)"/><circle cx="96" cy="120" r="5" fill="#E84393" filter="url(#nav-bump)"/><circle cx="110" cy="120" r="4.5" fill="#C94080" filter="url(#nav-bump)"/><circle cx="124" cy="124" r="4" fill="#A02860" filter="url(#nav-bump)"/>
+      </g>
+      <ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#nav-spec)" opacity="0.88"/>
+      <ellipse cx="77" cy="79" rx="7" ry="5" fill="white" opacity="0.28"/>
+      <ellipse cx="75" cy="77" rx="3.5" ry="2.5" fill="white" opacity="0.55"/>
+      <ellipse cx="100" cy="108" rx="58" ry="52" fill="none" stroke="#5A0E2E" stroke-width="2.5" opacity="0.35"/>
+      <path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#nav-stem)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <path d="M100,63 Q100,52 100,44 Q100,36 101,32" stroke="url(#nav-stem)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <ellipse cx="99" cy="64" rx="5" ry="3.5" fill="#3D7A25"/>
+      <ellipse cx="99" cy="63" rx="3.5" ry="2" fill="#5A9A35"/>
+      <path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#nav-leaf)"/>
+      <path d="M97,50 Q82,38 65,30" stroke="#8FE87A" stroke-width="1" fill="none" opacity="0.6"/>
+      <path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#nav-leaf)" opacity="0.88"/>
+      <path d="M103,48 Q118,36 137,26" stroke="#8FE87A" stroke-width="1" fill="none" opacity="0.55"/>
+      <path d="M99,44 Q92,28 86,18 Q94,24 100,36 Q102,40 100,46 Z" fill="#3D9A28" opacity="0.72"/>
+    </svg>
+    <span>Lychee</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="models.html">Models</a></li>
+    <li><a href="docs.html">Docs</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="#integrations">Integrations</a></li>
+    <li><a href="https://github.com/lychee/lychee" target="_blank">GitHub</a></li>
+    <li><a href="https://github.com/lychee/lychee" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:.8rem;color:var(--muted);text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='#555';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'"><img src="https://cdn.simpleicons.org/github/888888" width="14" height="14" alt=""> Star</a></li>
+    <li><a href="download.html" class="nav-cta">Download</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+
+  <div class="hero-badge">
+    <span></span>
+    731+ Models Available &nbsp;·&nbsp; No API Key Needed
+  </div>
+
+  <svg class="hero-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="hero-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="hero-bump"><feGaussianBlur stdDeviation="0.6"/></filter>
+      <radialGradient id="hero-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF9FD0"/><stop offset="35%" stop-color="#FF6DB3"/><stop offset="65%" stop-color="#E84393"/><stop offset="85%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient>
+      <radialGradient id="hero-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#D13580"/><stop offset="50%" stop-color="#B01E5F"/><stop offset="100%" stop-color="#7A1240"/></radialGradient>
+      <radialGradient id="hero-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#9B1E50"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient>
+      <radialGradient id="hero-spec" cx="34%" cy="27%" r="30%"><stop offset="0%" stop-color="rgba(255,255,255,0.75)"/><stop offset="60%" stop-color="rgba(255,255,255,0.15)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+      <radialGradient id="hero-spec2" cx="65%" cy="65%" r="25%"><stop offset="0%" stop-color="rgba(255,255,255,0.12)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+      <linearGradient id="hero-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="50%" stop-color="#4CAF35"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient>
+      <linearGradient id="hero-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient>
+      <radialGradient id="hero-bglow" cx="50%" cy="58%" r="52%"><stop offset="0%" stop-color="rgba(232,67,147,0.22)"/><stop offset="100%" stop-color="rgba(232,67,147,0)"/></radialGradient>
+      <radialGradient id="hero-shadow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(0,0,0,0.45)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
+      <clipPath id="hero-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath>
+    </defs>
+    <ellipse cx="100" cy="138" rx="66" ry="16" fill="url(#hero-shadow)" opacity="0.65"/>
+    <ellipse cx="100" cy="108" rx="84" ry="75" fill="url(#hero-bglow)"/>
+    <ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#hero-top)" filter="url(#hero-glow)"/>
+    <path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#hero-top)" opacity="0.9"/>
+    <path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#hero-right)" opacity="0.94"/>
+    <path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#hero-right)" opacity="0.84"/>
+    <path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#hero-bot)" opacity="0.9"/>
+    <path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#hero-bot)" opacity="0.8"/>
+    <g opacity="0.55" clip-path="url(#hero-clip)">
+      <circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#hero-bump)"/><circle cx="88" cy="72" r="4" fill="#FF85BB" filter="url(#hero-bump)"/><circle cx="104" cy="70" r="4.5" fill="#FF6DB3" filter="url(#hero-bump)"/><circle cx="120" cy="74" r="4" fill="#D44A8A" filter="url(#hero-bump)"/><circle cx="134" cy="81" r="4" fill="#C03878" filter="url(#hero-bump)"/>
+      <circle cx="60" cy="92" r="4" fill="#E84393" filter="url(#hero-bump)"/><circle cx="76" cy="85" r="5" fill="#FF6DB3" filter="url(#hero-bump)"/><circle cx="92" cy="81" r="4.5" fill="#FF85BB" filter="url(#hero-bump)"/><circle cx="108" cy="80" r="5" fill="#FF6DB3" filter="url(#hero-bump)"/><circle cx="124" cy="84" r="4.5" fill="#D44A8A" filter="url(#hero-bump)"/><circle cx="140" cy="92" r="4" fill="#B83070" filter="url(#hero-bump)"/>
+      <circle cx="56" cy="104" r="4.5" fill="#E84393" filter="url(#hero-bump)"/><circle cx="70" cy="97" r="5" fill="#FF6DB3" filter="url(#hero-bump)"/><circle cx="86" cy="92" r="4.5" fill="#FF85BB" filter="url(#hero-bump)"/><circle cx="100" cy="90" r="5.5" fill="#FF6DB3" filter="url(#hero-bump)"/><circle cx="114" cy="92" r="4.5" fill="#E84393" filter="url(#hero-bump)"/><circle cx="128" cy="97" r="5" fill="#C94080" filter="url(#hero-bump)"/><circle cx="142" cy="105" r="4.5" fill="#A02868" filter="url(#hero-bump)"/>
+      <circle cx="58" cy="117" r="4" fill="#D44A8A" filter="url(#hero-bump)"/><circle cx="72" cy="110" r="4.5" fill="#E84393" filter="url(#hero-bump)"/><circle cx="86" cy="105" r="5" fill="#FF6DB3" filter="url(#hero-bump)"/><circle cx="100" cy="103" r="5.5" fill="#FF85BB" filter="url(#hero-bump)"/><circle cx="114" cy="105" r="5" fill="#E84393" filter="url(#hero-bump)"/><circle cx="128" cy="110" r="4.5" fill="#C94080" filter="url(#hero-bump)"/><circle cx="140" cy="118" r="4" fill="#902060" filter="url(#hero-bump)"/>
+      <circle cx="68" cy="129" r="4" fill="#C41E6B" filter="url(#hero-bump)"/><circle cx="82" cy="123" r="4.5" fill="#D44A8A" filter="url(#hero-bump)"/><circle cx="96" cy="120" r="5" fill="#E84393" filter="url(#hero-bump)"/><circle cx="110" cy="120" r="5" fill="#C94080" filter="url(#hero-bump)"/><circle cx="124" cy="124" r="4" fill="#A02860" filter="url(#hero-bump)"/>
+    </g>
+    <g opacity="0.2" clip-path="url(#hero-clip)">
+      <ellipse cx="82" cy="90" rx="6.5" ry="3" fill="none" stroke="#FF9FD0" stroke-width="1.2"/>
+      <ellipse cx="100" cy="85" rx="7.5" ry="3.5" fill="none" stroke="#FF9FD0" stroke-width="1.2"/>
+      <ellipse cx="118" cy="90" rx="6" ry="3" fill="none" stroke="#D06090" stroke-width="1.2"/>
+      <ellipse cx="72" cy="100" rx="6" ry="3" fill="none" stroke="#FF9FD0" stroke-width="1.2"/>
+      <ellipse cx="90" cy="96" rx="7" ry="3.5" fill="none" stroke="#FF9FD0" stroke-width="1.2"/>
+      <ellipse cx="108" cy="96" rx="6.5" ry="3" fill="none" stroke="#D06090" stroke-width="1.2"/>
+      <ellipse cx="126" cy="100" rx="6" ry="3" fill="none" stroke="#C05080" stroke-width="1.2"/>
+    </g>
+    <ellipse cx="82" cy="85" rx="24" ry="17" fill="url(#hero-spec)" opacity="0.9"/>
+    <ellipse cx="118" cy="118" rx="14" ry="10" fill="url(#hero-spec2)" opacity="0.6"/>
+    <ellipse cx="77" cy="79" rx="8" ry="5.5" fill="white" opacity="0.28"/>
+    <ellipse cx="75" cy="77" rx="4" ry="2.8" fill="white" opacity="0.58"/>
+    <ellipse cx="100" cy="108" rx="58" ry="52" fill="none" stroke="#5A0E2E" stroke-width="3" opacity="0.4"/>
+    <path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#hero-stem)" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M100,63 Q100,52 100,44 Q100,36 101,32" stroke="url(#hero-stem)" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <ellipse cx="99" cy="64" rx="5.5" ry="3.5" fill="#3D7A25"/>
+    <ellipse cx="99" cy="63" rx="4" ry="2.2" fill="#5A9A35"/>
+    <path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#hero-leaf)"/>
+    <path d="M97,50 Q82,38 65,30" stroke="#8FE87A" stroke-width="1.2" fill="none" opacity="0.65"/>
+    <path d="M88,46 Q82,38 76,34" stroke="#7DC865" stroke-width="0.8" fill="none" opacity="0.5"/>
+    <path d="M97,48 Q82,32 68,30 Q74,36 82,42 Q88,47 97,50 Z" fill="rgba(255,255,255,0.1)"/>
+    <path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#hero-leaf)" opacity="0.9"/>
+    <path d="M103,48 Q118,36 137,26" stroke="#8FE87A" stroke-width="1.2" fill="none" opacity="0.6"/>
+    <path d="M112,44 Q118,38 124,32" stroke="#7DC865" stroke-width="0.8" fill="none" opacity="0.5"/>
+    <path d="M99,44 Q92,28 86,18 Q94,24 100,36 Q102,40 100,46 Z" fill="#3D9A28" opacity="0.75"/>
+  </svg>
+
+  <h1>Run AI Locally</h1>
+
+  <p>Get up and running with large language models in seconds.
+     No cloud. No API keys. No data leaving your machine.</p>
+
+  <div class="hero-actions">
+    <a href="#download" class="btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download for Free
+    </a>
+    <a href="#models" class="btn-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Browse Models
+    </a>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      <div class="terminal-title">lychee</div>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-prompt">$ </span><span class="t-cmd">lychee run llama3.1:8b</span></div>
+      <div class="t-output">pulling manifest...</div>
+      <div class="t-output">pulling ━━━━━━━━━━━━━━━━━━━━━ 100% <span class="t-accent">4.9 GB</span></div>
+      <div class="t-output">verifying sha256 digest ✓</div>
+      <div class="t-output">success</div>
+      <div>&nbsp;</div>
+      <div><span class="t-accent">&gt;&gt;&gt; </span><span class="t-cmd">Tell me about lychee fruit</span></div>
+      <div class="t-output" style="margin-top:4px">The lychee is a tropical fruit native to southern China,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;beloved for its floral sweetness and juicy texture...<span class="t-cursor"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat fade-in">
+    <div class="stat-num">731+</div>
+    <div class="stat-label">AI Models</div>
+  </div>
+  <div class="stat fade-in">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">Local &amp; Private</div>
+  </div>
+  <div class="stat fade-in">
+    <div class="stat-num">0</div>
+    <div class="stat-label">API Keys Needed</div>
+  </div>
+  <div class="stat fade-in">
+    <div class="stat-num">1 cmd</div>
+    <div class="stat-label">To Get Started</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="fade-in">
+      <div class="section-label">Why Lychee</div>
+      <h2 class="section-title">Everything you need<br>to run AI locally</h2>
+      <p class="section-sub">Lychee makes running powerful AI models as simple as installing an app.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(232,67,147,0.15)"><i data-lucide="shield-check"></i></div>
+        <h3>100% Private</h3>
+        <p>Your conversations never leave your machine. No telemetry, no data collection, no cloud dependency.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(74,222,128,0.15)"><i data-lucide="zap"></i></div>
+        <h3>Blazing Fast</h3>
+        <p>Optimized for Apple Silicon, NVIDIA, and AMD GPUs. Get the most out of your hardware automatically.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(96,165,250,0.15)"><i data-lucide="download-cloud"></i></div>
+        <h3>HuggingFace Direct</h3>
+        <p>Download any GGUF model directly from HuggingFace. No account or token required for public models.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(167,139,250,0.15)"><i data-lucide="plug"></i></div>
+        <h3>OpenAI-Compatible API</h3>
+        <p>Drop-in replacement for the OpenAI API. Switch any existing app to run locally in minutes.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(250,204,21,0.15)"><i data-lucide="package"></i></div>
+        <h3>Modelfile System</h3>
+        <p>Create, share and customize models with a simple Modelfile syntax. Full control over system prompts and parameters.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon" style="background:rgba(232,67,147,0.15)"><i data-lucide="globe"></i></div>
+        <h3>Multi-Platform</h3>
+        <p>Runs on macOS, Linux, and Windows. Native app with a beautiful UI included out of the box.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CODER SECTION -->
+<section id="api-drop-in" style="padding:6rem 2rem; background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 50%, var(--bg) 100%);">
+  <div class="container">
+    <div class="fade-in" style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
+      <div>
+        <div class="section-label">For Developers</div>
+        <h2 class="section-title">OpenAI-Compatible<br>Drop-in API</h2>
+        <p class="section-sub" style="margin-bottom:2rem">Switch any OpenAI app to run locally in 2 seconds. Same API, same SDK, zero cloud costs.</p>
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div style="display:flex;align-items:center;gap:12px"><i data-lucide="check-circle-2" style="color:var(--green);width:20px;height:20px;flex-shrink:0"></i><span>Port 11434 — same as OpenAI's format</span></div>
+          <div style="display:flex;align-items:center;gap:12px"><i data-lucide="check-circle-2" style="color:var(--green);width:20px;height:20px;flex-shrink:0"></i><span>Streaming responses with SSE</span></div>
+          <div style="display:flex;align-items:center;gap:12px"><i data-lucide="check-circle-2" style="color:var(--green);width:20px;height:20px;flex-shrink:0"></i><span>Embeddings endpoint built-in</span></div>
+          <div style="display:flex;align-items:center;gap:12px"><i data-lucide="check-circle-2" style="color:var(--green);width:20px;height:20px;flex-shrink:0"></i><span>Function calling &amp; tool use</span></div>
+        </div>
+        <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap">
+          <a href="docs.html#api" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;padding:11px 22px;border-radius:9px;font-weight:700;text-decoration:none;font-size:.95rem"><i data-lucide="book-open" style="width:16px;height:16px"></i> API Docs</a>
+          <a href="https://github.com/lychee/lychee" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--bg3);color:var(--text);padding:11px 22px;border-radius:9px;font-weight:600;text-decoration:none;border:1px solid var(--border);font-size:.95rem"><img src="https://cdn.simpleicons.org/github/ffffff" width="16" height="16" alt="GitHub"> GitHub</a>
+        </div>
+      </div>
+      <div class="fade-in">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+          <div style="background:var(--bg3);padding:10px 16px;display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border)">
+            <button class="api-tab active" onclick="switchApiTab(this,'py')" style="background:rgba(232,67,147,0.15);border:none;color:var(--text);font-family:var(--mono);font-size:.78rem;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer">Python</button>
+            <button class="api-tab" onclick="switchApiTab(this,'js')" style="background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:.78rem;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer">Node.js</button>
+            <button class="api-tab" onclick="switchApiTab(this,'curl')" style="background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:.78rem;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer">cURL</button>
+          </div>
+          <pre id="api-py" style="padding:1.5rem;font-family:var(--mono);font-size:.82rem;line-height:1.9;overflow-x:auto;margin:0"><span style="color:#6272a4"># pip install openai</span>
+<span style="color:#ff79c6">from</span> <span style="color:#f0f0f0">openai</span> <span style="color:#ff79c6">import</span> <span style="color:#f0f0f0">OpenAI</span>
+
+<span style="color:#f0f0f0">client</span> <span style="color:#ff79c6">=</span> <span style="color:#f0f0f0">OpenAI(</span>
+  <span style="color:#f0f0f0">base_url</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">"http://localhost:11434/v1"</span><span style="color:#f0f0f0">,</span>
+  <span style="color:#f0f0f0">api_key</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">"lychee"</span>  <span style="color:#6272a4"># any string</span>
+<span style="color:#f0f0f0">)</span>
+
+<span style="color:#f0f0f0">response</span> <span style="color:#ff79c6">=</span> <span style="color:#f0f0f0">client.chat.completions.create(</span>
+  <span style="color:#f0f0f0">model</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">"llama3.1:8b"</span><span style="color:#f0f0f0">,</span>
+  <span style="color:#f0f0f0">messages</span><span style="color:#ff79c6">=</span><span style="color:#f0f0f0">[{</span><span style="color:#f1fa8c">"role"</span><span style="color:#ff79c6">:</span><span style="color:#f1fa8c">"user"</span><span style="color:#f0f0f0">,</span><span style="color:#f1fa8c">"content"</span><span style="color:#ff79c6">:</span><span style="color:#f1fa8c">"Hello!"</span><span style="color:#f0f0f0">}]</span>
+<span style="color:#f0f0f0">)</span>
+<span style="color:#8be9fd">print</span><span style="color:#f0f0f0">(response.choices[</span><span style="color:#bd93f9">0</span><span style="color:#f0f0f0">].message.content)</span></pre>
+          <pre id="api-js" style="display:none;padding:1.5rem;font-family:var(--mono);font-size:.82rem;line-height:1.9;overflow-x:auto;margin:0"><span style="color:#6272a4">// npm install openai</span>
+<span style="color:#ff79c6">import</span> <span style="color:#f0f0f0">OpenAI</span> <span style="color:#ff79c6">from</span> <span style="color:#f1fa8c">'openai'</span><span style="color:#f0f0f0">;</span>
+
+<span style="color:#ff79c6">const</span> <span style="color:#f0f0f0">client</span> <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">new</span> <span style="color:#f0f0f0">OpenAI({</span>
+  <span style="color:#f0f0f0">baseURL</span><span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">'http://localhost:11434/v1'</span><span style="color:#f0f0f0">,</span>
+  <span style="color:#f0f0f0">apiKey</span><span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">'lychee'</span>
+<span style="color:#f0f0f0">});</span>
+
+<span style="color:#ff79c6">const</span> <span style="color:#f0f0f0">chat</span> <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">await</span> <span style="color:#f0f0f0">client.chat.completions.create({</span>
+  <span style="color:#f0f0f0">model</span><span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">'qwen3:32b'</span><span style="color:#f0f0f0">,</span>
+  <span style="color:#f0f0f0">messages</span><span style="color:#ff79c6">:</span> <span style="color:#f0f0f0">[{ role</span><span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">'user'</span><span style="color:#f0f0f0">, content</span><span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">'Hello!'</span> <span style="color:#f0f0f0">}],</span>
+  <span style="color:#f0f0f0">stream</span><span style="color:#ff79c6">:</span> <span style="color:#bd93f9">true</span>
+<span style="color:#f0f0f0">});</span>
+<span style="color:#ff79c6">for await</span> <span style="color:#f0f0f0">(</span><span style="color:#ff79c6">const</span> <span style="color:#f0f0f0">chunk</span> <span style="color:#ff79c6">of</span> <span style="color:#f0f0f0">chat) process.stdout.write(chunk.choices[</span><span style="color:#bd93f9">0</span><span style="color:#f0f0f0">]?.delta?.content</span> <span style="color:#ff79c6">??</span> <span style="color:#f1fa8c">''</span><span style="color:#f0f0f0">);</span></pre>
+          <pre id="api-curl" style="display:none;padding:1.5rem;font-family:var(--mono);font-size:.82rem;line-height:1.9;overflow-x:auto;margin:0"><span style="color:#4ade80">curl</span> <span style="color:#f0f0f0">http://localhost:11434/v1/chat/completions</span> <span style="color:#ff79c6">\</span>
+  <span style="color:#f0f0f0">-H</span> <span style="color:#f1fa8c">"Content-Type: application/json"</span> <span style="color:#ff79c6">\</span>
+  <span style="color:#f0f0f0">-d</span> <span style="color:#f1fa8c">'{</span>
+<span style="color:#f1fa8c">    "model": "deepseek-r1:14b",</span>
+<span style="color:#f1fa8c">    "messages": [</span>
+<span style="color:#f1fa8c">      {"role":"user","content":"Explain recursion"}</span>
+<span style="color:#f1fa8c">    ],</span>
+<span style="color:#f1fa8c">    "stream": false</span>
+<span style="color:#f1fa8c">  }'</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENCHMARK -->
+<section style="padding:5rem 2rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:3rem" class="fade-in">
+      <div class="section-label">Performance</div>
+      <h2 class="section-title" style="font-size:clamp(1.8rem,3.5vw,2.5rem)">Why choose Lychee?</h2>
+      <p class="section-sub" style="margin:0 auto">How we stack up against the alternatives</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1.25rem;max-width:1150px;margin:0 auto" class="fade-in">
+      <!-- Lychee -->
+      <div style="background:var(--bg3);border:1px solid rgba(232,67,147,.4);border-radius:var(--radius);padding:1.25rem;position:relative">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap">BEST CHOICE</div>
+        <div style="font-size:1rem;font-weight:800;margin-bottom:1.1rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px"><i data-lucide="cpu" style="width:20px;height:20px;color:#e84393"></i> Lychee</div>
+        <div style="display:flex;flex-direction:column;gap:.65rem">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Privacy</span><span style="color:var(--green);font-weight:700">✓ 100% Local</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Cost</span><span style="color:var(--green);font-weight:700">✓ Free</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HF Pull</span><span style="color:var(--green);font-weight:700">✓ Built-in</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Models</span><span style="color:var(--green);font-weight:700">✓ 731+</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Embeddings</span><span style="color:var(--green);font-weight:700">✓ Included</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">SHA256</span><span style="color:var(--green);font-weight:700">✓ Verified</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HW Scanner</span><span style="color:var(--green);font-weight:700">✓ Exclusive</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Open Source</span><span style="color:var(--green);font-weight:700">✓ Yes</span></div>
+        </div>
+      </div>
+      <!-- Ollama -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+        <div style="font-size:1rem;font-weight:800;margin-bottom:1.1rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px"><img src="https://cdn.simpleicons.org/ollama/ffffff" width="20" height="20" alt="Ollama"> Ollama</div>
+        <div style="display:flex;flex-direction:column;gap:.65rem">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Privacy</span><span style="color:var(--green);font-weight:700">✓ Local</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Cost</span><span style="color:var(--green);font-weight:700">✓ Free</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HF Pull</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Models</span><span style="color:var(--muted);font-weight:700">~200</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Embeddings</span><span style="color:var(--yellow);font-weight:700">~ Basic</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">SHA256</span><span style="color:var(--yellow);font-weight:700">~ Partial</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HW Scanner</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Open Source</span><span style="color:var(--green);font-weight:700">✓ Yes</span></div>
+        </div>
+      </div>
+      <!-- LM Studio -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+        <div style="font-size:1rem;font-weight:800;margin-bottom:1.1rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px"><i data-lucide="monitor" style="width:20px;height:20px;color:#a78bfa"></i> LM Studio</div>
+        <div style="display:flex;flex-direction:column;gap:.65rem">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Privacy</span><span style="color:var(--green);font-weight:700">✓ Local</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Cost</span><span style="color:var(--yellow);font-weight:700">~ Free/Pro</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HF Pull</span><span style="color:var(--yellow);font-weight:700">~ Manual UI</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Models</span><span style="color:var(--muted);font-weight:700">HF browse</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Embeddings</span><span style="color:var(--green);font-weight:700">✓ Yes</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">SHA256</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HW Scanner</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Open Source</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+        </div>
+      </div>
+      <!-- Jan -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+        <div style="font-size:1rem;font-weight:800;margin-bottom:1.1rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px"><i data-lucide="cpu" style="width:20px;height:20px;color:#4ade80"></i> Jan</div>
+        <div style="display:flex;flex-direction:column;gap:.65rem">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Privacy</span><span style="color:var(--green);font-weight:700">✓ Local</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Cost</span><span style="color:var(--green);font-weight:700">✓ Free</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HF Pull</span><span style="color:var(--yellow);font-weight:700">~ Manual UI</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Models</span><span style="color:var(--muted);font-weight:700">Limited</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Embeddings</span><span style="color:var(--yellow);font-weight:700">~ Basic</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">SHA256</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HW Scanner</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Open Source</span><span style="color:var(--green);font-weight:700">✓ Yes</span></div>
+        </div>
+      </div>
+      <!-- ChatGPT API -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+        <div style="font-size:1rem;font-weight:800;margin-bottom:1.1rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px"><img src="https://cdn.simpleicons.org/openai/888888" width="18" height="18" alt="OpenAI"> ChatGPT API</div>
+        <div style="display:flex;flex-direction:column;gap:.65rem">
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Privacy</span><span style="color:#f87171;font-weight:700">✗ Cloud</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Cost</span><span style="color:#f87171;font-weight:700">✗ Paid</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HF Pull</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Models</span><span style="color:var(--muted);font-weight:700">~5 models</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Embeddings</span><span style="color:var(--yellow);font-weight:700">~ Paid add-on</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">SHA256</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">HW Scanner</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem"><span style="color:var(--muted)">Open Source</span><span style="color:#f87171;font-weight:700">✗ No</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- responsive stacking -->
+    <style>@media(max-width:900px){.cmp-grid{grid-template-columns:1fr 1fr!important}}@media(max-width:560px){.cmp-grid{grid-template-columns:1fr!important}}</style>
+  </div>
+</section>
+
+<!-- INTEGRATIONS LOGOS -->
+<section style="padding:4rem 2rem;text-align:center">
+  <div class="container">
+    <p style="color:var(--muted);font-size:.85rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:2rem">Works with your favorite tools</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:2.5rem;flex-wrap:wrap;opacity:.7">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="https://cdn.simpleicons.org/python/888888" width="32" height="32" alt="Python"><span style="font-size:.72rem;color:var(--muted)">Python</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="https://cdn.simpleicons.org/nodedotjs/888888" width="32" height="32" alt="Node.js"><span style="font-size:.72rem;color:var(--muted)">Node.js</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="https://cdn.simpleicons.org/langchain/888888" width="32" height="32" alt="LangChain"><span style="font-size:.72rem;color:var(--muted)">LangChain</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="https://cdn.simpleicons.org/docker/888888" width="32" height="32" alt="Docker"><span style="font-size:.72rem;color:var(--muted)">Docker</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="https://cdn.simpleicons.org/visualstudiocode/888888" width="32" height="32" alt="VS Code"><span style="font-size:.72rem;color:var(--muted)">VS Code</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="https://cdn.simpleicons.org/curl/888888" width="32" height="32" alt="cURL"><span style="font-size:.72rem;color:var(--muted)">cURL</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="https://cdn.simpleicons.org/go/888888" width="32" height="32" alt="Go"><span style="font-size:.72rem;color:var(--muted)">Go SDK</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="https://cdn.simpleicons.org/rust/888888" width="32" height="32" alt="Rust"><span style="font-size:.72rem;color:var(--muted)">Rust</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODELS -->
+<section id="models" class="models-section">
+  <div class="container">
+    <div class="fade-in" style="text-align:center; margin-bottom:0">
+      <div class="section-label">Model Library</div>
+      <h2 class="section-title">731+ Models Ready to Run</h2>
+      <p class="section-sub" style="margin:0 auto">From tiny edge models to massive frontier models — all one command away.</p>
+    </div>
+
+    <div class="models-grid fade-in">
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Llama 3.1</div>
+        <div class="model-chip-meta">8B · 70B · 405B</div>
+        <span class="model-chip-tag">chat</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Qwen 3</div>
+        <div class="model-chip-meta">0.6B – 32B</div>
+        <span class="model-chip-tag tag-reasoning">reasoning</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">DeepSeek-R1</div>
+        <div class="model-chip-meta">7B · 14B · 70B</div>
+        <span class="model-chip-tag tag-reasoning">reasoning</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Gemma 3</div>
+        <div class="model-chip-meta">1B · 4B · 12B · 27B</div>
+        <span class="model-chip-tag">chat</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Mistral</div>
+        <div class="model-chip-meta">7B · 22B · 123B</div>
+        <span class="model-chip-tag">chat</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Phi 4</div>
+        <div class="model-chip-meta">3.8B · 14B</div>
+        <span class="model-chip-tag tag-reasoning">reasoning</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Qwen 2.5 Coder</div>
+        <div class="model-chip-meta">1.5B · 7B · 32B</div>
+        <span class="model-chip-tag tag-code">code</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">CodeLlama</div>
+        <div class="model-chip-meta">7B · 13B · 70B</div>
+        <span class="model-chip-tag tag-code">code</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Llama 3.2 Vision</div>
+        <div class="model-chip-meta">11B · 90B</div>
+        <span class="model-chip-tag tag-vision">vision</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Mixtral</div>
+        <div class="model-chip-meta">8x7B · 8x22B</div>
+        <span class="model-chip-tag">chat</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Falcon 3</div>
+        <div class="model-chip-meta">1B · 3B · 7B · 10B</div>
+        <span class="model-chip-tag">chat</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">QwQ 32B</div>
+        <div class="model-chip-meta">32B</div>
+        <span class="model-chip-tag tag-reasoning">reasoning</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Phi 4 Vision</div>
+        <div class="model-chip-meta">5.6B</div>
+        <span class="model-chip-tag tag-vision">vision</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Devstral</div>
+        <div class="model-chip-meta">24B</div>
+        <span class="model-chip-tag tag-code">code</span>
+      </a>
+      <a class="model-chip" href="#">
+        <div class="model-chip-name">Gemma 3n</div>
+        <div class="model-chip-meta">E2B · E4B</div>
+        <span class="model-chip-tag">edge</span>
+      </a>
+      <a class="model-chip" href="#" style="border-style:dashed; display:flex; align-items:center; justify-content:center; min-height:90px; color:var(--muted); font-size:0.85rem; gap:6px;">
+        <span style="font-size:1.3rem">+264</span> more
+      </a>
+    </div>
+
+    <div class="models-count fade-in">
+      Also pull any model directly from HuggingFace →
+      <code style="background:var(--bg3); padding:3px 8px; border-radius:6px; font-family:var(--mono); font-size:0.8rem; color:var(--green)">lychee hf pull username/repo</code>
+    </div>
+  </div>
+</section>
+
+<!-- API / CODE -->
+<section id="api">
+  <div class="container">
+    <div class="code-section">
+      <div class="code-text fade-in">
+        <div class="section-label">Developer API</div>
+        <h2 class="section-title">Build with any language</h2>
+        <p class="section-sub">Lychee exposes an OpenAI-compatible REST API and official SDKs for Python and JavaScript.</p>
+        <div style="margin-top:2rem; display:flex; flex-direction:column; gap:0.75rem;">
+          <div style="display:flex; align-items:center; gap:10px; color:var(--muted); font-size:0.9rem">
+            <span style="color:var(--green)">✓</span> Streaming responses
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; color:var(--muted); font-size:0.9rem">
+            <span style="color:var(--green)">✓</span> Tool / function calling
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; color:var(--muted); font-size:0.9rem">
+            <span style="color:var(--green)">✓</span> Vision &amp; multimodal
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; color:var(--muted); font-size:0.9rem">
+            <span style="color:var(--green)">✓</span> Embeddings
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; color:var(--muted); font-size:0.9rem">
+            <span style="color:var(--green)">✓</span> Structured outputs (JSON schema)
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block-wrap fade-in">
+        <div class="tabs" id="tabs">
+          <button class="tab active" onclick="switchTab('python')">Python</button>
+          <button class="tab" onclick="switchTab('js')">JavaScript</button>
+          <button class="tab" onclick="switchTab('curl')">cURL</button>
+        </div>
+
+        <div id="panel-python" class="code-panel active">
+<pre><span class="cm"># pip install lychee</span>
+<span class="py-kw">import</span> lychee
+
+response <span class="op">=</span> lychee.chat(
+  model<span class="op">=</span><span class="str">"llama3.1:8b"</span>,
+  messages<span class="op">=</span>[
+    {
+      <span class="str">"role"</span>: <span class="str">"user"</span>,
+      <span class="str">"content"</span>: <span class="str">"Why is the sky blue?"</span>
+    }
+  ]
+)
+
+<span class="py-fn">print</span>(response[<span class="str">"message"</span>][<span class="str">"content"</span>])</pre>
+        </div>
+
+        <div id="panel-js" class="code-panel">
+<pre><span class="cm">// npm i lychee</span>
+<span class="kw">import</span> { Lychee } <span class="kw">from</span> <span class="str">"lychee"</span>
+
+<span class="kw">const</span> <span class="var">client</span> <span class="op">=</span> <span class="kw">new</span> <span class="fn">Lychee</span>()
+
+<span class="kw">const</span> <span class="var">response</span> <span class="op">=</span> <span class="kw">await</span> <span class="var">client</span>.<span class="fn">chat</span>({
+  model: <span class="str">"llama3.1:8b"</span>,
+  messages: [
+    {
+      role: <span class="str">"user"</span>,
+      content: <span class="str">"Why is the sky blue?"</span>
+    }
+  ]
+})
+
+console.<span class="fn">log</span>(<span class="var">response</span>.message.content)</pre>
+        </div>
+
+        <div id="panel-curl" class="code-panel">
+<pre><span class="fn">curl</span> http://localhost:<span class="num">11434</span>/api/chat <span class="op">\</span>
+  <span class="kw">-d</span> <span class="str">'{
+    "model": "llama3.1:8b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Why is the sky blue?"
+      }
+    ]
+  }'</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXCLUSIVE COMMANDS SHOWCASE -->
+<section style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="fade-in" style="text-align:center;margin-bottom:3rem">
+      <div class="section-label">Exclusive Commands</div>
+      <h2 class="section-title">Tools built for power users</h2>
+      <p class="section-sub" style="margin:0 auto;max-width:560px">Four commands you won't find anywhere else — available only in Lychee.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem">
+
+      <!-- embed -->
+      <div class="feature-card fade-in" style="border-color:rgba(96,165,250,0.3)">
+        <div class="feature-icon" style="background:rgba(96,165,250,0.1);color:var(--blue)">⟨⟩</div>
+        <h3 class="feature-title">lychee embed</h3>
+        <p class="feature-desc">Generate vector embeddings from stdin or arguments. Output as JSON, CSV, or a human-readable preview. Pipe directly into your RAG pipeline.</p>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--green);margin-top:.75rem;overflow-x:auto">lychee embed "hello world" --output json</div>
+      </div>
+
+      <!-- scan -->
+      <div class="feature-card fade-in" style="border-color:rgba(74,222,128,0.3)">
+        <div class="feature-icon" style="background:rgba(74,222,128,0.1);color:var(--green)">⌗</div>
+        <h3 class="feature-title">lychee scan</h3>
+        <p class="feature-desc">Detect your GPU, VRAM, and system RAM then get a ranked list of models that will run smoothly on your hardware — no guessing.</p>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--green);margin-top:.75rem;overflow-x:auto">lychee scan</div>
+      </div>
+
+      <!-- compare -->
+      <div class="feature-card fade-in" style="border-color:rgba(232,67,147,0.3)">
+        <div class="feature-icon" style="background:rgba(232,67,147,0.1);color:var(--accent)">⟺</div>
+        <h3 class="feature-title">lychee compare</h3>
+        <p class="feature-desc">Run two models on the same prompt simultaneously and see outputs + speed + token counts side by side. Pick the right model for each task.</p>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--green);margin-top:.75rem;overflow-x:auto">lychee compare llama3.2:3b qwen3:4b</div>
+      </div>
+
+      <!-- stats -->
+      <div class="feature-card fade-in" style="border-color:rgba(250,204,21,0.3)">
+        <div class="feature-icon" style="background:rgba(250,204,21,0.1);color:var(--yellow)">◈</div>
+        <h3 class="feature-title">lychee stats</h3>
+        <p class="feature-desc">Live dashboard showing all running models — VRAM used, tokens/second, context length, and time until unload. Like htop for your AI.</p>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--green);margin-top:.75rem;overflow-x:auto">lychee stats --interval 1</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ECOSYSTEM & COMMUNITY -->
+<section style="border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="fade-in" style="text-align:center;margin-bottom:3rem">
+      <div class="section-label">Ecosystem & Community</div>
+      <h2 class="section-title">Built for builders</h2>
+      <p class="section-sub" style="margin:0 auto;max-width:560px">Discover new models, connect with developers, and seamlessly move your models across environments.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem">
+
+      <!-- community -->
+      <div class="feature-card fade-in" style="border-color:rgba(167,139,250,0.3)">
+        <div class="feature-icon" style="background:rgba(167,139,250,0.1);color:var(--purple)"><i data-lucide="users"></i></div>
+        <h3 class="feature-title">lychee community</h3>
+        <p class="feature-desc">Connect with the Lychee open-source community. Fetch links, browse Discord, and automatically pull "good first issues" right from your terminal.</p>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--green);margin-top:.75rem;overflow-x:auto">lychee community</div>
+      </div>
+
+      <!-- catalog -->
+      <div class="feature-card fade-in" style="border-color:rgba(250,204,21,0.3)">
+        <div class="feature-icon" style="background:rgba(250,204,21,0.1);color:var(--yellow)"><i data-lucide="library"></i></div>
+        <h3 class="feature-title">lychee serve-catalog</h3>
+        <p class="feature-desc">Host your own decentralized model registry. Instantly share your fine-tuned models with your team via a unified HTTP catalog protocol.</p>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--green);margin-top:.75rem;overflow-x:auto">lychee serve-catalog --port 8080</div>
+      </div>
+
+      <!-- generate-client -->
+      <div class="feature-card fade-in" style="border-color:rgba(74,222,128,0.3)">
+        <div class="feature-icon" style="background:rgba(74,222,128,0.1);color:var(--green)"><i data-lucide="code"></i></div>
+        <h3 class="feature-title">lychee generate-client</h3>
+        <p class="feature-desc">Stop writing boilerplate. Generate fully-typed, production-ready SDKs for your models in Go, Python, and TypeScript instantly.</p>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--green);margin-top:.75rem;overflow-x:auto">lychee generate-client llama3 --lang go</div>
+      </div>
+
+      <!-- export/import -->
+      <div class="feature-card fade-in" style="border-color:rgba(232,67,147,0.3)">
+        <div class="feature-icon" style="background:rgba(232,67,147,0.1);color:var(--accent)"><i data-lucide="package"></i></div>
+        <h3 class="feature-title">lychee export / import</h3>
+        <p class="feature-desc">Package your models into offline `.lychee` tarballs. Perfect for air-gapped deployments, backups, and peer-to-peer sharing.</p>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--green);margin-top:.75rem;overflow-x:auto">lychee export my-model backup.lychee</div>
+      </div>
+
+    </div>
+
+    <!-- Community Showcase Sub-section -->
+    <div class="fade-in" style="text-align:center;margin-top:4rem;margin-bottom:2rem">
+      <h3 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.5px;margin-bottom:0.5rem">Trending Community Models</h3>
+      <p style="color:var(--muted);font-size:0.95rem;margin:0 auto;max-width:560px">Discover fine-tunes and custom setups created by the Lychee developer community, powered by our open <a href="https://github.com/lychee-ai/community-registry" target="_blank" style="color:var(--accent2);text-decoration:none;font-weight:600">GitHub Community Registry</a>.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem;margin-bottom:2rem">
+      <!-- model 1 -->
+      <div class="feature-card fade-in" style="display:flex;flex-direction:column;justify-content:between;border-color:rgba(96,165,250,0.2)">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <span style="font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--accent2)">llama3-coder-super</span>
+            <span style="font-size:0.8rem;background:rgba(74,222,128,0.15);color:var(--green);padding:2px 8px;border-radius:100px;font-weight:600">👍 42 upvotes</span>
+          </div>
+          <p style="color:var(--muted);font-size:0.875rem;line-height:1.5;margin-bottom:1rem">Fine-tuned Llama 3 for extreme quality python completions and code generation. Ready for offline SDK use.</p>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:1rem;margin-top:auto">
+          <span style="font-size:0.8rem;color:var(--muted)">By <strong>@dev_mind</strong></span>
+          <code style="background:var(--bg3);padding:4px 8px;border-radius:6px;font-family:var(--mono);font-size:0.75rem;color:var(--green)">lychee pull dev_mind/llama3-coder-super</code>
+        </div>
+      </div>
+
+      <!-- model 2 -->
+      <div class="feature-card fade-in" style="display:flex;flex-direction:column;justify-content:between;border-color:rgba(167,139,250,0.2)">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <span style="font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--accent2)">qwen-3b-uncensored</span>
+            <span style="font-size:0.8rem;background:rgba(74,222,128,0.15);color:var(--green);padding:2px 8px;border-radius:100px;font-weight:600">👍 28 upvotes</span>
+          </div>
+          <p style="color:var(--muted);font-size:0.875rem;line-height:1.5;margin-bottom:1rem">Uncensored assistant model with dynamic context scaling. Ideal for local edge device agents.</p>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:1rem;margin-top:auto">
+          <span style="font-size:0.8rem;color:var(--muted)">By <strong>@mika_l</strong></span>
+          <code style="background:var(--bg3);padding:4px 8px;border-radius:6px;font-family:var(--mono);font-size:0.75rem;color:var(--green)">lychee pull mika_l/qwen-3b-uncensored</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- community callout -->
+    <div style="text-align:center;margin-top:2rem">
+      <span style="font-size:0.9rem;color:var(--muted)">Want to share your model fine-tune? Publish it via CLI: <code style="color:var(--green)">lychee community publish &lt;model_name&gt;</code> or submit directly to the <a href="https://github.com/lychee-ai/community-registry" target="_blank" style="color:var(--accent2);text-decoration:none;font-weight:600">GitHub Repository</a></span>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON TABLE -->
+<section>
+  <div class="container">
+    <div class="fade-in" style="text-align:center;margin-bottom:3rem">
+      <div class="section-label">Comparison</div>
+      <h2 class="section-title">Lychee vs the alternatives</h2>
+    </div>
+    <div class="fade-in" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.9rem;min-width:600px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:12px 16px;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700">Feature</th>
+            <th style="text-align:center;padding:12px 16px;color:var(--accent2);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700">Lychee</th>
+            <th style="text-align:center;padding:12px 16px;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700">ChatGPT API</th>
+            <th style="text-align:center;padding:12px 16px;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700">LM Studio</th>
+            <th style="text-align:center;padding:12px 16px;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700">Ollama</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:12px 16px;color:var(--text)">100% Local / Private</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:12px 16px;color:var(--text)">No API Key Required</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:12px 16px;color:var(--text)">Direct HuggingFace Pull</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:12px 16px;color:var(--text)">275+ Built-in Model Catalog</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--muted)">–</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--muted)">~200</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:12px 16px;color:var(--text)">lychee compare / scan / stats</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:12px 16px;color:var(--text)">OpenAI-compatible API</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:12px 16px;color:var(--text)">SHA256 Verified Downloads</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">✓</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--muted)">–</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--muted)">–</td>
+            <td style="text-align:center;padding:12px 16px;color:#f87171">✗</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 16px;color:var(--text)">Monthly Cost</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green);font-weight:700">$0</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--muted)">$20–$200+</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">$0</td>
+            <td style="text-align:center;padding:12px 16px;color:var(--green)">$0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="fade-in" style="text-align:center;margin-bottom:3rem">
+      <div class="section-label">Use Cases</div>
+      <h2 class="section-title">Who uses Lychee?</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem">
+      <div class="fade-in" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem">
+        <div style="font-size:2rem;margin-bottom:.75rem"><i data-lucide="code-2" style="width:36px;height:36px;color:#60a5fa"></i></div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.5rem">Developers</h3>
+        <p style="color:var(--muted);font-size:.875rem;line-height:1.6">Build AI-powered apps with zero API costs. Use the OpenAI-compatible endpoint to drop in local inference with no code changes.</p>
+        <ul style="margin-top:1rem;list-style:none;color:var(--muted);font-size:.82rem;display:flex;flex-direction:column;gap:.3rem">
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Code review & autocomplete</li>
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Chat bots & RAG pipelines</li>
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Test generation</li>
+        </ul>
+      </div>
+      <div class="fade-in" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem">
+        <div style="font-size:2rem;margin-bottom:.75rem"><i data-lucide="flask-conical" style="width:36px;height:36px;color:#e84393"></i></div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.5rem">Researchers</h3>
+        <p style="color:var(--muted);font-size:.875rem;line-height:1.6">Run experiments on frontier models without cloud bills. Compare models head-to-head with <code style="font-family:var(--mono);font-size:.8em;background:var(--bg);padding:1px 5px;border-radius:4px">lychee compare</code> and benchmark at scale.</p>
+        <ul style="margin-top:1rem;list-style:none;color:var(--muted);font-size:.82rem;display:flex;flex-direction:column;gap:.3rem">
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Model benchmarking</li>
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Embedding & similarity</li>
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Offline experimentation</li>
+        </ul>
+      </div>
+      <div class="fade-in" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem">
+        <div style="font-size:2rem;margin-bottom:.75rem"><i data-lucide="building-2" style="width:36px;height:36px;color:#f59e0b"></i></div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.5rem">Enterprises</h3>
+        <p style="color:var(--muted);font-size:.875rem;line-height:1.6">Deploy AI on-premise for complete data control. No data ever leaves your infrastructure — compliant with GDPR, HIPAA, and SOC2 requirements.</p>
+        <ul style="margin-top:1rem;list-style:none;color:var(--muted);font-size:.82rem;display:flex;flex-direction:column;gap:.3rem">
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Air-gapped deployments</li>
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Internal knowledge bases</li>
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Document processing</li>
+        </ul>
+      </div>
+      <div class="fade-in" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem">
+        <div style="font-size:2rem;margin-bottom:.75rem"><i data-lucide="graduation-cap" style="width:36px;height:36px;color:#2dd4bf"></i></div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.5rem">Students & Educators</h3>
+        <p style="color:var(--muted);font-size:.875rem;line-height:1.6">Learn how LLMs work without cloud subscriptions. Experiment freely — every model runs on your laptop, offline, at no cost.</p>
+        <ul style="margin-top:1rem;list-style:none;color:var(--muted);font-size:.82rem;display:flex;flex-direction:column;gap:.3rem">
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Free forever</li>
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>Works offline</li>
+          <li style="display:flex;gap:.5rem"><span style="color:var(--green)">→</span>250+ models to explore</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="background: var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="fade-in" style="text-align:center">
+      <div class="section-label">Get Started</div>
+      <h2 class="section-title">Up and running in 3 steps</h2>
+    </div>
+
+    <div class="steps">
+      <div class="step fade-in">
+        <div class="step-num">1</div>
+        <h3>Install Lychee</h3>
+        <p>Download the installer for your platform or use the install script.</p>
+        <div class="step-cmd">curl -fsSL lychee.ai/install.sh | sh</div>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">2</div>
+        <h3>Pull a Model</h3>
+        <p>Choose from 279+ models. Download runs in the background.</p>
+        <div class="step-cmd">lychee pull llama3.1:8b</div>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">3</div>
+        <h3>Start Chatting</h3>
+        <p>Chat in the terminal, the app UI, or via the REST API.</p>
+        <div class="step-cmd">lychee run llama3.1:8b</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATIONS -->
+<section id="integrations">
+  <div class="container">
+    <div class="fade-in" style="text-align:center">
+      <div class="section-label">Integrations</div>
+      <h2 class="section-title">Works with your favorite tools</h2>
+      <p class="section-sub" style="margin:0 auto">Lychee integrates with the tools you already use — no configuration needed.</p>
+    </div>
+
+    <div class="integrations-grid fade-in">
+      <div class="integration-chip"><div class="int-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Visual_Studio_Code_1.35_icon.svg" width="32" height="32" alt="VS Code"></div><div class="int-name">VS Code</div></div>
+      <div class="integration-chip"><div class="int-icon"><i data-lucide="bot" style="width:32px;height:32px;color:#e84393"></i></div><div class="int-name">Cline</div></div>
+      <div class="integration-chip"><div class="int-icon"><i data-lucide="play-circle" style="width:32px;height:32px;color:#4ade80"></i></div><div class="int-name">Continue</div></div>
+      <div class="integration-chip"><div class="int-icon"><img src="https://cdn.simpleicons.org/docker/2496ED" width="32" height="32" alt="Docker"></div><div class="int-name">Docker</div></div>
+      <div class="integration-chip"><div class="int-icon"><i data-lucide="globe" style="width:32px;height:32px;color:#a78bfa"></i></div><div class="int-name">Open WebUI</div></div>
+      <div class="integration-chip"><div class="int-icon"><img src="https://cdn.simpleicons.org/n8n/E91E63" width="32" height="32" alt="n8n"></div><div class="int-name">n8n</div></div>
+      <div class="integration-chip"><div class="int-icon"><img src="https://cdn.simpleicons.org/zedindustries/aaaaaa" width="32" height="32" alt="Zed"></div><div class="int-name">Zed</div></div>
+      <div class="integration-chip"><div class="int-icon"><img src="https://cdn.simpleicons.org/xcode/147EFB" width="32" height="32" alt="Xcode"></div><div class="int-name">Xcode</div></div>
+      <div class="integration-chip"><div class="int-icon"><img src="https://cdn.simpleicons.org/langchain/12B87B" width="32" height="32" alt="LangChain"></div><div class="int-name">LangChain</div></div>
+      <div class="integration-chip"><div class="int-icon"><i data-lucide="search" style="width:32px;height:32px;color:#f59e0b"></i></div><div class="int-name">LlamaIndex</div></div>
+      <div class="integration-chip"><div class="int-icon"><i data-lucide="smartphone" style="width:32px;height:32px;color:#aaaaaa"></i></div><div class="int-name">Droid</div></div>
+      <div class="integration-chip"><div class="int-icon"><i data-lucide="flask-conical" style="width:32px;height:32px;color:#2dd4bf"></i></div><div class="int-name">Marimo</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / DOWNLOAD -->
+<section class="cta-section" id="download">
+  <div class="container" style="text-align:center">
+    <div class="fade-in">
+      <div class="section-label">Download</div>
+      <h2 class="section-title">Start running AI locally<br>in minutes</h2>
+      <p>Free, open source, and always private.</p>
+
+      <div class="hero-actions" style="justify-content:center; margin-top:2rem">
+        <a href="#" class="btn-primary" style="display:inline-flex;align-items:center;gap:8px">
+          <img src="https://cdn.simpleicons.org/apple/ffffff" width="16" height="16" alt="macOS"> Download for macOS
+        </a>
+        <a href="#" class="btn-secondary" style="display:inline-flex;align-items:center;gap:8px">
+          <img src="https://cdn.simpleicons.org/windows/60a5fa" width="16" height="16" alt="Windows"> Download for Windows
+        </a>
+        <a href="#" class="btn-secondary" style="display:inline-flex;align-items:center;gap:8px">
+          <img src="https://cdn.simpleicons.org/linux/f0f0f0" width="16" height="16" alt="Linux"> Linux
+        </a>
+      </div>
+
+      <p style="margin-top:1.5rem; font-size:0.85rem; color:var(--muted)">
+        Or install via terminal:
+        &nbsp;
+        <code style="background:var(--bg3); padding:5px 12px; border-radius:8px; font-family:var(--mono); font-size:0.8rem; color:var(--green)">curl -fsSL lychee.ai/install.sh | sh</code>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="28" height="28" viewBox="0 0 200 200" fill="none">
+      <defs>
+        <filter id="ft-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="ft-bump"><feGaussianBlur stdDeviation="0.5"/></filter>
+        <radialGradient id="ft-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF8DC7"/><stop offset="40%" stop-color="#E84393"/><stop offset="78%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient>
+        <radialGradient id="ft-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#C93578"/><stop offset="55%" stop-color="#A01E5F"/><stop offset="100%" stop-color="#6A1238"/></radialGradient>
+        <radialGradient id="ft-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#901850"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient>
+        <radialGradient id="ft-spec" cx="34%" cy="27%" r="28%"><stop offset="0%" stop-color="rgba(255,255,255,0.72)"/><stop offset="65%" stop-color="rgba(255,255,255,0.12)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+        <linearGradient id="ft-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="55%" stop-color="#4CAF35"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient>
+        <linearGradient id="ft-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient>
+        <clipPath id="ft-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath>
+      </defs>
+      <ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#ft-top)" filter="url(#ft-glow)"/>
+      <path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#ft-top)" opacity="0.88"/>
+      <path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#ft-right)" opacity="0.92"/>
+      <path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#ft-right)" opacity="0.82"/>
+      <path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#ft-bot)" opacity="0.88"/>
+      <path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#ft-bot)" opacity="0.78"/>
+      <g opacity="0.5" clip-path="url(#ft-clip)">
+        <circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#ft-bump)"/><circle cx="100" cy="70" r="4.5" fill="#FF6DB3" filter="url(#ft-bump)"/><circle cx="128" cy="78" r="4" fill="#D44A8A" filter="url(#ft-bump)"/>
+        <circle cx="60" cy="92" r="4" fill="#E84393" filter="url(#ft-bump)"/><circle cx="86" cy="84" r="5" fill="#FF6DB3" filter="url(#ft-bump)"/><circle cx="114" cy="84" r="4.5" fill="#D44A8A" filter="url(#ft-bump)"/><circle cx="140" cy="92" r="4" fill="#B83070" filter="url(#ft-bump)"/>
+        <circle cx="70" cy="97" r="5" fill="#FF6DB3" filter="url(#ft-bump)"/><circle cx="100" cy="90" r="5" fill="#FF6DB3" filter="url(#ft-bump)"/><circle cx="128" cy="97" r="5" fill="#C94080" filter="url(#ft-bump)"/>
+        <circle cx="86" cy="105" r="5" fill="#FF6DB3" filter="url(#ft-bump)"/><circle cx="100" cy="103" r="5" fill="#FF85BB" filter="url(#ft-bump)"/><circle cx="114" cy="105" r="5" fill="#E84393" filter="url(#ft-bump)"/>
+        <circle cx="96" cy="120" r="5" fill="#E84393" filter="url(#ft-bump)"/>
+      </g>
+      <ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#ft-spec)" opacity="0.88"/>
+      <ellipse cx="75" cy="77" rx="3.5" ry="2.5" fill="white" opacity="0.55"/>
+      <path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#ft-stem)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <ellipse cx="99" cy="64" rx="5" ry="3.5" fill="#3D7A25"/>
+      <path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#ft-leaf)"/>
+      <path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#ft-leaf)" opacity="0.88"/>
+      <path d="M99,44 Q92,28 86,18 Q94,24 100,36 Q102,40 100,46 Z" fill="#3D9A28" opacity="0.72"/>
+    </svg>
+    Lychee
+  </div>
+  <div class="footer-links">
+    <a href="#">Docs</a>
+    <a href="#">Blog</a>
+    <a href="https://github.com/lychee/lychee" target="_blank">GitHub</a>
+    <a href="#">Discord</a>
+    <a href="#">Models</a>
+    <a href="#">API</a>
+  </div>
+  <div class="footer-copy">© 2025 Lychee. Open source.</div>
+</footer>
+
+<script>
+  // Tab switcher
+  function switchTab(lang) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('panel-' + lang).classList.add('active');
+  }
+
+  // Scroll fade-in
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Smooth anchor scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href').slice(1);
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+
+  // Animated counter
+  function animateCount(el, target, suffix = '') {
+    let start = 0;
+    const step = target / 60;
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { el.textContent = target + suffix; clearInterval(timer); return; }
+      el.textContent = Math.floor(start) + suffix;
+    }, 16);
+  }
+
+  const statsObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const nums = e.target.querySelectorAll('.stat-num');
+        nums.forEach(n => {
+          const text = n.textContent.trim();
+          if (text === '731+') animateCount(n, 731, '+');
+          else if (text === '100%') animateCount(n, 100, '%');
+          else if (text === '0') { /* stays 0 */ }
+        });
+        statsObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelector('.stats') && statsObserver.observe(document.querySelector('.stats'));
+
+  // API tab switcher (coder section)
+  function switchApiTab(btn, id) {
+    document.querySelectorAll('.api-tab').forEach(b => { b.style.color='var(--muted)'; b.style.background='none'; });
+    btn.style.color = 'var(--text)';
+    btn.style.background = 'rgba(232,67,147,0.15)';
+    ['py','js','curl'].forEach(k => { const el = document.getElementById('api-'+k); if(el) el.style.display = k===id ? 'block' : 'none'; });
+  }
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

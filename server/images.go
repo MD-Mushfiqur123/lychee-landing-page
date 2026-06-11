@@ -21,17 +21,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/fs/gguf"
-	"github.com/ollama/ollama/manifest"
-	"github.com/ollama/ollama/model/parsers"
-	"github.com/ollama/ollama/parser"
-	"github.com/ollama/ollama/template"
-	"github.com/ollama/ollama/thinking"
-	"github.com/ollama/ollama/types/model"
-	"github.com/ollama/ollama/version"
-	"github.com/ollama/ollama/x/transfer"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/fs/gguf"
+	"github.com/lychee/lychee/manifest"
+	"github.com/lychee/lychee/model/parsers"
+	"github.com/lychee/lychee/parser"
+	"github.com/lychee/lychee/template"
+	"github.com/lychee/lychee/thinking"
+	"github.com/lychee/lychee/types/model"
+	"github.com/lychee/lychee/version"
+	"github.com/lychee/lychee/x/transfer"
 )
 
 // Blobs newer than this may belong to another process that has not written its
@@ -154,7 +154,7 @@ func (m *Model) ggufCapabilities(capabilities []model.Capability, source templat
 	modelArch := f.KeyValue("general.architecture").String()
 	switch source {
 	case templateCapabilitySelected:
-		if !usesOllamaRenderedChat(m) {
+		if !usesLycheeRenderedChat(m) {
 			capabilities = chatTemplateCapabilities(capabilities, f.KeyValue("tokenizer.chat_template").String())
 		}
 	case templateCapabilityChat:
@@ -659,7 +659,7 @@ func GetModel(name string) (*Model, error) {
 		}
 
 		switch layer.MediaType {
-		case "application/vnd.ollama.image.model":
+		case "application/vnd.lychee.image.model":
 			m.ModelPath = filename
 			m.ParentModel = layer.From
 			if m.isGGUF() {
@@ -675,16 +675,16 @@ func GetModel(name string) (*Model, error) {
 			}
 		case manifest.MediaTypeImageDraft:
 			m.DraftPath = filename
-		case "application/vnd.ollama.image.embed":
+		case "application/vnd.lychee.image.embed":
 			// Deprecated in versions  > 0.1.2
 			// TODO: remove this warning in a future version
 			slog.Info("WARNING: model contains embeddings, but embeddings in modelfiles have been deprecated and will be ignored.")
-		case "application/vnd.ollama.image.adapter":
+		case "application/vnd.lychee.image.adapter":
 			m.AdapterPaths = append(m.AdapterPaths, filename)
-		case "application/vnd.ollama.image.projector":
+		case "application/vnd.lychee.image.projector":
 			m.ProjectorPaths = append(m.ProjectorPaths, filename)
-		case "application/vnd.ollama.image.prompt",
-			"application/vnd.ollama.image.template":
+		case "application/vnd.lychee.image.prompt",
+			"application/vnd.lychee.image.template":
 			m.HasGoTemplate = true
 			bts, err := os.ReadFile(filename)
 			if err != nil {
@@ -695,14 +695,14 @@ func GetModel(name string) (*Model, error) {
 			if err != nil {
 				return nil, err
 			}
-		case "application/vnd.ollama.image.system":
+		case "application/vnd.lychee.image.system":
 			bts, err := os.ReadFile(filename)
 			if err != nil {
 				return nil, err
 			}
 
 			m.System = string(bts)
-		case "application/vnd.ollama.image.params":
+		case "application/vnd.lychee.image.params":
 			params, err := os.Open(filename)
 			if err != nil {
 				return nil, err
@@ -713,7 +713,7 @@ func GetModel(name string) (*Model, error) {
 			if err = json.NewDecoder(params).Decode(&m.Options); err != nil {
 				return nil, err
 			}
-		case "application/vnd.ollama.image.messages":
+		case "application/vnd.lychee.image.messages":
 			msgs, err := os.Open(filename)
 			if err != nil {
 				return nil, err
@@ -723,7 +723,7 @@ func GetModel(name string) (*Model, error) {
 			if err = json.NewDecoder(msgs).Decode(&m.Messages); err != nil {
 				return nil, err
 			}
-		case "application/vnd.ollama.image.license":
+		case "application/vnd.lychee.image.license":
 			bts, err := os.ReadFile(filename)
 			if err != nil {
 				return nil, err
@@ -740,7 +740,7 @@ func GetModel(name string) (*Model, error) {
 	}
 
 	if m.ModelPath != "" && m.isGGUF() && !modelHasPooling && !m.HasChatTemplate && (!m.HasGoTemplate || !envconfig.GoTemplate(true)) && m.Config.Renderer == "" && m.Config.Parser == "" && !usesHarmony {
-		slog.Warn("model is missing tokenizer.chat_template and Go TEMPLATE support is unavailable; chat responses may be poorly formatted", "model", m.Name, "env", "OLLAMA_GO_TEMPLATE=1")
+		slog.Warn("model is missing tokenizer.chat_template and Go TEMPLATE support is unavailable; chat responses may be poorly formatted", "model", m.Name, "env", "LYCHEE_GO_TEMPLATE=1")
 	}
 
 	return m, nil
@@ -1319,7 +1319,7 @@ func makeRequest(ctx context.Context, method string, requestURL *url.URL, header
 		}
 	}
 
-	req.Header.Set("User-Agent", fmt.Sprintf("ollama/%s (%s %s) Go/%s", version.Version, runtime.GOARCH, runtime.GOOS, runtime.Version()))
+	req.Header.Set("User-Agent", fmt.Sprintf("lychee/%s (%s %s) Go/%s", version.Version, runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
 	if s := req.Header.Get("Content-Length"); s != "" {
 		contentLength, err := strconv.ParseInt(s, 10, 64)

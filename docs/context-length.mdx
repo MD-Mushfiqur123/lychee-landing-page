@@ -5,7 +5,7 @@ title: Context length
 Context length is the maximum number of tokens that the model has access to in memory.  
 
 <Note>
-  Ollama defaults to the following context lengths based on VRAM:
+  Lychee defaults to the following context lengths based on VRAM:
     - < 24 GiB VRAM: 4k context
     - 24-48 GiB VRAM: 32k context
     - &gt;= 48 GiB VRAM: 256k context
@@ -21,19 +21,19 @@ Cloud models are set to their maximum context length by default.
 
 ### App
 
-Change the slider in the Ollama app under settings to your desired context length.
-![Context length in Ollama app](./images/ollama-settings.png)
+Change the slider in the Lychee app under settings to your desired context length.
+![Context length in Lychee app](./images/lychee-settings.png)
 
 ### CLI
-If editing the context length for Ollama is not possible, the context length can also be updated when serving Ollama.  
+If editing the context length for Lychee is not possible, the context length can also be updated when serving Lychee.  
 ```
-OLLAMA_CONTEXT_LENGTH=64000 ollama serve
+LYCHEE_CONTEXT_LENGTH=64000 lychee serve
 ```
 
 ### Check allocated context length and model offloading
-For best performance, use the maximum context length for a model, and avoid offloading the model to CPU. Verify the split under `PROCESSOR` using `ollama ps`.
+For best performance, use the maximum context length for a model, and avoid offloading the model to CPU. Verify the split under `PROCESSOR` using `lychee ps`.
 ```
-ollama ps
+lychee ps
 ```
 ```
 NAME             ID              SIZE      PROCESSOR    CONTEXT    UNTIL

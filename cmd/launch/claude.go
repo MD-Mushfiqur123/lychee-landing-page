@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/ollama/ollama/envconfig"
+	"github.com/lychee/lychee/envconfig"
 )
 
 // Claude implements Runner for Claude Code integration.
@@ -58,7 +58,7 @@ func (c *Claude) Run(model string, _ []LaunchModel, args []string) error {
 	env := append(os.Environ(),
 		"ANTHROPIC_BASE_URL="+envconfig.Host().String(),
 		"ANTHROPIC_API_KEY=",
-		"ANTHROPIC_AUTH_TOKEN=ollama",
+		"ANTHROPIC_AUTH_TOKEN=lychee",
 		"CLAUDE_CODE_ATTRIBUTION_HEADER=0",
 	)
 
@@ -68,7 +68,7 @@ func (c *Claude) Run(model string, _ []LaunchModel, args []string) error {
 	return cmd.Run()
 }
 
-// modelEnvVars returns Claude Code env vars that route all model tiers through Ollama.
+// modelEnvVars returns Claude Code env vars that route all model tiers through Lychee.
 func (c *Claude) modelEnvVars(model string) []string {
 	env := []string{
 		"ANTHROPIC_DEFAULT_OPUS_MODEL=" + model,

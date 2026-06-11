@@ -1,9 +1,9 @@
-# Ollama for macOS and Windows
+# Lychee for macOS and Windows
 
 ## Download
 
-- [macOS](https://github.com/ollama/app/releases/download/latest/Ollama.dmg)
-- [Windows](https://github.com/ollama/app/releases/download/latest/OllamaSetup.exe)
+- [macOS](https://github.com/lychee/app/releases/download/latest/Lychee.dmg)
+- [Windows](https://github.com/lychee/app/releases/download/latest/LycheeSetup.exe)
 
 ## Development
 
@@ -34,11 +34,11 @@ npm install
 npm run dev
 ```
 
-2. In a separate terminal, run the Ollama app with the `-dev` flag:
+2. In a separate terminal, run the Lychee app with the `-dev` flag:
 
 ```bash
 go generate ./... &&
-OLLAMA_DEBUG=1 go run ./cmd/app -dev
+LYCHEE_DEBUG=1 go run ./cmd/app -dev
 ```
 
 The `-dev` flag enables:
@@ -56,7 +56,7 @@ The `-dev` flag enables:
 - https://jrsoftware.org/isinfo.php
 
 
-**Dependencies** - either build a local copy of ollama, or use a github release
+**Dependencies** - either build a local copy of lychee, or use a github release
 ```powershell
 # Local dependencies
 .\scripts\deps_local.ps1
@@ -82,7 +82,7 @@ export SDKROOT=/Applications/Xcode_14.1.0.app/Contents/Developer/Platforms/MacOS
 export DEVELOPER_DIR=/Applications/Xcode_14.1.0.app/Contents/Developer
 ```
 
-**Dependencies** - either build a local copy of Ollama, or use a GitHub release:
+**Dependencies** - either build a local copy of Lychee, or use a GitHub release:
 ```sh
 # Local dependencies
 ./scripts/deps_local.sh

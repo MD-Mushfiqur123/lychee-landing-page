@@ -16,20 +16,20 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/cmd/config"
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/envconfig"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/cmd/config"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/envconfig"
 )
 
 const (
 	hermesInstallScript     = "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup"
 	hermesWindowsInstallURL = "https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.ps1"
 	hermesWindowsInstallCmd = "& ([scriptblock]::Create((irm " + hermesWindowsInstallURL + "))) -SkipSetup"
-	hermesProviderName      = "Ollama"
-	hermesProviderKey       = "ollama-launch"
-	hermesLegacyKey         = "ollama"
-	hermesPlaceholderKey    = "ollama"
+	hermesProviderName      = "Lychee"
+	hermesProviderKey       = "lychee-launch"
+	hermesLegacyKey         = "lychee"
+	hermesPlaceholderKey    = "lychee"
 	hermesGatewaySetupHint  = "hermes gateway setup"
 	hermesGatewaySetupTitle = "Connect a messaging app now?"
 )
@@ -39,7 +39,7 @@ var (
 	hermesLookPath  = exec.LookPath
 	hermesCommand   = exec.Command
 	hermesUserHome  = os.UserHomeDir
-	hermesOllamaURL = envconfig.ConnectableHost
+	hermesLycheeURL = envconfig.ConnectableHost
 )
 
 var hermesMessagingEnvGroups = [][]string{
@@ -61,7 +61,7 @@ var hermesMessagingEnvGroups = [][]string{
 }
 
 // Hermes is intentionally not an Editor integration: launch owns one primary
-// model and the local Ollama endpoint, while Hermes keeps its own discovery and
+// model and the local Lychee endpoint, while Hermes keeps its own discovery and
 // switching UX after startup.
 type Hermes struct{}
 
@@ -246,9 +246,9 @@ func (h *Hermes) Configure(model string) error {
 	applyHermesManagedProviders(cfg, hermesBaseURL(), model, models)
 
 	// launch writes the minimum provider/default-model settings needed to
-	// bootstrap Hermes against Ollama. The active provider stays on a
+	// bootstrap Hermes against Lychee. The active provider stays on a
 	// launch-owned key so /model stays aligned with the launcher-managed entry,
-	// and the Ollama endpoint lives in providers: so the picker shows one row.
+	// and the Lychee endpoint lives in providers: so the picker shows one row.
 	modelSection["provider"] = hermesProviderKey
 	modelSection["default"] = model
 	modelSection["base_url"] = hermesBaseURL()
@@ -256,7 +256,7 @@ func (h *Hermes) Configure(model string) error {
 	cfg["model"] = modelSection
 
 	// use Hermes' built-in web toolset for now.
-	// TODO(parthsareen): move this to using Ollama web search
+	// TODO(parthsareen): move this to using Lychee web search
 	cfg["toolsets"] = mergeHermesToolsets(cfg["toolsets"])
 
 	data, err := yaml.Marshal(cfg)
@@ -334,7 +334,7 @@ func (h *Hermes) ensureInstalledFor(command string) error {
 		}
 	}
 	if len(missing) > 0 {
-		return fmt.Errorf("Hermes is not installed and required dependencies are missing\n\nInstall the following first:\n  %s\n\nThen re-run:\n  ollama launch %s", strings.Join(missing, "\n  "), command)
+		return fmt.Errorf("Hermes is not installed and required dependencies are missing\n\nInstall the following first:\n  %s\n\nThen re-run:\n  lychee launch %s", strings.Join(missing, "\n  "), command)
 	}
 
 	ok, err := ConfirmPrompt("Hermes is not installed. Install now?")
@@ -366,7 +366,7 @@ func (h *Hermes) runInstallScript() error {
 }
 
 func (h *Hermes) listModels(defaultModel string) []string {
-	client := hermesOllamaClient()
+	client := hermesLycheeClient()
 	resp, err := client.List(context.Background())
 	if err != nil {
 		return []string{defaultModel}
@@ -482,7 +482,7 @@ func hermesConfigPath() (string, error) {
 }
 
 func hermesBaseURL() string {
-	return strings.TrimRight(hermesOllamaURL().String(), "/") + "/v1"
+	return strings.TrimRight(hermesLycheeURL().String(), "/") + "/v1"
 }
 
 func hermesEnvPath() (string, error) {
@@ -646,10 +646,10 @@ func hermesParseEnvFile(data []byte) map[string]string {
 	return out
 }
 
-func hermesOllamaClient() *api.Client {
-	// Hermes queries the same launch-resolved Ollama host that launch writes
+func hermesLycheeClient() *api.Client {
+	// Hermes queries the same launch-resolved Lychee host that launch writes
 	// into config, so model discovery follows the configured endpoint.
-	return api.NewClient(hermesOllamaURL(), http.DefaultClient)
+	return api.NewClient(hermesLycheeURL(), http.DefaultClient)
 }
 
 func applyHermesManagedProviders(cfg map[string]any, baseURL string, model string, models []string) {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ollama/ollama/logutil"
+	"github.com/lychee/lychee/logutil"
 )
 
 const spmWhitespaceSep = "▁"

@@ -15,9 +15,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/app/store"
-	"github.com/ollama/ollama/app/updater"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/app/store"
+	"github.com/lychee/lychee/app/updater"
 )
 
 func TestHandlePostApiSettings(t *testing.T) {
@@ -122,7 +122,7 @@ func TestHandlePostApiSettings(t *testing.T) {
 func TestHandlePostApiCloudSetting(t *testing.T) {
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
-	t.Setenv("OLLAMA_NO_CLOUD", "")
+	t.Setenv("LYCHEE_NO_CLOUD", "")
 
 	testStore := &store.Store{
 		DBPath: filepath.Join(t.TempDir(), "db.sqlite"),
@@ -183,7 +183,7 @@ func TestHandlePostApiCloudSetting(t *testing.T) {
 func TestHandleGetApiCloudSetting(t *testing.T) {
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
-	t.Setenv("OLLAMA_NO_CLOUD", "")
+	t.Setenv("LYCHEE_NO_CLOUD", "")
 
 	testStore := &store.Store{
 		DBPath: filepath.Join(t.TempDir(), "db.sqlite"),
@@ -400,8 +400,8 @@ func TestUserAgent(t *testing.T) {
 	ua := userAgent()
 
 	// The userAgent function should return a string in the format:
-	// "ollama/version (arch os) app/version Go/goversion"
-	// Example: "ollama/v0.1.28 (amd64 darwin) Go/go1.21.0"
+	// "lychee/version (arch os) app/version Go/goversion"
+	// Example: "lychee/v0.1.28 (amd64 darwin) Go/go1.21.0"
 
 	if ua == "" {
 		t.Fatal("userAgent returned empty string")
@@ -410,7 +410,7 @@ func TestUserAgent(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", nil)
 	req.Header.Set("User-Agent", ua)
 
-	// This is a copy of the logic ollama.com uses to parse the user agent
+	// This is a copy of the logic lychee.com uses to parse the user agent
 	clientInfoFromRequest := func(r *http.Request) struct {
 		Product    string
 		Version    string
@@ -465,8 +465,8 @@ func TestUserAgent(t *testing.T) {
 	}
 
 	info := clientInfoFromRequest(req)
-	if info.Product != "ollama" {
-		t.Errorf("Expected Product to be 'ollama', got '%s'", info.Product)
+	if info.Product != "lychee" {
+		t.Errorf("Expected Product to be 'lychee', got '%s'", info.Product)
 	}
 
 	if info.Version != "" && info.Version[0] != 'v' {
@@ -520,8 +520,8 @@ func TestUserAgentTransport(t *testing.T) {
 		t.Errorf("User-Agent mismatch\nExpected: %s\nReceived: %s", expectedUA, receivedUA)
 	}
 
-	if !strings.HasPrefix(receivedUA, "ollama/") {
-		t.Errorf("User-Agent should start with 'ollama/', got: %s", receivedUA)
+	if !strings.HasPrefix(receivedUA, "lychee/") {
+		t.Errorf("User-Agent should start with 'lychee/', got: %s", receivedUA)
 	}
 
 	t.Logf("User-Agent transport successfully set: %s", receivedUA)
@@ -536,7 +536,7 @@ func TestInferenceClientUsesUserAgent(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	t.Setenv("OLLAMA_HOST", ts.URL)
+	t.Setenv("LYCHEE_HOST", ts.URL)
 
 	server := &Server{}
 	client := server.inferenceClient()

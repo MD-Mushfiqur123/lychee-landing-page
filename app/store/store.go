@@ -1,7 +1,7 @@
 //go:build windows || darwin
 
 // Package store provides a simple JSON file store for the desktop application
-// to save and load data such as ollama server configuration, messages,
+// to save and load data such as lychee server configuration, messages,
 // login information and more.
 package store
 
@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/ollama/ollama/app/types/not"
+	"github.com/lychee/lychee/app/types/not"
 )
 
 type File struct {
@@ -121,16 +121,16 @@ func NewChat(id string) *Chat {
 }
 
 type Settings struct {
-	// Expose is a boolean that indicates if the ollama server should
+	// Expose is a boolean that indicates if the lychee server should
 	// be exposed to the network
 	Expose bool
 
-	// Browser is a boolean that indicates if the ollama server should
+	// Browser is a boolean that indicates if the lychee server should
 	// be exposed to browser windows (e.g. CORS set to allow all origins)
 	Browser bool
 
 	// Survey is a boolean that indicates if the user allows anonymous
-	// inference information to be shared with Ollama
+	// inference information to be shared with Lychee
 	Survey bool
 
 	// Models is a string that contains the models to load on startup
@@ -146,10 +146,10 @@ type Settings struct {
 	// WorkingDir specifies the working directory for all agent operations
 	WorkingDir string
 
-	// ContextLength specifies the context length for the ollama server (using OLLAMA_CONTEXT_LENGTH)
+	// ContextLength specifies the context length for the lychee server (using LYCHEE_CONTEXT_LENGTH)
 	ContextLength int
 
-	// TurboEnabled indicates if Ollama Turbo features are enabled
+	// TurboEnabled indicates if Lychee Turbo features are enabled
 	TurboEnabled bool
 
 	// Maps gpt-oss specific frontend name' BrowserToolEnabled' to db field 'websearch_enabled'
@@ -186,11 +186,11 @@ type Store struct {
 var defaultDBPath = func() string {
 	switch runtime.GOOS {
 	case "windows":
-		return filepath.Join(os.Getenv("LOCALAPPDATA"), "Ollama", "db.sqlite")
+		return filepath.Join(os.Getenv("LOCALAPPDATA"), "Lychee", "db.sqlite")
 	case "darwin":
-		return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "Ollama", "db.sqlite")
+		return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "Lychee", "db.sqlite")
 	default:
-		return filepath.Join(os.Getenv("HOME"), ".ollama", "db.sqlite")
+		return filepath.Join(os.Getenv("HOME"), ".lychee", "db.sqlite")
 	}
 }()
 
@@ -198,11 +198,11 @@ var defaultDBPath = func() string {
 var legacyConfigPath = func() string {
 	switch runtime.GOOS {
 	case "windows":
-		return filepath.Join(os.Getenv("LOCALAPPDATA"), "Ollama", "config.json")
+		return filepath.Join(os.Getenv("LOCALAPPDATA"), "Lychee", "config.json")
 	case "darwin":
-		return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "Ollama", "config.json")
+		return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "Lychee", "config.json")
 	default:
-		return filepath.Join(os.Getenv("HOME"), ".ollama", "config.json")
+		return filepath.Join(os.Getenv("HOME"), ".lychee", "config.json")
 	}
 }()
 
@@ -271,7 +271,7 @@ func (s *Store) ensureDB() error {
 }
 
 // migrateCloudSetting migrates legacy airplane_mode into server.json exactly once.
-// After this, cloud state is sourced from server.json OR OLLAMA_NO_CLOUD.
+// After this, cloud state is sourced from server.json OR LYCHEE_NO_CLOUD.
 func (s *Store) migrateCloudSetting(database *database) error {
 	migrated, err := database.isCloudSettingMigrated()
 	if err != nil {
@@ -381,13 +381,13 @@ func (s *Store) Settings() (Settings, error) {
 
 	// Set default models directory if not set
 	if settings.Models == "" {
-		dir := os.Getenv("OLLAMA_MODELS")
+		dir := os.Getenv("LYCHEE_MODELS")
 		if dir != "" {
 			settings.Models = dir
 		} else {
 			home, err := os.UserHomeDir()
 			if err == nil {
-				settings.Models = filepath.Join(home, ".ollama", "models")
+				settings.Models = filepath.Join(home, ".lychee", "models")
 			}
 		}
 	}

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 func TestVisionModels(t *testing.T) {
@@ -66,7 +66,7 @@ func TestVisionModels(t *testing.T) {
 			}
 			skipIfNotGPULoaded(ctx, t, client, req.Model, 80)
 
-			// Note: sometimes it returns "the ollamas" sometimes "the ollams"
+			// Note: sometimes it returns "the lychees" sometimes "the lychees"
 			// llava models on CPU can be quite slow to start
 			DoChat(ctx, t, client, req, []string{"the ollam"}, 240*time.Second, 30*time.Second)
 		})
@@ -97,7 +97,7 @@ func TestIntegrationSplitBatch(t *testing.T) {
 		},
 	}
 
-	// Note: sometimes it returns "the ollamas" sometimes "the ollams"
+	// Note: sometimes it returns "the lychees" sometimes "the lychees"
 	resp := "the ollam"
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()

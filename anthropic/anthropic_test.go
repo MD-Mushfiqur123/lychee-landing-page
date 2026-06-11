@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 const (
@@ -1798,9 +1798,9 @@ func TestConvertMessage_WebSearchToolResultErrorStillCreatesToolMessage(t *testi
 	}
 }
 
-func TestConvertOllamaToAnthropicResults(t *testing.T) {
-	ollamaResp := &OllamaWebSearchResponse{
-		Results: []OllamaWebSearchResult{
+func TestConvertLycheeToAnthropicResults(t *testing.T) {
+	lycheeResp := &LycheeWebSearchResponse{
+		Results: []LycheeWebSearchResult{
 			{
 				Title:   "Test Title",
 				URL:     "https://example.com",
@@ -1814,7 +1814,7 @@ func TestConvertOllamaToAnthropicResults(t *testing.T) {
 		},
 	}
 
-	results := ConvertOllamaToAnthropicResults(ollamaResp)
+	results := ConvertLycheeToAnthropicResults(lycheeResp)
 
 	if len(results) != 2 {
 		t.Fatalf("expected 2 results, got %d", len(results))

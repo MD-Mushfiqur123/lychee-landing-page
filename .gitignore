@@ -14,5 +14,11 @@ test_data
 __debug_bin*
 llama/build
 llama/vendor
-/ollama
+/lychee
 integration/testdata/models/
+node_modules/
+dist/
+.idea/
+.vscode/
+.DS_Store
+*.exe

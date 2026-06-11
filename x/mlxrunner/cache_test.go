@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/x/mlxrunner/cache"
-	"github.com/ollama/ollama/x/mlxrunner/mlx"
+	"github.com/lychee/lychee/x/mlxrunner/cache"
+	"github.com/lychee/lychee/x/mlxrunner/mlx"
 )
 
 // snapshotTracker records every fakeSnapshot created and every Close() call

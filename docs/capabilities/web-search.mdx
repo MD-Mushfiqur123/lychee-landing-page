@@ -2,13 +2,13 @@
 title: Web search
 ---
 
-Ollama's web search API can be used to augment models with the latest information to reduce hallucinations and improve accuracy.
+Lychee’s web search API can be used to augment models with the latest information to reduce hallucinations and improve accuracy.
 
 Web search is provided as a REST API with deeper tool integrations in the Python and JavaScript libraries. This also enables models like OpenAI’s gpt-oss models to conduct long-running research tasks.
 
 ## Authentication
 
-For access to Ollama's web search API, create an [API key](https://ollama.com/settings/keys). A free Ollama account is required.
+For access to Lychee’s web search API, create an [API key](https://lychee.ai/settings/keys). A free Lychee account is required.
 
 ## Web search API
 
@@ -16,7 +16,7 @@ Performs a web search for a single query and returns relevant results.
 
 ### Request
 
-`POST https://ollama.com/api/web_search`
+`POST https://lychee.ai/api/web_search`
 
 - `query` (string, required): the search query string
 - `max_results` (integer, optional): maximum results to return (default 5, max 10)
@@ -33,16 +33,16 @@ Returns an object containing:
 ### Examples
 
 <Note>
-  Ensure OLLAMA_API_KEY is set or it must be passed in the Authorization header.
+  Ensure LYCHEE_API_KEY is set or it must be passed in the Authorization header.
 </Note>
 
 #### cURL Request
 
 ```bash
-curl https://ollama.com/api/web_search \
-  --header "Authorization: Bearer $OLLAMA_API_KEY" \
+curl https://lychee.ai/api/web_search \
+  --header "Authorization: Bearer $LYCHEE_API_KEY" \
 	-d '{
-	  "query":"what is ollama?"
+	  "query":"what is lychee?"
 	}'
 ```
 
@@ -52,18 +52,18 @@ curl https://ollama.com/api/web_search \
 {
   "results": [
     {
-      "title": "Ollama",
-      "url": "https://ollama.com/",
+      "title": "Lychee",
+      "url": "https://lychee.ai/",
       "content": "Cloud models are now available..."
     },
     {
-      "title": "What is Ollama? Introduction to the AI model management tool",
-      "url": "https://www.hostinger.com/tutorials/what-is-ollama",
+      "title": "What is Lychee? Introduction to the AI model management tool",
+      "url": "https://www.hostinger.com/tutorials/what-is-lychee",
       "content": "Ariffud M. 6min Read..."
     },
     {
-      "title": "Ollama Explained: Transforming AI Accessibility and Language ...",
-      "url": "https://www.geeksforgeeks.org/artificial-intelligence/ollama-explained-transforming-ai-accessibility-and-language-processing/",
+      "title": "Lychee Explained: Transforming AI Accessibility and Language ...",
+      "url": "https://www.geeksforgeeks.org/artificial-intelligence/lychee-explained-transforming-ai-accessibility-and-language-processing/",
       "content": "Data Science Data Science Projects Data Analysis..."
     }
   ]
@@ -73,8 +73,8 @@ curl https://ollama.com/api/web_search \
 #### Python library
 
 ```python
-import ollama
-response = ollama.web_search("What is Ollama?")
+import lychee
+response = lychee.web_search("What is Lychee?")
 print(response)
 ```
 
@@ -84,33 +84,33 @@ print(response)
 
 results = [
     {
-        "title": "Ollama",
-        "url": "https://ollama.com/",
-        "content": "Cloud models are now available in Ollama..."
+        "title": "Lychee",
+        "url": "https://lychee.ai/",
+        "content": "Cloud models are now available in Lychee..."
     },
     {
-        "title": "What is Ollama? Features, Pricing, and Use Cases - Walturn",
-        "url": "https://www.walturn.com/insights/what-is-ollama-features-pricing-and-use-cases",
+        "title": "What is Lychee? Features, Pricing, and Use Cases - Walturn",
+        "url": "https://www.walturn.com/insights/what-is-lychee-features-pricing-and-use-cases",
         "content": "Our services..."
     },
     {
-        "title": "Complete Ollama Guide: Installation, Usage & Code Examples",
-        "url": "https://collabnix.com/complete-ollama-guide-installation-usage-code-examples",
+        "title": "Complete Lychee Guide: Installation, Usage & Code Examples",
+        "url": "https://collabnix.com/complete-lychee-guide-installation-usage-code-examples",
         "content": "Join our Discord Server..."
     }
 ]
 
 ```
 
-More Ollama [Python example](https://github.com/ollama/ollama-python/blob/main/examples/web-search.py)
+More Lychee [Python example](https://github.com/lychee/lychee-python/blob/main/examples/web-search.py)
 
 #### JavaScript Library
 
 ```tsx
-import { Ollama } from "ollama";
+import { Lychee } from "lychee";
 
-const client = new Ollama();
-const results = await client.webSearch("what is ollama?");
+const client = new Lychee();
+const results = await client.webSearch("what is lychee?");
 console.log(JSON.stringify(results, null, 2));
 ```
 
@@ -120,25 +120,25 @@ console.log(JSON.stringify(results, null, 2));
 {
   "results": [
     {
-      "title": "Ollama",
-      "url": "https://ollama.com/",
+      "title": "Lychee",
+      "url": "https://lychee.ai/",
       "content": "Cloud models are now available..."
     },
     {
-      "title": "What is Ollama? Introduction to the AI model management tool",
-      "url": "https://www.hostinger.com/tutorials/what-is-ollama",
-      "content": "Ollama is an open-source tool..."
+      "title": "What is Lychee? Introduction to the AI model management tool",
+      "url": "https://www.hostinger.com/tutorials/what-is-lychee",
+      "content": "Lychee is an open-source tool..."
     },
     {
-      "title": "Ollama Explained: Transforming AI Accessibility and Language Processing",
-      "url": "https://www.geeksforgeeks.org/artificial-intelligence/ollama-explained-transforming-ai-accessibility-and-language-processing/",
-      "content": "Ollama is a groundbreaking..."
+      "title": "Lychee Explained: Transforming AI Accessibility and Language Processing",
+      "url": "https://www.geeksforgeeks.org/artificial-intelligence/lychee-explained-transforming-ai-accessibility-and-language-processing/",
+      "content": "Lychee is a groundbreaking..."
     }
   ]
 }
 ```
 
-More Ollama [JavaScript example](https://github.com/ollama/ollama-js/blob/main/examples/websearch/websearch-tools.ts)
+More Lychee [JavaScript example](https://github.com/lychee/lychee-js/blob/main/examples/websearch/websearch-tools.ts)
 
 ## Web fetch API
 
@@ -146,7 +146,7 @@ Fetches a single web page by URL and returns its content.
 
 ### Request
 
-`POST https://ollama.com/api/web_fetch`
+`POST https://lychee.ai/api/web_fetch`
 
 - `url` (string, required): the URL to fetch
 
@@ -164,11 +164,11 @@ Returns an object containing:
 
 ```python
 curl --request POST \
-  --url https://ollama.com/api/web_fetch \
-  --header "Authorization: Bearer $OLLAMA_API_KEY" \
+  --url https://lychee.ai/api/web_fetch \
+  --header "Authorization: Bearer $LYCHEE_API_KEY" \
   --header 'Content-Type: application/json' \
   --data '{
-      "url": "ollama.com"
+      "url": "lychee.ai"
   }'
 ```
 
@@ -176,12 +176,12 @@ curl --request POST \
 
 ```json
 {
-  "title": "Ollama",
-  "content": "[Cloud models](https://ollama.com/blog/cloud-models) are now available in Ollama...",
+  "title": "Lychee",
+  "content": "[Cloud models](https://lychee.ai/blog/cloud-models) are now available in Lychee...",
   "links": [
-    "http://ollama.com/",
-    "http://ollama.com/models",
-    "https://github.com/ollama/ollama"
+    "http://lychee.ai/",
+    "http://lychee.ai/models",
+    "https://github.com/lychee/lychee"
   ]
 
 ```
@@ -189,9 +189,9 @@ curl --request POST \
 #### Python SDK
 
 ```python
-from ollama import web_fetch
+from lychee import web_fetch
 
-result = web_fetch('https://ollama.com')
+result = web_fetch('https://lychee.ai')
 print(result)
 ```
 
@@ -199,21 +199,21 @@ print(result)
 
 ```python
 WebFetchResponse(
-    title='Ollama',
-    content='[Cloud models](https://ollama.com/blog/cloud-models) are now available in Ollama\n\n**Chat & build
-with open models**\n\n[Download](https://ollama.com/download) [Explore
-models](https://ollama.com/models)\n\nAvailable for macOS, Windows, and Linux',
-    links=['https://ollama.com/', 'https://ollama.com/models', 'https://github.com/ollama/ollama']
+    title='Lychee',
+    content='[Cloud models](https://lychee.ai/blog/cloud-models) are now available in Lychee\n\n**Chat & build
+with open models**\n\n[Download](https://lychee.ai/download) [Explore
+models](https://lychee.ai/models)\n\nAvailable for macOS, Windows, and Linux',
+    links=['https://lychee.ai/', 'https://lychee.ai/models', 'https://github.com/lychee/lychee']
 )
 ```
 
 #### JavaScript SDK
 
 ```tsx
-import { Ollama } from "ollama";
+import { Lychee } from "lychee";
 
-const client = new Ollama();
-const fetchResult = await client.webFetch("https://ollama.com");
+const client = new Lychee();
+const fetchResult = await client.webFetch("https://lychee.ai");
 console.log(JSON.stringify(fetchResult, null, 2));
 ```
 
@@ -221,32 +221,32 @@ console.log(JSON.stringify(fetchResult, null, 2));
 
 ```json
 {
-  "title": "Ollama",
-  "content": "[Cloud models](https://ollama.com/blog/cloud-models) are now available in Ollama...",
+  "title": "Lychee",
+  "content": "[Cloud models](https://lychee.ai/blog/cloud-models) are now available in Lychee...",
   "links": [
-    "https://ollama.com/",
-    "https://ollama.com/models",
-    "https://github.com/ollama/ollama"
+    "https://lychee.ai/",
+    "https://lychee.ai/models",
+    "https://github.com/lychee/lychee"
   ]
 }
 ```
 
 ## Building a search agent
 
-Use Ollama’s web search API as a tool to build a mini search agent.
+Use Lychee’s web search API as a tool to build a mini search agent.
 
 This example uses Alibaba’s Qwen 3 model with 4B parameters.
 
 ```bash
-ollama pull qwen3:4b
+lychee pull qwen3:4b
 ```
 
 ```python
-from ollama import chat, web_fetch, web_search
+from lychee import chat, web_fetch, web_search
 
 available_tools = {'web_search': web_search, 'web_fetch': web_fetch}
 
-messages = [{'role': 'user', 'content': "what is ollama's new engine"}]
+messages = [{'role': 'user', 'content': "what is lychee's new engine"}]
 
 while True:
   response = chat(
@@ -279,16 +279,16 @@ while True:
 **Result**
 
 ```
-Thinking:  Okay, the user is asking about Ollama's new engine. I need to figure out what they're referring to. Ollama is a company that develops large language models, so maybe they've released a new model or an updated version of their existing engine....
+Thinking:  Okay, the user is asking about Lychee’s new engine. I need to figure out what they’re referring to. Lychee is a company that develops large language models, so maybe they’ve released a new model or an updated version of their existing engine....
 
-Tool calls:  [ToolCall(function=Function(name='web_search', arguments={'max_results': 3, 'query': 'Ollama new engine'}))]
-Result:  results=[WebSearchResult(content='# New model scheduling\n\n## September 23, 2025\n\nOllama now includes a significantly improved model scheduling system. Ahead of running a model, Ollama’s new engine
+Tool calls:  [ToolCall(function=Function(name=’web_search’, arguments={‘max_results’: 3, ‘query’: ‘Lychee new engine’}))]
+Result:  results=[WebSearchResult(content=’# New model scheduling\n\n## September 23, 2025\n\nLychee now includes a significantly improved model scheduling system. Ahead of running a model, Lychee’s new engine
 
-Thinking:  Okay, the user asked about Ollama's new engine. Let me look at the search results.
+Thinking:  Okay, the user asked about Lychee’s new engine. Let me look at the search results.
 
 First result is from September 23, 2025, talking about new model scheduling. It mentions improved memory management, reduced crashes, better GPU utilization, and multi-GPU performance. Examples show speed improvements and accurate memory reporting. Supported models include gemma3, llama4, qwen3, etc...
 
-Content:  Ollama has introduced two key updates to its engine, both released in 2025:
+Content:  Lychee has introduced two key updates to its engine, both released in 2025:
 
 1. **Enhanced Model Scheduling (September 23, 2025)**
    - **Precision Memory Management**: Exact memory allocation reduces out-of-memory crashes and optimizes GPU utilization.
@@ -300,20 +300,20 @@ Content:  Ollama has introduced two key updates to its engine, both released in 
    - **Vision Support**: First-class support for vision models, including `llama4:scout` (109B parameters), `gemma3`, `qwen2.5vl`, and `mistral-small3.1`.
    - **Multimodal Tasks**: Examples include identifying animals in multiple images, answering location-based questions from videos, and document scanning.
 
-These updates highlight Ollama's focus on efficiency, performance, and expanded capabilities for both text and vision tasks.
+These updates highlight Lychee’s focus on efficiency, performance, and expanded capabilities for both text and vision tasks.
 ```
 
 ### Context length and agents
 
-Web search results can return thousands of tokens. It is recommended to increase the context length of the model to at least ~32000 tokens. Search agents work best with full context length. [Ollama's cloud models](https://docs.ollama.com/cloud) run at the full context length.
+Web search results can return thousands of tokens. It is recommended to increase the context length of the model to at least ~32000 tokens. Search agents work best with full context length. [Lychee's cloud models](https://docs.lychee.ai/cloud) run at the full context length.
 
 ## MCP Server
 
-You can enable web search in any MCP client through the [Python MCP server](https://github.com/ollama/ollama-python/blob/main/examples/web-search-mcp.py).
+You can enable web search in any MCP client through the [Python MCP server](https://github.com/lychee/lychee-python/blob/main/examples/web-search-mcp.py).
 
 ### Cline
 
-Ollama's web search can be integrated with Cline easily using the MCP server configuration.
+Lychee's web search can be integrated with Cline easily using the MCP server configuration.
 
 `Manage MCP Servers` > `Configure MCP Servers` > Add the following configuration:
 
@@ -324,7 +324,7 @@ Ollama's web search can be integrated with Cline easily using the MCP server con
       "type": "stdio",
       "command": "uv",
       "args": ["run", "path/to/web-search-mcp.py"],
-      "env": { "OLLAMA_API_KEY": "your_api_key_here" }
+      "env": { "LYCHEE_API_KEY": "your_api_key_here" }
     }
   }
 }
@@ -334,7 +334,7 @@ Ollama's web search can be integrated with Cline easily using the MCP server con
 
 ### Codex
 
-Ollama works well with OpenAI's Codex tool.
+Lychee works well with OpenAI's Codex tool.
 
 Add the following configuration to `~/.codex/config.toml`
 
@@ -342,14 +342,14 @@ Add the following configuration to `~/.codex/config.toml`
 [mcp_servers.web_search]
 command = "uv"
 args = ["run", "path/to/web-search-mcp.py"]
-env = { "OLLAMA_API_KEY" = "your_api_key_here" }
+env = { "LYCHEE_API_KEY" = "your_api_key_here" }
 ```
 
 ![Codex MCP Configuration](/images/codex-mcp.png)
 
 ### Goose
 
-Ollama can integrate with Goose via its MCP feature.
+Lychee can integrate with Goose via its MCP feature.
 
 ![Goose MCP Configuration 1](/images/goose-mcp-1.png)
 
@@ -357,4 +357,4 @@ Ollama can integrate with Goose via its MCP feature.
 
 ### Other integrations
 
-Ollama can be integrated into most of the tools available either through direct integration of Ollama's API, Python / JavaScript libraries, OpenAI compatible API, and MCP server integration.
+Lychee can be integrated into most of the tools available either through direct integration of Lychee's API, Python / JavaScript libraries, OpenAI compatible API, and MCP server integration.

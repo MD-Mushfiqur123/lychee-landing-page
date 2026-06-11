@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	modelpkg "github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	modelpkg "github.com/lychee/lychee/types/model"
 )
 
 func TestCodexIntegration(t *testing.T) {
@@ -32,7 +32,7 @@ func TestCodexArgs(t *testing.T) {
 	c := &Codex{}
 	catalogPath := filepath.Join("tmp", "model.json")
 	managedArgs := []string{
-		"--profile", "ollama-launch",
+		"--profile", "lychee-launch",
 		"-c", fmt.Sprintf("%s=%q", codexRootModelProviderKey, codexProfileName),
 		"-c", fmt.Sprintf("model_providers.%s.name=%q", codexProfileName, codexProviderName),
 		"-c", fmt.Sprintf("model_providers.%s.base_url=%q", codexProfileName, codexBaseURL()),
@@ -90,7 +90,7 @@ func TestCodexArgsRejectManagedOverrides(t *testing.T) {
 		{"--model=other"},
 		{"-c", `model_catalog_json="/tmp/other.json"`},
 		{"--config", `model_provider="openai"`},
-		{"--config=model_providers.ollama-launch.base_url=\"http://other.invalid/v1/\""},
+		{"--config=model_providers.lychee-launch.base_url=\"http://other.invalid/v1/\""},
 	} {
 		t.Run(strings.Join(extra, " "), func(t *testing.T) {
 			_, err := c.args("llama3.2", "", extra)
@@ -104,7 +104,7 @@ func TestCodexArgsRejectManagedOverrides(t *testing.T) {
 func TestWriteCodexProfileConfig(t *testing.T) {
 	t.Run("creates new file when none exists", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		profilePath := filepath.Join(tmpDir, "ollama-launch.config.toml")
+		profilePath := filepath.Join(tmpDir, "lychee-launch.config.toml")
 		catalogPath := filepath.Join(tmpDir, "model.json")
 
 		if err := writeCodexProfileConfig(profilePath, "llama3.2", catalogPath); err != nil {
@@ -119,10 +119,10 @@ func TestWriteCodexProfileConfig(t *testing.T) {
 		content := string(data)
 		for _, want := range []string{
 			`model = "llama3.2"`,
-			`model_provider = "ollama-launch"`,
+			`model_provider = "lychee-launch"`,
 			fmt.Sprintf("model_catalog_json = %q", catalogPath),
-			"[model_providers.ollama-launch]",
-			`name = "Ollama"`,
+			"[model_providers.lychee-launch]",
+			`name = "Lychee"`,
 			`base_url = "http://127.0.0.1:11434/v1/"`,
 			`wire_api = "responses"`,
 		} {
@@ -133,7 +133,7 @@ func TestWriteCodexProfileConfig(t *testing.T) {
 		if got, ok := codexRootStringValueOK(content, "profile"); ok {
 			t.Fatalf("legacy root profile should not be generated, got %q in:\n%s", got, content)
 		}
-		if strings.Contains(content, "[profiles.ollama-launch]") {
+		if strings.Contains(content, "[profiles.lychee-launch]") {
 			t.Fatalf("legacy profile section should not be generated, got:\n%s", content)
 		}
 		if err := codexValidateConfigText(content); err != nil {
@@ -144,7 +144,7 @@ func TestWriteCodexProfileConfig(t *testing.T) {
 	t.Run("overwrites owned profile and backs up previous profile", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		setTestHome(t, tmpDir)
-		profilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+		profilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 		if err := os.MkdirAll(filepath.Dir(profilePath), 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -162,13 +162,13 @@ func TestWriteCodexProfileConfig(t *testing.T) {
 		if strings.Contains(content, "old-provider") {
 			t.Fatalf("profile should be replaced, got:\n%s", content)
 		}
-		assertBackupContains(t, filepath.Join(fileutil.BackupDir(), "ollama-launch.config.toml.*"), "original-codex-profile-backup-marker")
+		assertBackupContains(t, filepath.Join(fileutil.BackupDir(), "lychee-launch.config.toml.*"), "original-codex-profile-backup-marker")
 	})
 
-	t.Run("uses custom OLLAMA_HOST", func(t *testing.T) {
-		t.Setenv("OLLAMA_HOST", "http://myhost:9999")
+	t.Run("uses custom LYCHEE_HOST", func(t *testing.T) {
+		t.Setenv("LYCHEE_HOST", "http://myhost:9999")
 		tmpDir := t.TempDir()
-		profilePath := filepath.Join(tmpDir, "ollama-launch.config.toml")
+		profilePath := filepath.Join(tmpDir, "lychee-launch.config.toml")
 
 		if err := writeCodexProfileConfig(profilePath, "llama3.2", ""); err != nil {
 			t.Fatal(err)
@@ -183,9 +183,9 @@ func TestWriteCodexProfileConfig(t *testing.T) {
 	})
 
 	t.Run("uses connectable host for unspecified bind address", func(t *testing.T) {
-		t.Setenv("OLLAMA_HOST", "http://0.0.0.0:11434")
+		t.Setenv("LYCHEE_HOST", "http://0.0.0.0:11434")
 		tmpDir := t.TempDir()
-		profilePath := filepath.Join(tmpDir, "ollama-launch.config.toml")
+		profilePath := filepath.Join(tmpDir, "lychee-launch.config.toml")
 
 		if err := writeCodexProfileConfig(profilePath, "", ""); err != nil {
 			t.Fatal(err)
@@ -217,13 +217,13 @@ func TestEnsureCodexConfig(t *testing.T) {
 			t.Fatalf("root config.toml should not be created by CLI config refresh, err=%v", err)
 		}
 
-		profilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+		profilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 		data, err := os.ReadFile(profilePath)
 		if err != nil {
 			t.Fatalf("profile config not created: %v", err)
 		}
 		content := string(data)
-		if strings.Contains(content, "[profiles.ollama-launch]") {
+		if strings.Contains(content, "[profiles.lychee-launch]") {
 			t.Fatalf("legacy profile section should not be generated, got:\n%s", content)
 		}
 		if got := codexRootStringValue(content, "model"); got != "llama3.2" {
@@ -298,18 +298,18 @@ func TestEnsureCodexConfig(t *testing.T) {
 		if _, err := os.Stat(configPath); !os.IsNotExist(err) {
 			t.Fatalf("root config.toml should not be created by CLI config refresh, err=%v", err)
 		}
-		profilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+		profilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 		data, err := os.ReadFile(profilePath)
 		if err != nil {
 			t.Fatal(err)
 		}
 		content := string(data)
 
-		if strings.Contains(content, "[profiles.ollama-launch]") {
+		if strings.Contains(content, "[profiles.lychee-launch]") {
 			t.Fatalf("legacy profile section should not be generated, got:\n%s", content)
 		}
-		if strings.Count(content, "[model_providers.ollama-launch]") != 1 {
-			t.Errorf("expected exactly one [model_providers.ollama-launch] section after two calls, got %d", strings.Count(content, "[model_providers.ollama-launch]"))
+		if strings.Count(content, "[model_providers.lychee-launch]") != 1 {
+			t.Errorf("expected exactly one [model_providers.lychee-launch] section after two calls, got %d", strings.Count(content, "[model_providers.lychee-launch]"))
 		}
 	})
 
@@ -322,12 +322,12 @@ func TestEnsureCodexConfig(t *testing.T) {
 			t.Fatal(err)
 		}
 		existing := "" +
-			`profile = "ollama-launch"` + "\n" +
+			`profile = "lychee-launch"` + "\n" +
 			`model = "gpt-5.5"` + "\n" +
 			`model_provider = "openai"` + "\n\n" +
-			"[profiles.ollama-launch]\n" +
+			"[profiles.lychee-launch]\n" +
 			`model = "old-local"` + "\n" +
-			`model_provider = "ollama-launch"` + "\n\n" +
+			`model_provider = "lychee-launch"` + "\n\n" +
 			"[profiles.default]\n" +
 			`model = "gpt-5.5"` + "\n"
 		if err := os.WriteFile(configPath, []byte(existing), 0o644); err != nil {
@@ -359,7 +359,7 @@ func TestEnsureCodexConfig(t *testing.T) {
 			}
 		}
 
-		profilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+		profilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 		profileData, err := os.ReadFile(profilePath)
 		if err != nil {
 			t.Fatal(err)
@@ -367,7 +367,7 @@ func TestEnsureCodexConfig(t *testing.T) {
 		if !strings.Contains(string(profileData), `model = "llama3.2"`) {
 			t.Fatalf("managed profile was not written with selected model:\n%s", profileData)
 		}
-		assertBackupContains(t, filepath.Join(fileutil.BackupDir(), "config.toml.*"), `profile = "ollama-launch"`)
+		assertBackupContains(t, filepath.Join(fileutil.BackupDir(), "config.toml.*"), `profile = "lychee-launch"`)
 	})
 }
 
@@ -395,7 +395,7 @@ func TestCodexRestoreRemovesCLIProfileAndCatalogWithoutChangingUserRootConfig(t 
 		t.Fatalf("Restore returned error: %v", err)
 	}
 
-	profilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+	profilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 	if _, err := os.Stat(profilePath); !os.IsNotExist(err) {
 		t.Fatalf("CLI profile should be removed, got err=%v", err)
 	}
@@ -418,20 +418,20 @@ func TestCodexRestoreDoesNotRewriteRootConfig(t *testing.T) {
 
 	configPath := filepath.Join(tmpDir, ".codex", "config.toml")
 	catalogPath := filepath.Join(tmpDir, ".codex", "model.json")
-	profilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+	profilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	legacyConfig := "" +
-		`profile = "ollama-launch"` + "\n" +
+		`profile = "lychee-launch"` + "\n" +
 		`model = "llama3.2"` + "\n" +
-		`model_provider = "ollama-launch"` + "\n" +
+		`model_provider = "lychee-launch"` + "\n" +
 		fmt.Sprintf("model_catalog_json = %q\n\n", catalogPath) +
-		"[model_providers.ollama-launch]\n" +
-		`name = "Ollama"` + "\n" +
+		"[model_providers.lychee-launch]\n" +
+		`name = "Lychee"` + "\n" +
 		`base_url = "http://127.0.0.1:11434/v1/"` + "\n" +
 		`wire_api = "responses"` + "\n\n" +
-		"[profiles.ollama-launch]\n" +
+		"[profiles.lychee-launch]\n" +
 		`model = "llama3.2"` + "\n\n" +
 		"[tools]\n" +
 		`web_search = true` + "\n"
@@ -441,7 +441,7 @@ func TestCodexRestoreDoesNotRewriteRootConfig(t *testing.T) {
 	if err := os.WriteFile(catalogPath, []byte(`{"models":[]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(profilePath, []byte(`model_provider = "ollama-launch"`), 0o644); err != nil {
+	if err := os.WriteFile(profilePath, []byte(`model_provider = "lychee-launch"`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -471,7 +471,7 @@ func TestCodexRestoreDoesNotTouchCodexAppConfig(t *testing.T) {
 	configPath := filepath.Join(tmpDir, ".codex", "config.toml")
 	cliCatalogPath := filepath.Join(tmpDir, ".codex", "model.json")
 	appCatalogPath := filepath.Join(tmpDir, ".codex", codexAppModelCatalogFilename)
-	cliProfilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+	cliProfilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 	appProfilePath := filepath.Join(tmpDir, ".codex", codexAppProfileName+".config.toml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
 		t.Fatal(err)
@@ -481,11 +481,11 @@ func TestCodexRestoreDoesNotTouchCodexAppConfig(t *testing.T) {
 		fmt.Sprintf("model_provider = %q\n", codexAppProfileName) +
 		fmt.Sprintf("model_catalog_json = %q\n\n", appCatalogPath) +
 		codexProviderHeaderFor(codexAppProfileName) + "\n" +
-		`name = "Ollama"` + "\n" +
+		`name = "Lychee"` + "\n" +
 		`base_url = "http://127.0.0.1:11434/v1/"` + "\n" +
 		`wire_api = "responses"` + "\n\n" +
 		codexProviderHeader() + "\n" +
-		`name = "Ollama"` + "\n" +
+		`name = "Lychee"` + "\n" +
 		`base_url = "http://127.0.0.1:11434/v1/"` + "\n" +
 		`wire_api = "responses"` + "\n"
 	if err := os.WriteFile(configPath, []byte(appManagedConfig), 0o644); err != nil {
@@ -533,11 +533,11 @@ func TestLaunchIntegrationCodexRestoreDoesNotRequireInstalledCLI(t *testing.T) {
 	setTestHome(t, tmpDir)
 	t.Setenv("PATH", tmpDir)
 
-	profilePath := filepath.Join(tmpDir, ".codex", "ollama-launch.config.toml")
+	profilePath := filepath.Join(tmpDir, ".codex", "lychee-launch.config.toml")
 	if err := os.MkdirAll(filepath.Dir(profilePath), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(profilePath, []byte(`model_provider = "ollama-launch"`), 0o644); err != nil {
+	if err := os.WriteFile(profilePath, []byte(`model_provider = "lychee-launch"`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -615,7 +615,7 @@ func TestBuildCodexModelEntryContextWindow(t *testing.T) {
 			wantContext: 131072,
 		},
 		{
-			name: "OLLAMA_CONTEXT_LENGTH overrides local gguf inventory context",
+			name: "LYCHEE_CONTEXT_LENGTH overrides local gguf inventory context",
 			model: LaunchModel{
 				Name:          "llama3.2",
 				ContextLength: 131072,
@@ -672,9 +672,9 @@ func TestBuildCodexModelEntryContextWindow(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.envContextLen != "" {
-				t.Setenv("OLLAMA_CONTEXT_LENGTH", tt.envContextLen)
+				t.Setenv("LYCHEE_CONTEXT_LENGTH", tt.envContextLen)
 			} else {
-				t.Setenv("OLLAMA_CONTEXT_LENGTH", "")
+				t.Setenv("LYCHEE_CONTEXT_LENGTH", "")
 			}
 
 			entry := buildCodexModelEntry(tt.model)

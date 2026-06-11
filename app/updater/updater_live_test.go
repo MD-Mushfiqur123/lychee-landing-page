@@ -11,13 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/app/store"
-	"github.com/ollama/ollama/app/version"
+	"github.com/lychee/lychee/app/store"
+	"github.com/lychee/lychee/app/version"
 )
 
 // TestLiveAppUpdate exercises the production update endpoint and downloads the
 // current OS update artifact. It is intentionally excluded from normal test
-// runs because it depends on ollama.com and downloads a release artifact.
+// runs because it depends on lychee.com and downloads a release artifact.
 //
 // Run with:
 //
@@ -45,9 +45,9 @@ func TestLiveAppUpdate(t *testing.T) {
 	switch runtime.GOOS {
 	case "windows":
 		t.Setenv("LOCALAPPDATA", t.TempDir())
-		expectedFilename = "OllamaSetup.exe"
+		expectedFilename = "LycheeSetup.exe"
 	case "darwin":
-		expectedFilename = "Ollama-darwin.zip"
+		expectedFilename = "Lychee-darwin.zip"
 	default:
 		t.Fatalf("unsupported updater live test OS %q", runtime.GOOS)
 	}

@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/fs/ggml"
-	"github.com/ollama/ollama/ml"
+	"github.com/lychee/lychee/fs/ggml"
+	"github.com/lychee/lychee/ml"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -589,7 +589,7 @@ func TestLlamaServerCompletionWithMediaUsesRunnerMarker(t *testing.T) {
 	var portInt int
 	fmt.Sscanf(parts[len(parts)-1], "%d", &portInt)
 
-	const mediaMarker = "<__ollama_media_test__>"
+	const mediaMarker = "<__lychee_media_test__>"
 	runner := &llamaServerRunner{
 		port:        portInt,
 		cmd:         fakeRunningCmd(),
@@ -807,7 +807,7 @@ func TestLlamaServerWaitUntilRunningWaitsOnRecoverableStartupOOM(t *testing.T) {
 }
 
 func TestLlamaServerWaitUntilRunningTimesOutWhenLoadStalls(t *testing.T) {
-	t.Setenv("OLLAMA_LOAD_TIMEOUT", "10ms")
+	t.Setenv("LYCHEE_LOAD_TIMEOUT", "10ms")
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/health" {
@@ -838,7 +838,7 @@ func TestLlamaServerWaitUntilRunningTimesOutWhenLoadStalls(t *testing.T) {
 }
 
 func TestLlamaServerWaitUntilRunningExtendsTimeoutOnOutputActivity(t *testing.T) {
-	t.Setenv("OLLAMA_LOAD_TIMEOUT", "20ms")
+	t.Setenv("LYCHEE_LOAD_TIMEOUT", "20ms")
 
 	var activityCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1061,7 +1061,7 @@ func TestSetupLlamaServerCommandEnv(t *testing.T) {
 	t.Setenv(pathEnv, userLibDir)
 
 	cmd := exec.Command("echo")
-	SetupLlamaServerCommandEnv(cmd, exe, []string{ml.LibOllamaPath, gpuDir}, map[string]string{"OLLAMA_DEBUG": "1"})
+	SetupLlamaServerCommandEnv(cmd, exe, []string{ml.LibLycheePath, gpuDir}, map[string]string{"LYCHEE_DEBUG": "1"})
 
 	env := make(map[string]string)
 	for _, kv := range cmd.Env {
@@ -1074,8 +1074,8 @@ func TestSetupLlamaServerCommandEnv(t *testing.T) {
 	if got := env["GGML_BACKEND_PATH"]; got != backendPath {
 		t.Fatalf("GGML_BACKEND_PATH = %q, want %q", got, backendPath)
 	}
-	if got := env["OLLAMA_DEBUG"]; got != "1" {
-		t.Fatalf("OLLAMA_DEBUG = %q, want %q", got, "1")
+	if got := env["LYCHEE_DEBUG"]; got != "1" {
+		t.Fatalf("LYCHEE_DEBUG = %q, want %q", got, "1")
 	}
 
 	paths := filepath.SplitList(env[strings.ToUpper(pathEnv)])
@@ -1095,8 +1095,8 @@ func TestSetupLlamaServerCommandEnv(t *testing.T) {
 
 func TestFilteredEnvLogValue(t *testing.T) {
 	attrs := filteredEnv([]string{
-		"OLLAMA_DEBUG=1",
-		"OLLAMA_API_KEY=ollama-secret",
+		"LYCHEE_DEBUG=1",
+		"LYCHEE_API_KEY=lychee-secret",
 		"OPENAI_API_KEY=openai-secret",
 		"HF_TOKEN=hf-secret",
 		"GGML_BACKEND_PATH=/tmp/ggml",
@@ -1111,7 +1111,7 @@ func TestFilteredEnvLogValue(t *testing.T) {
 		got[attr.Key] = attr.Value.String()
 	}
 
-	for _, key := range []string{"OLLAMA_DEBUG", "OLLAMA_API_KEY", "OPENAI_API_KEY", "HF_TOKEN"} {
+	for _, key := range []string{"LYCHEE_DEBUG", "LYCHEE_API_KEY", "OPENAI_API_KEY", "HF_TOKEN"} {
 		if _, ok := got[key]; ok {
 			t.Fatalf("%s should not be logged: %#v", key, got)
 		}
@@ -1669,6 +1669,18 @@ func TestAppendBatchArgs(t *testing.T) {
 			numParallel: 2,
 			want:        []string{"--embedding", "-b", "1024", "-ub", "1024"},
 		},
+		{
+			name:        "generation decouples logical and physical batch when parallel",
+			opts:        api.Options{Runner: api.Runner{NumBatch: 2048}},
+			numParallel: 2,
+			want:        []string{"-b", "2048", "-ub", "512"},
+		},
+		{
+			name:        "generation decouples logical and physical batch when parallel with low batch size",
+			opts:        api.Options{Runner: api.Runner{NumBatch: 512}},
+			numParallel: 2,
+			want:        []string{"-b", "512", "-ub", "512"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -1917,7 +1929,7 @@ func TestAppendJinjaArgs(t *testing.T) {
 			want: []string{"base"},
 		},
 		{
-			name:   "ollama rendered path disables unused jinja template",
+			name:   "lychee rendered path disables unused jinja template",
 			config: LlamaServerConfig{DisableJinja: true},
 			want:   []string{"base", "--no-jinja", "--chat-template", "chatml"},
 		},
@@ -2064,15 +2076,15 @@ func setFlashAttentionEnv(t *testing.T, value string, set bool) {
 	t.Helper()
 
 	if set {
-		t.Setenv("OLLAMA_FLASH_ATTENTION", value)
+		t.Setenv("LYCHEE_FLASH_ATTENTION", value)
 		return
 	}
 
-	old, ok := os.LookupEnv("OLLAMA_FLASH_ATTENTION")
+	old, ok := os.LookupEnv("LYCHEE_FLASH_ATTENTION")
 	if ok {
-		t.Setenv("OLLAMA_FLASH_ATTENTION", old)
+		t.Setenv("LYCHEE_FLASH_ATTENTION", old)
 	}
-	os.Unsetenv("OLLAMA_FLASH_ATTENTION")
+	os.Unsetenv("LYCHEE_FLASH_ATTENTION")
 }
 
 func TestNormalizeEmbeddingError(t *testing.T) {

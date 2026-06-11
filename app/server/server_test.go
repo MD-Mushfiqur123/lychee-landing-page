@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/app/store"
+	"github.com/lychee/lychee/app/store"
 )
 
 func TestNew(t *testing.T) {
@@ -30,13 +30,13 @@ func TestNew(t *testing.T) {
 }
 
 func TestServerCmd(t *testing.T) {
-	os.Unsetenv("OLLAMA_HOST")
-	os.Unsetenv("OLLAMA_ORIGINS")
-	os.Unsetenv("OLLAMA_MODELS")
+	os.Unsetenv("LYCHEE_HOST")
+	os.Unsetenv("LYCHEE_ORIGINS")
+	os.Unsetenv("LYCHEE_MODELS")
 	var defaultModels string
 	home, err := os.UserHomeDir()
 	if err == nil {
-		defaultModels = filepath.Join(home, ".ollama", "models")
+		defaultModels = filepath.Join(home, ".lychee", "models")
 		os.MkdirAll(defaultModels, 0o755)
 	}
 
@@ -50,32 +50,32 @@ func TestServerCmd(t *testing.T) {
 		{
 			name:     "default",
 			settings: store.Settings{},
-			want:     []string{"OLLAMA_MODELS=" + defaultModels},
-			dont:     []string{"OLLAMA_HOST=", "OLLAMA_ORIGINS="},
+			want:     []string{"LYCHEE_MODELS=" + defaultModels},
+			dont:     []string{"LYCHEE_HOST=", "LYCHEE_ORIGINS="},
 		},
 		{
 			name:     "expose",
 			settings: store.Settings{Expose: true},
-			want:     []string{"OLLAMA_HOST=0.0.0.0", "OLLAMA_MODELS=" + defaultModels},
-			dont:     []string{"OLLAMA_ORIGINS="},
+			want:     []string{"LYCHEE_HOST=0.0.0.0", "LYCHEE_MODELS=" + defaultModels},
+			dont:     []string{"LYCHEE_ORIGINS="},
 		},
 		{
 			name:     "browser",
 			settings: store.Settings{Browser: true},
-			want:     []string{"OLLAMA_ORIGINS=*", "OLLAMA_MODELS=" + defaultModels},
-			dont:     []string{"OLLAMA_HOST="},
+			want:     []string{"LYCHEE_ORIGINS=*", "LYCHEE_MODELS=" + defaultModels},
+			dont:     []string{"LYCHEE_HOST="},
 		},
 		{
 			name:     "models",
 			settings: store.Settings{Models: tmpModels},
-			want:     []string{"OLLAMA_MODELS=" + tmpModels},
-			dont:     []string{"OLLAMA_HOST=", "OLLAMA_ORIGINS="},
+			want:     []string{"LYCHEE_MODELS=" + tmpModels},
+			dont:     []string{"LYCHEE_HOST=", "LYCHEE_ORIGINS="},
 		},
 		{
 			name:     "inaccessible_models",
 			settings: store.Settings{Models: "/nonexistent/external/drive/models"},
 			want:     []string{},
-			dont:     []string{"OLLAMA_MODELS="},
+			dont:     []string{"LYCHEE_MODELS="},
 		},
 		{
 			name: "all",
@@ -85,9 +85,9 @@ func TestServerCmd(t *testing.T) {
 				Models:  tmpModels,
 			},
 			want: []string{
-				"OLLAMA_HOST=0.0.0.0",
-				"OLLAMA_ORIGINS=*",
-				"OLLAMA_MODELS=" + tmpModels,
+				"LYCHEE_HOST=0.0.0.0",
+				"LYCHEE_ORIGINS=*",
+				"LYCHEE_MODELS=" + tmpModels,
 			},
 			dont: []string{},
 		},
@@ -145,22 +145,22 @@ func TestServerCmdCloudSettingEnv(t *testing.T) {
 	}{
 		{
 			name: "default cloud enabled",
-			want: "OLLAMA_NO_CLOUD=0",
+			want: "LYCHEE_NO_CLOUD=0",
 		},
 		{
 			name:     "env disables cloud",
 			envValue: "1",
-			want:     "OLLAMA_NO_CLOUD=1",
+			want:     "LYCHEE_NO_CLOUD=1",
 		},
 		{
 			name:          "config disables cloud",
-			configContent: `{"disable_ollama_cloud": true}`,
-			want:          "OLLAMA_NO_CLOUD=1",
+			configContent: `{"disable_lychee_cloud": true}`,
+			want:          "LYCHEE_NO_CLOUD=1",
 		},
 		{
 			name:     "invalid env disables cloud",
 			envValue: "invalid",
-			want:     "OLLAMA_NO_CLOUD=1",
+			want:     "LYCHEE_NO_CLOUD=1",
 		},
 	}
 
@@ -169,10 +169,10 @@ func TestServerCmdCloudSettingEnv(t *testing.T) {
 			tmpHome := t.TempDir()
 			t.Setenv("HOME", tmpHome)
 			t.Setenv("USERPROFILE", tmpHome)
-			t.Setenv("OLLAMA_NO_CLOUD", tt.envValue)
+			t.Setenv("LYCHEE_NO_CLOUD", tt.envValue)
 
 			if tt.configContent != "" {
-				configDir := filepath.Join(tmpHome, ".ollama")
+				configDir := filepath.Join(tmpHome, ".lychee")
 				if err := os.MkdirAll(configDir, 0o755); err != nil {
 					t.Fatalf("mkdir config dir: %v", err)
 				}
@@ -205,45 +205,45 @@ func TestServerCmdCloudSettingEnv(t *testing.T) {
 	}
 }
 
-func TestOllamaServeArgs(t *testing.T) {
+func TestLycheeServeArgs(t *testing.T) {
 	tests := []struct {
 		name string
 		args []string
 		want bool
 	}{
 		{
-			name: "system ollama serve",
-			args: []string{"ollama", "serve"},
+			name: "system lychee serve",
+			args: []string{"lychee", "serve"},
 			want: true,
 		},
 		{
-			name: "relative path ollama serve",
-			args: []string{"./ollama", "serve"},
+			name: "relative path lychee serve",
+			args: []string{"./lychee", "serve"},
 			want: true,
 		},
 		{
 			name: "serve after other flags",
-			args: []string{"./ollama", "--verbose", "serve"},
+			args: []string{"./lychee", "--verbose", "serve"},
 			want: true,
 		},
 		{
 			name: "start alias",
-			args: []string{"ollama", "start"},
+			args: []string{"lychee", "start"},
 			want: true,
 		},
 		{
 			name: "launch command",
-			args: []string{"ollama", "launch", "opencode"},
+			args: []string{"lychee", "launch", "opencode"},
 			want: false,
 		},
 		{
 			name: "run command with model named serve",
-			args: []string{"ollama", "run", "serve"},
+			args: []string{"lychee", "run", "serve"},
 			want: false,
 		},
 		{
 			name: "launch command with serve in passthrough args",
-			args: []string{"ollama", "launch", "codex", "--", "-p", "serve"},
+			args: []string{"lychee", "launch", "codex", "--", "-p", "serve"},
 			want: false,
 		},
 		{
@@ -255,8 +255,8 @@ func TestOllamaServeArgs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ollamaServeArgs(tt.args); got != tt.want {
-				t.Fatalf("ollamaServeArgs(%v) = %v, want %v", tt.args, got, tt.want)
+			if got := lycheeServeArgs(tt.args); got != tt.want {
+				t.Fatalf("lycheeServeArgs(%v) = %v, want %v", tt.args, got, tt.want)
 			}
 		})
 	}

@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Library – Lychee</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #888;
+      --accent: #e84393;
+      --accent2: #ff6db3;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --blue: #60a5fa;
+      --purple: #a78bfa;
+      --orange: #fb923c;
+      --teal: #2dd4bf;
+      --radius: 12px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo svg { width: 36px; height: 36px; }
+    .nav-logo span { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-cta {
+      background: var(--text); color: var(--bg) !important;
+      padding: 7px 18px; border-radius: 8px; font-weight: 600;
+      font-size: 0.85rem !important; transition: opacity 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ── HERO ── */
+    .page-hero {
+      padding: 120px 2rem 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,67,147,0.12) 0%, transparent 70%);
+      top: 0; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .page-hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.05;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 1rem;
+    }
+    .page-hero p { color: var(--muted); font-size: 1.15rem; max-width: 540px; margin: 0 auto 2.5rem; }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      max-width: 600px; margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); pointer-events: none;
+    }
+    #model-search {
+      width: 100%; padding: 14px 14px 14px 48px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text);
+      font-family: var(--font); font-size: 1rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    #model-search::placeholder { color: var(--muted); }
+    #model-search:focus { border-color: var(--accent); }
+
+    /* ── FILTER TABS ── */
+    .filter-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 3rem;
+    }
+    .filter-tab {
+      padding: 8px 20px; border-radius: 100px;
+      border: 1px solid var(--border);
+      background: transparent; color: var(--muted);
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; font-family: var(--font);
+    }
+    .filter-tab:hover { border-color: #555; color: var(--text); }
+    .filter-tab.active {
+      background: var(--accent); border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── CONTAINER ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+    /* ── FAMILY SECTION ── */
+    .family-section { margin-bottom: 3.5rem; }
+    .family-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 1.25rem; padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .family-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .family-name { font-size: 1.15rem; font-weight: 700; }
+    .family-count {
+      font-size: 0.78rem; background: var(--bg3); border: 1px solid var(--border);
+      padding: 3px 10px; border-radius: 100px; color: var(--muted);
+    }
+
+    /* ── MODEL CARDS GRID ── */
+    .models-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .model-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.4rem;
+      transition: border-color 0.25s, transform 0.25s;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .model-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .model-card:hover { border-color: #3a3a3a; transform: translateY(-3px); }
+    .model-card:hover::before { opacity: 1; }
+
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-name { font-size: 1rem; font-weight: 700; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .tag {
+      display: inline-flex; align-items: center;
+      font-size: 0.67rem; font-weight: 700;
+      padding: 3px 8px; border-radius: 100px;
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .tag-chat    { background: rgba(96,165,250,0.15); color: var(--blue); }
+    .tag-code    { background: rgba(74,222,128,0.12); color: var(--green); }
+    .tag-vision  { background: rgba(167,139,250,0.12); color: var(--purple); }
+    .tag-reasoning { background: rgba(250,204,21,0.12); color: var(--yellow); }
+    .tag-embedding { background: rgba(45,212,191,0.12); color: var(--teal); }
+    .tag-edge    { background: rgba(251,146,60,0.12); color: var(--orange); }
+    .tag-medical { background: rgba(248,113,113,0.12); color: #f87171; }
+    .tag-multilingual { background: rgba(232,67,147,0.12); color: var(--accent2); }
+    .tag-math     { background: rgba(250,204,21,0.12); color: var(--yellow); }
+    .tag-tools    { background: rgba(167,139,250,0.15); color: var(--purple); }
+    .tag-roleplay { background: rgba(232,67,147,0.15); color: var(--accent2); }
+    .tag-finance  { background: rgba(74,222,128,0.12); color: var(--green); }
+    .tag-audio    { background: rgba(45,212,191,0.15); color: var(--teal); }
+
+    .card-desc { color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+
+    .card-sizes { display: flex; gap: 6px; flex-wrap: wrap; }
+    .size-chip {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px 9px;
+      font-size: 0.73rem; font-weight: 600; color: var(--text);
+      font-family: var(--mono);
+    }
+
+    .card-footer {
+      display: flex; align-items: center; gap: 8px; margin-top: auto;
+      border-top: 1px solid var(--border); padding-top: 0.75rem;
+    }
+    .pull-cmd {
+      flex: 1; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px;
+      font-family: var(--mono); font-size: 0.78rem; color: var(--green);
+      overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    }
+    .copy-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: var(--bg3); border: 1px solid var(--border);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; flex-shrink: 0; color: var(--muted);
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    /* ── NO RESULTS ── */
+    .no-results {
+      text-align: center; padding: 4rem 2rem; color: var(--muted);
+      display: none;
+    }
+    .no-results.visible { display: block; }
+    .no-results h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      background: var(--bg2); border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex; align-items: center; justify-content: center;
+      gap: 3rem; flex-wrap: wrap;
+    }
+    .sb-item { text-align: center; }
+    .sb-num {
+      font-size: 1.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #fff, var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .sb-label { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 3rem 2rem; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1.5rem; max-width: 1100px; margin: 0 auto;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; }
+    .footer-links { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--muted); font-size: 0.8rem; }
+
+    /* ── HF BADGE ── */
+    .pull-cmd.hf::before { content:''; display:inline-block; width:12px; height:12px; background:url('https://cdn.simpleicons.org/huggingface/4ade80') no-repeat center/contain; margin-right:6px; vertical-align:middle; }
+
+    /* ── FADE-IN ── */
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .fade-in.visible { opacity: 1; transform: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .models-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="m-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="m-bump"><feGaussianBlur stdDeviation="0.5"/></filter>
+        <radialGradient id="m-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF8DC7"/><stop offset="40%" stop-color="#E84393"/><stop offset="78%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient>
+        <radialGradient id="m-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#C93578"/><stop offset="55%" stop-color="#A01E5F"/><stop offset="100%" stop-color="#6A1238"/></radialGradient>
+        <radialGradient id="m-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#901850"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient>
+        <radialGradient id="m-spec" cx="34%" cy="27%" r="28%"><stop offset="0%" stop-color="rgba(255,255,255,0.72)"/><stop offset="65%" stop-color="rgba(255,255,255,0.12)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+        <linearGradient id="m-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="55%" stop-color="#4CAF35"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient>
+        <linearGradient id="m-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient>
+        <radialGradient id="m-bglow" cx="50%" cy="55%" r="50%"><stop offset="0%" stop-color="rgba(232,67,147,0.2)"/><stop offset="100%" stop-color="rgba(232,67,147,0)"/></radialGradient>
+        <clipPath id="m-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath>
+      </defs>
+      <ellipse cx="100" cy="108" rx="78" ry="70" fill="url(#m-bglow)"/>
+      <ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#m-top)" filter="url(#m-glow)"/>
+      <path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#m-top)" opacity="0.88"/>
+      <path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#m-right)" opacity="0.92"/>
+      <path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#m-right)" opacity="0.82"/>
+      <path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#m-bot)" opacity="0.88"/>
+      <path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#m-bot)" opacity="0.78"/>
+      <g opacity="0.5" clip-path="url(#m-clip)">
+        <circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#m-bump)"/><circle cx="100" cy="70" r="4.5" fill="#FF6DB3" filter="url(#m-bump)"/><circle cx="128" cy="78" r="4" fill="#D44A8A" filter="url(#m-bump)"/>
+        <circle cx="60" cy="92" r="4" fill="#E84393" filter="url(#m-bump)"/><circle cx="86" cy="84" r="5" fill="#FF6DB3" filter="url(#m-bump)"/><circle cx="114" cy="84" r="4.5" fill="#D44A8A" filter="url(#m-bump)"/><circle cx="140" cy="92" r="4" fill="#B83070" filter="url(#m-bump)"/>
+        <circle cx="70" cy="97" r="5" fill="#FF6DB3" filter="url(#m-bump)"/><circle cx="100" cy="90" r="5" fill="#FF6DB3" filter="url(#m-bump)"/><circle cx="128" cy="97" r="5" fill="#C94080" filter="url(#m-bump)"/>
+        <circle cx="86" cy="105" r="5" fill="#FF6DB3" filter="url(#m-bump)"/><circle cx="100" cy="103" r="5" fill="#FF85BB" filter="url(#m-bump)"/><circle cx="114" cy="105" r="5" fill="#E84393" filter="url(#m-bump)"/>
+        <circle cx="96" cy="120" r="5" fill="#E84393" filter="url(#m-bump)"/>
+      </g>
+      <ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#m-spec)" opacity="0.88"/>
+      <ellipse cx="75" cy="77" rx="3.5" ry="2.5" fill="white" opacity="0.55"/>
+      <path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#m-stem)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <ellipse cx="99" cy="64" rx="5" ry="3.5" fill="#3D7A25"/>
+      <path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#m-leaf)"/>
+      <path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#m-leaf)" opacity="0.88"/>
+      <path d="M99,44 Q92,28 86,18 Q94,24 100,36 Q102,40 100,46 Z" fill="#3D9A28" opacity="0.72"/>
+    </svg>
+    <span>Lychee</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="models.html" class="active">Models</a></li>
+    <li><a href="docs.html">Docs</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="https://github.com/lychee/lychee" target="_blank">GitHub</a></li>
+    <li><a href="download.html" class="nav-cta">Download</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div style="font-size:0.8rem;font-weight:600;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:1rem">Model Library</div>
+  <h1>731+ Models<br>Ready to Run</h1>
+  <p>From tiny 135M edge models to massive 671B frontier models — all one command away. No account needed.</p>
+
+  <div class="search-wrap">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input type="text" id="model-search" placeholder="Search models by name, size, or capability..." autocomplete="off" />
+  </div>
+
+  <div class="filter-tabs">
+    <button class="filter-tab active" data-filter="all">All</button>
+    <button class="filter-tab" data-filter="chat">Chat</button>
+    <button class="filter-tab" data-filter="code">Code</button>
+    <button class="filter-tab" data-filter="vision">Vision</button>
+    <button class="filter-tab" data-filter="reasoning">Reasoning</button>
+    <button class="filter-tab" data-filter="embedding">Embedding</button>
+    <button class="filter-tab" data-filter="edge">Edge</button>
+    <button class="filter-tab" data-filter="medical">Medical</button>
+    <button class="filter-tab" data-filter="multilingual">Multilingual</button>
+    <button class="filter-tab" data-filter="tools">Tools/Agents</button>
+    <button class="filter-tab" data-filter="math">Math</button>
+    <button class="filter-tab" data-filter="roleplay">Roleplay</button>
+    <button class="filter-tab" data-filter="audio">Audio</button>
+    <button class="filter-tab" data-filter="finance">Finance</button>
+  </div>
+
+  <div style="display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:.8rem;color:var(--muted);margin-top:1rem">
+    <img src="https://cdn.simpleicons.org/github/888888" width="14" height="14" alt="">
+    <span>lychee/lychee</span>
+    <span style="background:rgba(74,222,128,.12);color:var(--green);padding:2px 8px;border-radius:100px;font-size:.72rem;font-weight:700">⭐ 12.4k</span>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="sb-item"><div class="sb-num">731+</div><div class="sb-label">Total Models</div></div>
+  <div class="sb-item"><div class="sb-num">35+</div><div class="sb-label">Model Families</div></div>
+  <div class="sb-item"><div class="sb-num">0</div><div class="sb-label">API Keys Needed</div></div>
+  <div class="sb-item"><div class="sb-num">1 cmd</div><div class="sb-label">To Pull Any Model</div></div>
+</div>
+
+<!-- MODEL LIBRARY -->
+<section style="padding: 4rem 0 6rem;">
+  <div class="container">
+
+    <!-- MODEL COUNT BAR -->
+    <div id="model-count-bar" style="text-align:center;padding:.75rem 2rem;color:var(--muted);font-size:.85rem;border-bottom:1px solid var(--border);margin-bottom:2rem;display:flex;align-items:center;justify-content:center;gap:12px">
+      Showing <span id="visible-count" style="color:var(--text);font-weight:700">731</span> models
+      <button onclick="pickRandom()" style="display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--muted);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'"><i data-lucide="shuffle" style="width:14px;height:14px"></i> Random</button>
+    </div>
+
+    <!-- NO RESULTS -->
+    <div class="no-results" id="no-results">
+      <h3>No models found</h3>
+      <p>Try a different search term or filter</p>
+    </div>
+
+    <!-- ── LLAMA ── -->
+    <div class="family-section fade-in" data-family="llama">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(250,204,21,0.12)"><img src="https://cdn.simpleicons.org/meta/e84393" width="28" height="28" alt="Meta"></div>
+        <div class="family-name">LLaMA Family</div>
+        <div class="family-count">Meta AI</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="chat" data-name="llama3.3 llama 3.3">
+          <div class="card-top">
+            <div class="card-name">Llama 3.3</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Meta's latest flagship instruction-tuned model. Excellent reasoning and instruction following at 70B scale.</div>
+          <div class="card-sizes"><span class="size-chip">70b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull llama3.3:70b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull llama3.3:70b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat edge" data-name="llama3.2 llama 3.2">
+          <div class="card-top">
+            <div class="card-name">Llama 3.2</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-edge">Edge</span></div>
+          </div>
+          <div class="card-desc">Lightweight Llama models for edge and mobile deployment. Efficient with strong multilingual capabilities.</div>
+          <div class="card-sizes"><span class="size-chip">1b</span><span class="size-chip">3b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull llama3.2:3b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull llama3.2:3b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="llama3.1 llama 3.1">
+          <div class="card-top">
+            <div class="card-name">Llama 3.1</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">State-of-the-art open model from Meta. The 405B variant rivals GPT-4 class models on many benchmarks.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span><span class="size-chip">70b</span><span class="size-chip">405b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull llama3.1:8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull llama3.1:8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="llama3 llama 3">
+          <div class="card-top">
+            <div class="card-name">Llama 3</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Meta's Llama 3 base generation. Strong general-purpose chat and instruction following capabilities.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span><span class="size-chip">70b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull llama3:8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull llama3:8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="llama2 llama 2">
+          <div class="card-top">
+            <div class="card-name">Llama 2</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">The original open Llama series. Reliable and widely tested across many applications and fine-tunes.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span><span class="size-chip">13b</span><span class="size-chip">70b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull llama2:7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull llama2:7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="code" data-name="codellama code llama">
+          <div class="card-top">
+            <div class="card-name">CodeLlama</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">Fine-tuned Llama for code generation, completion, and debugging. Supports Python, C++, Java, and more.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span><span class="size-chip">13b</span><span class="size-chip">34b</span><span class="size-chip">70b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull codellama:13b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull codellama:13b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="vision" data-name="llama3.2 vision llama vision">
+          <div class="card-top">
+            <div class="card-name">Llama 3.2 Vision</div>
+            <div class="card-tags"><span class="tag tag-vision">Vision</span></div>
+          </div>
+          <div class="card-desc">Llama 3.2 with native vision capabilities. Analyze images, diagrams, screenshots, and charts.</div>
+          <div class="card-sizes"><span class="size-chip">11b</span><span class="size-chip">90b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull llama3.2-vision:11b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull llama3.2-vision:11b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── MISTRAL ── -->
+    <div class="family-section fade-in" data-family="mistral">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(96,165,250,0.12)"><img src="https://cdn.simpleicons.org/mistral/e84393" width="28" height="28" alt="Mistral"></div>
+        <div class="family-name">Mistral Family</div>
+        <div class="family-count">Mistral AI</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="chat" data-name="mistral 7b">
+          <div class="card-top">
+            <div class="card-name">Mistral 7B</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">The original Mistral model. Punches well above its weight class with excellent reasoning at 7B.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull mistral:7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull mistral:7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="mistral nemo 12b">
+          <div class="card-top">
+            <div class="card-name">Mistral Nemo</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">12B model with a 128K context window. Ideal for long documents, research, and extended conversations.</div>
+          <div class="card-sizes"><span class="size-chip">12b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull mistral-nemo:12b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull mistral-nemo:12b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="mistral small 22b">
+          <div class="card-top">
+            <div class="card-name">Mistral Small</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">22B enterprise-grade model balanced for performance and efficiency. Great for production deployments.</div>
+          <div class="card-sizes"><span class="size-chip">22b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull mistral-small:22b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull mistral-small:22b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="mistral large 123b">
+          <div class="card-top">
+            <div class="card-name">Mistral Large</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Mistral's flagship 123B model. Top-tier performance for complex reasoning, coding, and analysis.</div>
+          <div class="card-sizes"><span class="size-chip">123b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull mistral-large:123b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull mistral-large:123b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="mixtral moe mixture of experts">
+          <div class="card-top">
+            <div class="card-name">Mixtral MoE</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Sparse Mixture of Experts architecture. Massive capacity with efficient inference. Best-in-class open MoE.</div>
+          <div class="card-sizes"><span class="size-chip">8x7b</span><span class="size-chip">8x22b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull mixtral:8x7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull mixtral:8x7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="code" data-name="codestral 22b code">
+          <div class="card-top">
+            <div class="card-name">Codestral</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">Mistral's dedicated code model. Supports 80+ programming languages with FIM (fill-in-the-middle) capability.</div>
+          <div class="card-sizes"><span class="size-chip">22b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull codestral:22b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull codestral:22b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="code" data-name="devstral 24b agentic code">
+          <div class="card-top">
+            <div class="card-name">Devstral</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">Agentic coding model built for software engineering tasks, multi-file editing, and tool use.</div>
+          <div class="card-sizes"><span class="size-chip">24b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull devstral:24b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull devstral:24b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── QWEN ── -->
+    <div class="family-section fade-in" data-family="qwen">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(232,67,147,0.12)"><img src="https://cdn.simpleicons.org/alibaba/e84393" width="28" height="28" alt="Alibaba"></div>
+        <div class="family-name">Qwen Family</div>
+        <div class="family-count">Alibaba Cloud</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="reasoning chat" data-name="qwen3 qwen 3">
+          <div class="card-top">
+            <div class="card-name">Qwen 3</div>
+            <div class="card-tags"><span class="tag tag-reasoning">Reasoning</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Latest Qwen generation with hybrid thinking modes. Toggle between fast response and deep chain-of-thought reasoning.</div>
+          <div class="card-sizes"><span class="size-chip">0.6b</span><span class="size-chip">1.7b</span><span class="size-chip">4b</span><span class="size-chip">8b</span><span class="size-chip">14b</span><span class="size-chip">32b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull qwen3:8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen3:8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="qwen2.5 qwen 2.5">
+          <div class="card-top">
+            <div class="card-name">Qwen 2.5</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Excellent multilingual model with strong math and coding. Wide size range from 0.5B to 72B.</div>
+          <div class="card-sizes"><span class="size-chip">0.5b</span><span class="size-chip">1.5b</span><span class="size-chip">3b</span><span class="size-chip">7b</span><span class="size-chip">14b</span><span class="size-chip">32b</span><span class="size-chip">72b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull qwen2.5:7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen2.5:7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="code" data-name="qwen2.5 coder qwen coder">
+          <div class="card-top">
+            <div class="card-name">Qwen 2.5 Coder</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">Best-in-class open-source coding model. Excels at code generation, debugging, and documentation.</div>
+          <div class="card-sizes"><span class="size-chip">1.5b</span><span class="size-chip">7b</span><span class="size-chip">14b</span><span class="size-chip">32b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull qwen2.5-coder:7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen2.5-coder:7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="reasoning" data-name="qwq 32b reasoning thinking">
+          <div class="card-top">
+            <div class="card-name">QwQ 32B</div>
+            <div class="card-tags"><span class="tag tag-reasoning">Reasoning</span></div>
+          </div>
+          <div class="card-desc">Deep reasoning model that thinks step-by-step. Exceptional on math olympiad problems and logic puzzles.</div>
+          <div class="card-sizes"><span class="size-chip">32b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull qwq:32b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull qwq:32b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── GEMMA ── -->
+    <div class="family-section fade-in" data-family="gemma">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(74,222,128,0.12)"><img src="https://cdn.simpleicons.org/google/e84393" width="28" height="28" alt="Google"></div>
+        <div class="family-name">Gemma Family</div>
+        <div class="family-count">Google DeepMind</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="chat" data-name="gemma3 gemma 3">
+          <div class="card-top">
+            <div class="card-name">Gemma 3</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Google's latest open model family. Strong multilingual support, 128K context, and multimodal capabilities.</div>
+          <div class="card-sizes"><span class="size-chip">1b</span><span class="size-chip">4b</span><span class="size-chip">12b</span><span class="size-chip">27b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull gemma3:4b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull gemma3:4b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat" data-name="gemma2 gemma 2">
+          <div class="card-top">
+            <div class="card-name">Gemma 2</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Efficient and capable open models using knowledge distillation. Outperforms larger models at same size.</div>
+          <div class="card-sizes"><span class="size-chip">2b</span><span class="size-chip">9b</span><span class="size-chip">27b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull gemma2:9b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull gemma2:9b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="code" data-name="codegemma code gemma">
+          <div class="card-top">
+            <div class="card-name">CodeGemma</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">Gemma fine-tuned for code completion and generation. Lightweight and fast for IDE integrations.</div>
+          <div class="card-sizes"><span class="size-chip">2b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull codegemma:7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull codegemma:7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PHI ── -->
+    <div class="family-section fade-in" data-family="phi">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(96,165,250,0.12)"><img src="https://cdn.simpleicons.org/microsoft/e84393" width="28" height="28" alt="Microsoft"></div>
+        <div class="family-name">Phi Family</div>
+        <div class="family-count">Microsoft</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="reasoning chat" data-name="phi4 phi 4">
+          <div class="card-top">
+            <div class="card-name">Phi 4</div>
+            <div class="card-tags"><span class="tag tag-reasoning">Reasoning</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Microsoft's most capable small model. Excellent at STEM reasoning and code with only 14B parameters.</div>
+          <div class="card-sizes"><span class="size-chip">14b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull phi4:14b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull phi4:14b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="edge chat" data-name="phi4-mini phi 4 mini 3.8b">
+          <div class="card-top">
+            <div class="card-name">Phi 4 Mini</div>
+            <div class="card-tags"><span class="tag tag-edge">Edge</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Compact 3.8B model for resource-constrained environments. Surprisingly capable for its tiny footprint.</div>
+          <div class="card-sizes"><span class="size-chip">3.8b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull phi4-mini:3.8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull phi4-mini:3.8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="reasoning" data-name="phi4 reasoning phi 4 reasoning">
+          <div class="card-top">
+            <div class="card-name">Phi 4 Reasoning</div>
+            <div class="card-tags"><span class="tag tag-reasoning">Reasoning</span></div>
+          </div>
+          <div class="card-desc">Extended chain-of-thought reasoning variant of Phi 4. Optimal for math, science, and complex analysis.</div>
+          <div class="card-sizes"><span class="size-chip">14b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull phi4-reasoning:14b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull phi4-reasoning:14b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="vision" data-name="phi4 multimodal vision phi 4">
+          <div class="card-top">
+            <div class="card-name">Phi 4 Multimodal</div>
+            <div class="card-tags"><span class="tag tag-vision">Vision</span></div>
+          </div>
+          <div class="card-desc">Vision + audio capable Phi 4. Understands images, documents, and speech in a single compact model.</div>
+          <div class="card-sizes"><span class="size-chip">5.6b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull phi4-multimodal:5.6b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull phi4-multimodal:5.6b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="chat edge" data-name="phi3.5 phi 3.5 3.8b">
+          <div class="card-top">
+            <div class="card-name">Phi 3.5</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-edge">Edge</span></div>
+          </div>
+          <div class="card-desc">MoE and mini variants at 3.8B. Designed for on-device scenarios with multilingual support.</div>
+          <div class="card-sizes"><span class="size-chip">3.8b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull phi3.5:3.8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull phi3.5:3.8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── DEEPSEEK ── -->
+    <div class="family-section fade-in" data-family="deepseek">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(167,139,250,0.12)">🔍</div>
+        <div class="family-name">DeepSeek Family</div>
+        <div class="family-count">DeepSeek AI</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="reasoning" data-name="deepseek r1 reasoning thinking">
+          <div class="card-top">
+            <div class="card-name">DeepSeek R1</div>
+            <div class="card-tags"><span class="tag tag-reasoning">Reasoning</span></div>
+          </div>
+          <div class="card-desc">Frontier reasoning model that rivals o1. Shows its thinking process step by step. Available at many sizes.</div>
+          <div class="card-sizes"><span class="size-chip">1.5b</span><span class="size-chip">7b</span><span class="size-chip">8b</span><span class="size-chip">14b</span><span class="size-chip">32b</span><span class="size-chip">70b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull deepseek-r1:7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull deepseek-r1:7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="code" data-name="deepseek coder code">
+          <div class="card-top">
+            <div class="card-name">DeepSeek Coder</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">Purpose-built for software engineering. Trained on 87% code data. Excellent fill-in-the-middle performance.</div>
+          <div class="card-sizes"><span class="size-chip">1.3b</span><span class="size-chip">6.7b</span><span class="size-chip">33b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull deepseek-coder:6.7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull deepseek-coder:6.7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="code" data-name="deepseek coder v2 moe code">
+          <div class="card-top">
+            <div class="card-name">DeepSeek Coder V2</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">MoE architecture with 16B active parameters from a 236B total. Claude Sonnet-level coding at a fraction of the compute.</div>
+          <div class="card-sizes"><span class="size-chip">16b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull deepseek-coder-v2:16b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull deepseek-coder-v2:16b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── VISION ── -->
+    <div class="family-section fade-in" data-family="vision">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(167,139,250,0.12)"><i data-lucide="eye" style="width:24px;height:24px;color:var(--purple)"></i></div>
+        <div class="family-name">Vision Models</div>
+        <div class="family-count">Multimodal</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="vision" data-name="llava vision">
+          <div class="card-top">
+            <div class="card-name">LLaVA</div>
+            <div class="card-tags"><span class="tag tag-vision">Vision</span></div>
+          </div>
+          <div class="card-desc">Large Language and Vision Assistant. One of the first open vision-language models. Widely supported.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span><span class="size-chip">13b</span><span class="size-chip">34b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull llava:13b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull llava:13b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="vision edge" data-name="llava phi3 vision 3.8b">
+          <div class="card-top">
+            <div class="card-name">LLaVA Phi3</div>
+            <div class="card-tags"><span class="tag tag-vision">Vision</span><span class="tag tag-edge">Edge</span></div>
+          </div>
+          <div class="card-desc">Tiny vision model based on Phi 3. Excellent image understanding in a small 3.8B footprint.</div>
+          <div class="card-sizes"><span class="size-chip">3.8b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull llava-phi3:3.8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull llava-phi3:3.8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="vision edge" data-name="moondream 1.8b tiny vision">
+          <div class="card-top">
+            <div class="card-name">Moondream 2</div>
+            <div class="card-tags"><span class="tag tag-vision">Vision</span><span class="tag tag-edge">Edge</span></div>
+          </div>
+          <div class="card-desc">Ultra-compact 1.8B vision model. Runs on edge devices and mobile hardware. Fast and surprisingly accurate.</div>
+          <div class="card-sizes"><span class="size-chip">1.8b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull moondream2:1.8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull moondream2:1.8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="vision" data-name="minicpm vision 8b">
+          <div class="card-top">
+            <div class="card-name">MiniCPM-V</div>
+            <div class="card-tags"><span class="tag tag-vision">Vision</span></div>
+          </div>
+          <div class="card-desc">High resolution image understanding. Supports 1.8MP images and multi-image reasoning with 8B parameters.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull minicpm-v:8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull minicpm-v:8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="vision" data-name="internvl2 vision 8b 26b">
+          <div class="card-top">
+            <div class="card-name">InternVL2</div>
+            <div class="card-tags"><span class="tag tag-vision">Vision</span></div>
+          </div>
+          <div class="card-desc">Strong performance on visual understanding, OCR, and document parsing. Great for complex image analysis.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span><span class="size-chip">26b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull internvl2:8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull internvl2:8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="vision edge" data-name="smolvlm tiny vision 256m 500m">
+          <div class="card-top">
+            <div class="card-name">SmolVLM</div>
+            <div class="card-tags"><span class="tag tag-vision">Vision</span><span class="tag tag-edge">Edge</span></div>
+          </div>
+          <div class="card-desc">World's smallest production-quality vision-language model. Runs anywhere — browser, mobile, embedded.</div>
+          <div class="card-sizes"><span class="size-chip">256m</span><span class="size-chip">500m</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull smolvlm:500m</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull smolvlm:500m')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── EMBEDDING ── -->
+    <div class="family-section fade-in" data-family="embedding">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(45,212,191,0.12)"><i data-lucide="database" style="width:24px;height:24px;color:var(--teal)"></i></div>
+        <div class="family-name">Embedding Models</div>
+        <div class="family-count">Vector Search & RAG</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="embedding" data-name="nomic embed text embedding">
+          <div class="card-top">
+            <div class="card-name">nomic-embed-text</div>
+            <div class="card-tags"><span class="tag tag-embedding">Embedding</span></div>
+          </div>
+          <div class="card-desc">8192 token context embedding model. Excellent for RAG pipelines and semantic search at any scale.</div>
+          <div class="card-sizes"><span class="size-chip">137m</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull nomic-embed-text</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull nomic-embed-text')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="embedding" data-name="mxbai embed large embedding">
+          <div class="card-top">
+            <div class="card-name">mxbai-embed-large</div>
+            <div class="card-tags"><span class="tag tag-embedding">Embedding</span></div>
+          </div>
+          <div class="card-desc">State-of-the-art large embedding model. Top performer on MTEB benchmark for retrieval tasks.</div>
+          <div class="card-sizes"><span class="size-chip">334m</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull mxbai-embed-large</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull mxbai-embed-large')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="embedding multilingual" data-name="bge m3 multilingual embedding">
+          <div class="card-top">
+            <div class="card-name">BGE M3</div>
+            <div class="card-tags"><span class="tag tag-embedding">Embedding</span><span class="tag tag-multilingual">Multilingual</span></div>
+          </div>
+          <div class="card-desc">Multi-Lingual, Multi-Functionality, Multi-Granularity embedding. Supports 100+ languages for cross-lingual retrieval.</div>
+          <div class="card-sizes"><span class="size-chip">567m</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull bge-m3</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull bge-m3')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="embedding" data-name="bge large embedding">
+          <div class="card-top">
+            <div class="card-name">BGE Large</div>
+            <div class="card-tags"><span class="tag tag-embedding">Embedding</span></div>
+          </div>
+          <div class="card-desc">BAAI General Embedding large model. High quality dense retrieval optimized for English text.</div>
+          <div class="card-sizes"><span class="size-chip">335m</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull bge-large</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull bge-large')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="embedding edge" data-name="all minilm tiny embedding">
+          <div class="card-top">
+            <div class="card-name">all-minilm</div>
+            <div class="card-tags"><span class="tag tag-embedding">Embedding</span><span class="tag tag-edge">Edge</span></div>
+          </div>
+          <div class="card-desc">Tiny but effective sentence embedding model. Blazing fast for high-throughput embedding pipelines.</div>
+          <div class="card-sizes"><span class="size-chip">22m</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull all-minilm:22m</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull all-minilm:22m')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── MEDICAL ── -->
+    <div class="family-section fade-in" data-family="medical">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(248,113,113,0.12)"><i data-lucide="heart-pulse" style="width:24px;height:24px;color:#f87171"></i></div>
+        <div class="family-name">Medical Models</div>
+        <div class="family-count">Healthcare AI</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="medical chat" data-name="meditron medical 7b 70b">
+          <div class="card-top">
+            <div class="card-name">Meditron</div>
+            <div class="card-tags"><span class="tag tag-medical">Medical</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Adapted from Llama 2 on medical data. Strong on clinical guidelines, medical reasoning, and biomedical QA.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span><span class="size-chip">70b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull meditron:7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull meditron:7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="medical chat" data-name="medalpaca medical 7b">
+          <div class="card-top">
+            <div class="card-name">MedAlpaca</div>
+            <div class="card-tags"><span class="tag tag-medical">Medical</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Open-source medical chatbot. Fine-tuned on medical Q&A datasets. Good for healthcare assistant applications.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull medalpaca:7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull medalpaca:7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="medical chat" data-name="clinical camel 70b medical">
+          <div class="card-top">
+            <div class="card-name">Clinical Camel</div>
+            <div class="card-tags"><span class="tag tag-medical">Medical</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Large 70B clinical LLM. Designed for healthcare applications, clinical notes, and medical conversations.</div>
+          <div class="card-sizes"><span class="size-chip">70b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull clinical-camel:70b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull clinical-camel:70b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── MULTILINGUAL ── -->
+    <div class="family-section fade-in" data-family="multilingual">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(232,67,147,0.12)">🌍</div>
+        <div class="family-name">Multilingual Models</div>
+        <div class="family-count">Global Languages</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="multilingual chat" data-name="aya expanse 8b 32b multilingual">
+          <div class="card-top">
+            <div class="card-name">Aya Expanse</div>
+            <div class="card-tags"><span class="tag tag-multilingual">Multilingual</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Cohere's multilingual model covering 23 languages. Particularly strong on low-resource languages.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span><span class="size-chip">32b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull aya-expanse:8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull aya-expanse:8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="multilingual chat" data-name="sailor2 8b 20b southeast asian">
+          <div class="card-top">
+            <div class="card-name">Sailor2</div>
+            <div class="card-tags"><span class="tag tag-multilingual">Multilingual</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Specialized for Southeast Asian languages including Thai, Vietnamese, Malay, Khmer, and more.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span><span class="size-chip">20b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull sailor2:8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull sailor2:8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="multilingual chat" data-name="jais arabic 13b 30b">
+          <div class="card-top">
+            <div class="card-name">Jais</div>
+            <div class="card-tags"><span class="tag tag-multilingual">Multilingual</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">State-of-the-art Arabic and English bilingual model. Best-in-class Arabic language understanding.</div>
+          <div class="card-sizes"><span class="size-chip">13b</span><span class="size-chip">30b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull jais:13b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull jais:13b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="multilingual chat" data-name="exaone 3.5 korean 2.4b 7.8b 32b">
+          <div class="card-top">
+            <div class="card-name">EXAONE 3.5</div>
+            <div class="card-tags"><span class="tag tag-multilingual">Multilingual</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">LG AI Research's bilingual model excelling in Korean and English. Strong instruction following.</div>
+          <div class="card-sizes"><span class="size-chip">2.4b</span><span class="size-chip">7.8b</span><span class="size-chip">32b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull exaone3.5:7.8b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull exaone3.5:7.8b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── EDGE ── -->
+    <div class="family-section fade-in" data-family="edge">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(251,146,60,0.12)"><i data-lucide="cpu" style="width:24px;height:24px;color:var(--orange)"></i></div>
+        <div class="family-name">Tiny / Edge Models</div>
+        <div class="family-count">Mobile & Embedded</div>
+      </div>
+      <div class="models-grid">
+
+        <div class="model-card" data-tags="edge chat" data-name="smollm2 tiny 135m 360m 1.7b edge">
+          <div class="card-top">
+            <div class="card-name">SmolLM2</div>
+            <div class="card-tags"><span class="tag tag-edge">Edge</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">HuggingFace's tiny language models. Designed to run on browser, mobile, and micro-computers.</div>
+          <div class="card-sizes"><span class="size-chip">135m</span><span class="size-chip">360m</span><span class="size-chip">1.7b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull smollm2:1.7b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull smollm2:1.7b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="edge chat" data-name="tinyllama 1.1b tiny edge">
+          <div class="card-top">
+            <div class="card-name">TinyLlama</div>
+            <div class="card-tags"><span class="tag tag-edge">Edge</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">1.1B Llama architecture trained on 3T tokens. Remarkably capable given its tiny size.</div>
+          <div class="card-sizes"><span class="size-chip">1.1b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull tinyllama:1.1b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull tinyllama:1.1b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="edge chat" data-name="minicpm3 4b edge efficient">
+          <div class="card-top">
+            <div class="card-name">MiniCPM3</div>
+            <div class="card-tags"><span class="tag tag-edge">Edge</span><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">4B model with GPT-3.5 level performance. Tool calling, RAG, and code capabilities in a pocket-sized model.</div>
+          <div class="card-sizes"><span class="size-chip">4b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull minicpm3:4b</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull minicpm3:4b')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="model-card" data-tags="edge" data-name="mobilellm 125m 350m tiny mobile">
+          <div class="card-top">
+            <div class="card-name">MobileLLM</div>
+            <div class="card-tags"><span class="tag tag-edge">Edge</span></div>
+          </div>
+          <div class="card-desc">Meta's mobile-optimized models. Designed specifically for on-device inference on smartphones and tablets.</div>
+          <div class="card-sizes"><span class="size-chip">125m</span><span class="size-chip">350m</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee pull mobilellm:350m</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee pull mobilellm:350m')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- HF BANNER -->
+    <div class="fade-in" style="background:linear-gradient(135deg,rgba(232,67,147,0.08),rgba(96,165,250,0.08));border:1px solid var(--border);border-radius:var(--radius);padding:2rem 2.5rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;margin-top:2rem;">
+      <div style="font-size:2.5rem">🤗</div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-weight:700;font-size:1.05rem;margin-bottom:0.3rem;">Pull any model from HuggingFace</div>
+        <div style="color:var(--muted);font-size:0.875rem;">Any public GGUF model on HuggingFace Hub works directly — no token required.</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:0.82rem;background:var(--bg3);border:1px solid var(--border);padding:12px 18px;border-radius:10px;color:var(--green);white-space:nowrap;">lychee hf pull username/model-name</div>
+    </div>
+
+    <!-- EXTRA MODEL FAMILIES -->
+
+    <!-- Falcon -->
+    <div class="family-section fade-in" data-family="falcon">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(251,146,60,0.12)">🦅</div>
+        <div class="family-name">Falcon</div>
+        <div class="family-count">Technology Innovation Institute</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat" data-name="falcon 7b chat">
+          <div class="card-top">
+            <div class="card-name">Falcon 7B</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">TII's efficient 7B model trained on RefinedWeb. Strong multilingual capabilities.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull tiiuae/falcon-7b-instruct-gguf</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull tiiuae/falcon-7b-instruct-gguf')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card" data-tags="chat" data-name="falcon 40b">
+          <div class="card-top">
+            <div class="card-name">Falcon 40B</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Powerful 40B model. Top open-source model at release. Great for complex reasoning tasks.</div>
+          <div class="card-sizes"><span class="size-chip">40b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull tiiuae/falcon-40b-instruct-gguf</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull tiiuae/falcon-40b-instruct-gguf')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card" data-tags="chat" data-name="falcon3 1b 3b 7b 10b newest">
+          <div class="card-top">
+            <div class="card-name">Falcon 3</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Latest Falcon generation (2024). Significantly more efficient than Falcon 1/2 — 1B–10B sizes available.</div>
+          <div class="card-sizes"><span class="size-chip">1b</span><span class="size-chip">3b</span><span class="size-chip">7b</span><span class="size-chip">10b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/Falcon3-7B-Instruct-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/Falcon3-7B-Instruct-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- StarCoder -->
+    <div class="family-section fade-in" data-family="starcoder">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(96,165,250,0.12)"><img src="https://cdn.simpleicons.org/huggingface/e84393" width="28" height="28" alt="HuggingFace"></div>
+        <div class="family-name">StarCoder</div>
+        <div class="family-count">Code-specialized LLMs</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="code" data-name="starcoder2 3b 7b 15b code">
+          <div class="card-top">
+            <div class="card-name">StarCoder2</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">State-of-the-art open-source code models trained on The Stack v2. 600+ programming languages. Best-in-class at 15B.</div>
+          <div class="card-sizes"><span class="size-chip">3b</span><span class="size-chip">7b</span><span class="size-chip">15b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/starcoder2-15b-instruct-v0.1-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/starcoder2-15b-instruct-v0.1-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card" data-tags="code" data-name="stable code 3b instruct">
+          <div class="card-top">
+            <div class="card-name">Stable Code 3B</div>
+            <div class="card-tags"><span class="tag tag-code">Code</span></div>
+          </div>
+          <div class="card-desc">Stability AI's code model. Outperforms Code Llama 7B at one-fifth the size. Lightweight and fast.</div>
+          <div class="card-sizes"><span class="size-chip">3b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/stable-code-instruct-3b-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/stable-code-instruct-3b-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Command R -->
+    <div class="family-section fade-in" data-family="command-r">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(167,139,250,0.12)"><i data-lucide="terminal" style="width:24px;height:24px;color:var(--accent)"></i></div>
+        <div class="family-name">Command R</div>
+        <div class="family-count">Cohere — RAG-optimized</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat" data-name="command r 35b rag retrieval">
+          <div class="card-top">
+            <div class="card-name">Command R</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Cohere's 35B model optimized for retrieval-augmented generation, long contexts, and tool use. Excellent for RAG pipelines.</div>
+          <div class="card-sizes"><span class="size-chip">35b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/c4ai-command-r-v01-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/c4ai-command-r-v01-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card" data-tags="chat" data-name="command r plus 104b largest">
+          <div class="card-top">
+            <div class="card-name">Command R+</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Cohere's flagship 104B model. Industry-leading at RAG and complex multi-step reasoning. Best for enterprise workflows.</div>
+          <div class="card-sizes"><span class="size-chip">104b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/c4ai-command-r-plus-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/c4ai-command-r-plus-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yi -->
+    <div class="family-section fade-in" data-family="yi">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(250,204,21,0.12)">🌟</div>
+        <div class="family-name">Yi</div>
+        <div class="family-count">01.AI — Bilingual (EN/ZH)</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat multilingual" data-name="yi 1.5 6b 9b 34b bilingual chinese english">
+          <div class="card-top">
+            <div class="card-name">Yi 1.5</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-multilingual">Multilingual</span></div>
+          </div>
+          <div class="card-desc">01.AI's bilingual models (English + Chinese). Yi-34B is competitive with GPT-3.5 on many benchmarks. 4k–200k context.</div>
+          <div class="card-sizes"><span class="size-chip">6b</span><span class="size-chip">9b</span><span class="size-chip">34b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/Yi-1.5-9B-Chat-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/Yi-1.5-9B-Chat-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zephyr / OpenHermes -->
+    <div class="family-section fade-in" data-family="zephyr">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(74,222,128,0.12)"><img src="https://cdn.simpleicons.org/huggingface/e84393" width="28" height="28" alt="HuggingFace"></div>
+        <div class="family-name">Zephyr / OpenHermes</div>
+        <div class="family-count">Fine-tuned community favorites</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat" data-name="zephyr 7b beta alignment dpo">
+          <div class="card-top">
+            <div class="card-name">Zephyr 7B</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">HuggingFace's DPO fine-tune of Mistral 7B. Excellent alignment and instruction following — one of the best 7B chat models.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/zephyr-7b-beta-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/zephyr-7b-beta-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card" data-tags="chat" data-name="openhermes 2.5 mistral hermes function calling">
+          <div class="card-top">
+            <div class="card-name">OpenHermes 2.5</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">NousResearch's Mistral fine-tune with exceptional instruction following and function calling. Community favorite for agents.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/OpenHermes-2.5-Mistral-7B-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/OpenHermes-2.5-Mistral-7B-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card" data-tags="chat" data-name="neural chat 7b intel">
+          <div class="card-top">
+            <div class="card-name">Neural Chat 7B</div>
+            <div class="card-tags"><span class="tag tag-chat">Chat</span></div>
+          </div>
+          <div class="card-desc">Intel's optimized fine-tune of Mistral 7B. Scored top on MT-Bench when released. Efficient on Intel Arc GPUs.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span></div>
+          <div class="card-footer">
+            <div class="pull-cmd">lychee hf pull bartowski/neural-chat-7b-v3-3-GGUF</div>
+            <button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/neural-chat-7b-v3-3-GGUF')" title="Copy command">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- NEW MODEL FAMILIES SECTION 1 -->
+<section style="padding: 0 0 2rem;">
+  <div class="container">
+
+    <!-- ── DeepSeek ── -->
+    <div class="family-section fade-in" data-family="deepseek-v2v3">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(96,165,250,0.12)">🔍</div>
+        <div class="family-name">DeepSeek V2 / V3 / Janus</div>
+        <div class="family-count">DeepSeek AI — Reasoning & MoE giants</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="reasoning moe general" data-name="deepseek r1 671b reasoning">
+          <div class="card-top"><div class="card-name">DeepSeek-R1</div><div class="card-tags"><span class="tag tag-reasoning">Reasoning</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">DeepSeek's landmark reasoning model. 671B MoE with chain-of-thought. Matches o1 on math and code benchmarks.</div>
+          <div class="card-sizes"><span class="size-chip">671b</span><span class="size-chip">70b</span><span class="size-chip">14b</span><span class="size-chip">8b</span><span class="size-chip">1.5b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull deepseek-r1:70b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull deepseek-r1:70b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat moe general" data-name="deepseek v3 671b">
+          <div class="card-top"><div class="card-name">DeepSeek-V3</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">671B MoE chat model trained at unprecedented efficiency. Top open-source general model as of 2025.</div>
+          <div class="card-sizes"><span class="size-chip">671b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee hf pull bartowski/DeepSeek-V3-GGUF</div><button class="copy-btn" onclick="copyCmd(this,'lychee hf pull bartowski/DeepSeek-V3-GGUF')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat moe" data-name="deepseek v2 236b lite">
+          <div class="card-top"><div class="card-name">DeepSeek-V2</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">236B MoE (16B active). Strong performance at much lower inference cost than dense models.</div>
+          <div class="card-sizes"><span class="size-chip">236b</span><span class="size-chip">16b-lite</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull deepseek-v2:16b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull deepseek-v2:16b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="code moe general" data-name="deepseek coder v2 236b code">
+          <div class="card-top"><div class="card-name">DeepSeek-Coder-V2</div><div class="card-tags"><span class="tag tag-code">Code</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">236B MoE code model. Surpasses GPT-4 Turbo on coding benchmarks. Supports 338 programming languages.</div>
+          <div class="card-sizes"><span class="size-chip">236b</span><span class="size-chip">16b</span><span class="size-chip">7b</span><span class="size-chip">1.3b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull deepseek-coder-v2:16b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull deepseek-coder-v2:16b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="vision edge" data-name="janus pro vision multimodal">
+          <div class="card-top"><div class="card-name">Janus-Pro</div><div class="card-tags"><span class="tag tag-vision">Vision</span></div></div>
+          <div class="card-desc">DeepSeek's unified multimodal model for image understanding and generation. State-of-the-art on visual benchmarks.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull janus-pro:7b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull janus-pro:7b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Qwen 3 / QwQ ── -->
+    <div class="family-section fade-in" data-family="qwen3">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(45,212,191,0.12)"><img src="https://cdn.simpleicons.org/alibaba/e84393" width="28" height="28" alt="Alibaba"></div>
+        <div class="family-name">Qwen 3 / QwQ / QvQ</div>
+        <div class="family-count">Alibaba — Flagship 2025 models</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat reasoning moe general" data-name="qwen3 235b moe">
+          <div class="card-top"><div class="card-name">Qwen3-235B-A22B</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-reasoning">Reasoning</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">Alibaba's most powerful open model. 235B MoE with 22B active params. Exceptional at math, code, and multilingual tasks.</div>
+          <div class="card-sizes"><span class="size-chip">235b-a22b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull qwen3:235b-a22b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen3:235b-a22b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat reasoning" data-name="qwen3 32b chat">
+          <div class="card-top"><div class="card-name">Qwen3-32B</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-reasoning">Reasoning</span></div></div>
+          <div class="card-desc">Dense 32B with hybrid thinking mode — toggle chain-of-thought on/off. Best open model at 32B scale for reasoning.</div>
+          <div class="card-sizes"><span class="size-chip">32b</span><span class="size-chip">14b</span><span class="size-chip">8b</span><span class="size-chip">4b</span><span class="size-chip">1.7b</span><span class="size-chip">0.6b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull qwen3:32b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen3:32b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="reasoning general" data-name="qwq 72b reasoning math">
+          <div class="card-top"><div class="card-name">QwQ-72B</div><div class="card-tags"><span class="tag tag-reasoning">Reasoning</span></div></div>
+          <div class="card-desc">Qwen's dedicated thinking model — deep chain-of-thought reasoning on math, logic, and science problems.</div>
+          <div class="card-sizes"><span class="size-chip">72b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull qwq:72b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull qwq:72b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="vision reasoning general" data-name="qvq 32b vision reasoning">
+          <div class="card-top"><div class="card-name">QvQ-32B</div><div class="card-tags"><span class="tag tag-vision">Vision</span><span class="tag tag-reasoning">Reasoning</span></div></div>
+          <div class="card-desc">Qwen's visual reasoning model — step-by-step thinking about images. Strong on science diagrams and visual math.</div>
+          <div class="card-sizes"><span class="size-chip">32b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull qvq:32b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull qvq:32b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="vision general" data-name="qwen2.5 vl 72b vision language">
+          <div class="card-top"><div class="card-name">Qwen2.5-VL</div><div class="card-tags"><span class="tag tag-vision">Vision</span></div></div>
+          <div class="card-desc">Qwen's top vision-language model. Understands documents, charts, video, and multi-image inputs with high accuracy.</div>
+          <div class="card-sizes"><span class="size-chip">72b</span><span class="size-chip">32b</span><span class="size-chip">7b</span><span class="size-chip">3b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull qwen2.5-vl:7b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen2.5-vl:7b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="code" data-name="qwen3 coder 32b code">
+          <div class="card-top"><div class="card-name">Qwen3-Coder</div><div class="card-tags"><span class="tag tag-code">Code</span></div></div>
+          <div class="card-desc">Qwen3's specialized coding variant with agentic code execution and 256K context window for large codebases.</div>
+          <div class="card-sizes"><span class="size-chip">32b</span><span class="size-chip">8b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull qwen3-coder:32b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen3-coder:32b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Mistral Extended ── -->
+    <div class="family-section fade-in" data-family="mistral-ext">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(250,204,21,0.12)"><img src="https://cdn.simpleicons.org/mistral/e84393" width="28" height="28" alt="Mistral"></div>
+        <div class="family-name">Mistral Extended Family</div>
+        <div class="family-count">Mistral AI — All variants</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat general" data-name="mistral large 123b">
+          <div class="card-top"><div class="card-name">Mistral Large</div><div class="card-tags"><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">Mistral's flagship 123B dense model. Top-tier reasoning, multilingual fluency, and function calling.</div>
+          <div class="card-sizes"><span class="size-chip">123b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull mistral-large:123b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull mistral-large:123b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat" data-name="mistral small 24b">
+          <div class="card-top"><div class="card-name">Mistral Small 3</div><div class="card-tags"><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">24B efficient model with excellent performance per compute. Great for production deployments that need speed.</div>
+          <div class="card-sizes"><span class="size-chip">24b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull mistral-small3:24b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull mistral-small3:24b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat edge" data-name="ministral 8b 3b edge">
+          <div class="card-top"><div class="card-name">Ministral</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-edge">Edge</span></div></div>
+          <div class="card-desc">Mistral's ultra-efficient mini series. 3B and 8B variants built for on-device and low-latency deployments.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span><span class="size-chip">3b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull ministral:8b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull ministral:8b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="code" data-name="codestral 22b code">
+          <div class="card-top"><div class="card-name">Codestral</div><div class="card-tags"><span class="tag tag-code">Code</span></div></div>
+          <div class="card-desc">Mistral's dedicated code model. Trained on 80+ languages with fill-in-the-middle support for IDE integration.</div>
+          <div class="card-sizes"><span class="size-chip">22b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull codestral-22b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull codestral-22b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="vision chat" data-name="pixtral 12b vision">
+          <div class="card-top"><div class="card-name">Pixtral</div><div class="card-tags"><span class="tag tag-vision">Vision</span><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">Mistral's multimodal models. Pixtral-12B for edge; Pixtral-Large-124B for frontier visual understanding.</div>
+          <div class="card-sizes"><span class="size-chip">124b</span><span class="size-chip">12b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull pixtral:12b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull pixtral:12b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat moe general" data-name="mixtral 8x22b moe">
+          <div class="card-top"><div class="card-name">Mixtral 8x22B</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">Mistral's largest MoE. 141B total / 39B active. Multilingual, strong at code and reasoning tasks.</div>
+          <div class="card-sizes"><span class="size-chip">141b-a39b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull mixtral:8x22b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull mixtral:8x22b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Gemma 3 / 3n ── -->
+    <div class="family-section fade-in" data-family="gemma3">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(74,222,128,0.12)"><img src="https://cdn.simpleicons.org/google/e84393" width="28" height="28" alt="Google"></div>
+        <div class="family-name">Gemma 3 / 3n</div>
+        <div class="family-count">Google DeepMind — 2025 flagship</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="vision general" data-name="gemma3 27b vision">
+          <div class="card-top"><div class="card-name">Gemma 3 27B</div><div class="card-tags"><span class="tag tag-vision">Vision</span><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">Google's best open model. Multimodal, 128K context, multilingual across 140+ languages. Beats Llama 3 70B on many tasks.</div>
+          <div class="card-sizes"><span class="size-chip">27b</span><span class="size-chip">12b</span><span class="size-chip">4b</span><span class="size-chip">1b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull gemma3:27b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull gemma3:27b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat multimodal edge" data-name="gemma3n e4b e2b edge multimodal">
+          <div class="card-top"><div class="card-name">Gemma 3n</div><div class="card-tags"><span class="tag tag-edge">Edge</span><span class="tag tag-vision">Vision</span></div></div>
+          <div class="card-desc">Google's mobile-optimized Gemma. MatFormer architecture runs 4B-equivalent quality at 2B memory footprint.</div>
+          <div class="card-sizes"><span class="size-chip">e4b</span><span class="size-chip">e2b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull gemma3n:e4b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull gemma3n:e4b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="vision" data-name="paligemma2 vision 28b">
+          <div class="card-top"><div class="card-name">PaliGemma 2</div><div class="card-tags"><span class="tag tag-vision">Vision</span></div></div>
+          <div class="card-desc">Google's vision-language specialist. Fine-tuned for dense captioning, VQA, and OCR with exceptional accuracy.</div>
+          <div class="card-sizes"><span class="size-chip">28b</span><span class="size-chip">10b</span><span class="size-chip">3b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull paligemma2:10b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull paligemma2:10b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Phi 4 / BitNet ── -->
+    <div class="family-section fade-in" data-family="phi4">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(96,165,250,0.12)"><img src="https://cdn.simpleicons.org/microsoft/e84393" width="28" height="28" alt="Microsoft"></div>
+        <div class="family-name">Phi 4 Family</div>
+        <div class="family-count">Microsoft — Small but mighty</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat" data-name="phi4 14b chat">
+          <div class="card-top"><div class="card-name">Phi-4</div><div class="card-tags"><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">Microsoft's 14B model trained on high-quality synthetic data. Beats much larger models on STEM and reasoning benchmarks.</div>
+          <div class="card-sizes"><span class="size-chip">14b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull phi4:14b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull phi4:14b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="vision chat" data-name="phi4 vision 14b multimodal">
+          <div class="card-top"><div class="card-name">Phi-4 Vision</div><div class="card-tags"><span class="tag tag-vision">Vision</span><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">Phi-4 extended with vision capabilities. Understands charts, documents, and images with strong OCR performance.</div>
+          <div class="card-sizes"><span class="size-chip">14b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull phi4-vision:14b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull phi4-vision:14b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat edge" data-name="phi4 mini 3.8b edge">
+          <div class="card-top"><div class="card-name">Phi-4 Mini</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-edge">Edge</span></div></div>
+          <div class="card-desc">3.8B distilled from Phi-4. Exceptional reasoning-per-parameter ratio for on-device applications.</div>
+          <div class="card-sizes"><span class="size-chip">3.8b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull phi4:3.8b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull phi4:3.8b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat edge" data-name="bitnet 1-bit 3b edge">
+          <div class="card-top"><div class="card-name">BitNet b1.58</div><div class="card-tags"><span class="tag tag-edge">Edge</span></div></div>
+          <div class="card-desc">Microsoft's 1-bit LLM. Weights stored as -1/0/+1 — runs on CPU without sacrificing quality significantly.</div>
+          <div class="card-sizes"><span class="size-chip">3b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull bitnet-b1.58:3b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull bitnet-b1.58:3b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GLM / ChatGLM ── -->
+    <div class="family-section fade-in" data-family="glm">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(251,146,60,0.12)">🐉</div>
+        <div class="family-name">GLM / ChatGLM</div>
+        <div class="family-count">Zhipu AI — Chinese-English bilingual</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="reasoning chinese general" data-name="glm z1 32b reasoning">
+          <div class="card-top"><div class="card-name">GLM-Z1</div><div class="card-tags"><span class="tag tag-reasoning">Reasoning</span><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">Zhipu's reasoning model with long chain-of-thought. Excellent Chinese-English bilingual performance on STEM tasks.</div>
+          <div class="card-sizes"><span class="size-chip">32b</span><span class="size-chip">9b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull glm-z1:32b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull glm-z1:32b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat chinese long-context" data-name="glm4 9b chat 1m long context">
+          <div class="card-top"><div class="card-name">GLM-4-9B</div><div class="card-tags"><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">9B chat model with 1M token context window. Strong bilingual Chinese/English assistant for long documents.</div>
+          <div class="card-sizes"><span class="size-chip">9b</span><span class="size-chip">9b-1m</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull glm4-flash:9b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull glm4-flash:9b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="code chinese" data-name="codegeex4 9b code chinese">
+          <div class="card-top"><div class="card-name">CodeGeeX4</div><div class="card-tags"><span class="tag tag-code">Code</span></div></div>
+          <div class="card-desc">Zhipu's 9B code assistant. Multi-language code completion, debugging, and repository-level understanding.</div>
+          <div class="card-sizes"><span class="size-chip">9b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull codegeex4:9b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull codegeex4:9b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Command R (extended) -->
+    <div class="family-section fade-in" data-family="command-r-ext">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(232,67,147,0.12)"><i data-lucide="terminal" style="width:24px;height:24px;color:var(--accent)"></i></div>
+        <div class="family-name">Cohere Command R</div>
+        <div class="family-count">Cohere — RAG & multilingual specialists</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat tools general" data-name="command r plus 104b rag">
+          <div class="card-top"><div class="card-name">Command R+</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-tools">Tools</span></div></div>
+          <div class="card-desc">Cohere's flagship 104B model. Built for RAG, grounded generation, and multi-step tool use across 10 languages.</div>
+          <div class="card-sizes"><span class="size-chip">104b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull command-r-plus</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull command-r-plus')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat tools multilingual" data-name="aya expanse 32b multilingual">
+          <div class="card-top"><div class="card-name">Aya Expanse</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-multilingual">Multilingual</span></div></div>
+          <div class="card-desc">Cohere's massively multilingual model trained on 23 languages. One of the best non-English open models available.</div>
+          <div class="card-sizes"><span class="size-chip">32b</span><span class="size-chip">8b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull aya-expanse:32b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull aya-expanse:32b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Audio / Whisper ── -->
+    <div class="family-section fade-in" data-family="audio">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(45,212,191,0.12)"><i data-lucide="mic" style="width:24px;height:24px;color:var(--teal)"></i></div>
+        <div class="family-name">Audio Models</div>
+        <div class="family-count">Whisper, Qwen2-Audio, Ultravox</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="audio" data-name="whisper large v3 turbo transcription speech">
+          <div class="card-top"><div class="card-name">Whisper Large v3</div><div class="card-tags"><span class="tag" style="background:rgba(45,212,191,0.15);color:#2dd4bf;border-color:rgba(45,212,191,0.3)">Audio</span></div></div>
+          <div class="card-desc">OpenAI's best speech-to-text model. 99-language transcription and translation with near-human accuracy.</div>
+          <div class="card-sizes"><span class="size-chip">1.5b</span><span class="size-chip">turbo-809m</span><span class="size-chip">medium-769m</span><span class="size-chip">small-244m</span><span class="size-chip">base-74m</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull whisper-large-v3:1.5b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull whisper-large-v3:1.5b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="audio general" data-name="qwen2 audio 7b 72b audio language">
+          <div class="card-top"><div class="card-name">Qwen2-Audio</div><div class="card-tags"><span class="tag" style="background:rgba(45,212,191,0.15);color:#2dd4bf;border-color:rgba(45,212,191,0.3)">Audio</span><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">Qwen's audio-language model. Understands speech, sounds, and music — chat with audio context natively.</div>
+          <div class="card-sizes"><span class="size-chip">72b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull qwen2-audio:7b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen2-audio:7b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Math Specialists ── -->
+    <div class="family-section fade-in" data-family="math-models">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(250,204,21,0.12)"><i data-lucide="calculator" style="width:24px;height:24px;color:var(--yellow)"></i></div>
+        <div class="family-name">Math Specialists</div>
+        <div class="family-count">WizardMath, MetaMath, Qwen2.5-Math, DeepSeek-Prover</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="math reasoning" data-name="wizardmath 70b math stem">
+          <div class="card-top"><div class="card-name">WizardMath</div><div class="card-tags"><span class="tag tag-math">Math</span></div></div>
+          <div class="card-desc">Evol-Instruct fine-tune of Llama 2 on mathematical reasoning. Dominant on GSM8K and MATH benchmarks at release.</div>
+          <div class="card-sizes"><span class="size-chip">70b</span><span class="size-chip">13b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull wizardmath:70b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull wizardmath:70b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="math" data-name="qwen2.5 math 72b math">
+          <div class="card-top"><div class="card-name">Qwen2.5-Math</div><div class="card-tags"><span class="tag tag-math">Math</span></div></div>
+          <div class="card-desc">Alibaba's math-specialized model. State-of-the-art on competition math (AIME, AMC) in the open-source world.</div>
+          <div class="card-sizes"><span class="size-chip">72b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull qwen2.5-math:7b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull qwen2.5-math:7b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="math reasoning" data-name="deepseek prover v2 moe math proof">
+          <div class="card-top"><div class="card-name">DeepSeek-Prover</div><div class="card-tags"><span class="tag tag-math">Math</span><span class="tag tag-reasoning">Reasoning</span></div></div>
+          <div class="card-desc">Formal theorem proving in Lean 4. Solves competition-level mathematical proofs with verified step-by-step derivations.</div>
+          <div class="card-sizes"><span class="size-chip">671b-moe</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull deepseek-prover:7b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull deepseek-prover:7b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tool Use / Agents ── -->
+    <div class="family-section fade-in" data-family="tools-agents">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(167,139,250,0.12)"><i data-lucide="bot" style="width:24px;height:24px;color:var(--purple)"></i></div>
+        <div class="family-name">Tool Use &amp; Agents</div>
+        <div class="family-count">Functionary, xLAM, ToolACE, Hammer</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="tools chat general" data-name="functionary v3 70b function calling tools">
+          <div class="card-top"><div class="card-name">Functionary v3</div><div class="card-tags"><span class="tag tag-tools">Tools</span><span class="tag tag-chat">Chat</span></div></div>
+          <div class="card-desc">MeetKai's function-calling specialist. Reliable JSON tool calling with parallel function execution support.</div>
+          <div class="card-sizes"><span class="size-chip">70b</span><span class="size-chip">8b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull functionary-v3:8b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull functionary-v3:8b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="tools edge" data-name="xlam 7b 1b salesforce function calling">
+          <div class="card-top"><div class="card-name">xLAM</div><div class="card-tags"><span class="tag tag-tools">Tools</span></div></div>
+          <div class="card-desc">Salesforce's Large Action Model series. Fine-tuned for API calling and agentic task completion in complex workflows.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span><span class="size-chip">1b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull xlam:7b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull xlam:7b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="tools" data-name="toolace 8b tool use agent">
+          <div class="card-top"><div class="card-name">ToolACE</div><div class="card-tags"><span class="tag tag-tools">Tools</span></div></div>
+          <div class="card-desc">IBM's 8B tool-use model with 26K diverse API training set. High accuracy on unseen APIs and multi-turn tool dialogues.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull toolace:8b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull toolace:8b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="code tools" data-name="devstral small 24b code agent">
+          <div class="card-top"><div class="card-name">Devstral Small</div><div class="card-tags"><span class="tag tag-code">Code</span><span class="tag tag-tools">Tools</span></div></div>
+          <div class="card-desc">Mistral's agentic coding model. Designed to browse codebases, call tools, and write production-ready code autonomously.</div>
+          <div class="card-sizes"><span class="size-chip">24b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull devstral-small:24b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull devstral-small:24b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Medical ── -->
+    <div class="family-section fade-in" data-family="medical-ext">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(74,222,128,0.12)"><i data-lucide="heart-pulse" style="width:24px;height:24px;color:#f87171"></i></div>
+        <div class="family-name">Medical &amp; Biomedical</div>
+        <div class="family-count">Meditron, Med42, Aloe, Asclepius, OpenBioLLM</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="medical general" data-name="meditron 70b medical clinical">
+          <div class="card-top"><div class="card-name">Meditron</div><div class="card-tags"><span class="tag tag-medical">Medical</span></div></div>
+          <div class="card-desc">EPFL's medical Llama fine-tune on clinical guidelines, PubMed, and medical case reports. Strong clinical reasoning.</div>
+          <div class="card-sizes"><span class="size-chip">70b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull meditron:70b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull meditron:70b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="medical general" data-name="med42 llama3 70b medical">
+          <div class="card-top"><div class="card-name">Med42 (Llama 3)</div><div class="card-tags"><span class="tag tag-medical">Medical</span></div></div>
+          <div class="card-desc">M42 Health's Llama 3 fine-tune for clinical QA. 70B model with strong performance on USMLE and medical MCQ benchmarks.</div>
+          <div class="card-sizes"><span class="size-chip">70b</span><span class="size-chip">8b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull llama3-med42:70b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull llama3-med42:70b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="medical" data-name="aloe 8b medical llama3">
+          <div class="card-top"><div class="card-name">Aloe Beta</div><div class="card-tags"><span class="tag tag-medical">Medical</span></div></div>
+          <div class="card-desc">HPAI's medical Llama 3 fine-tune. Excels at clinical note generation and biomedical question answering.</div>
+          <div class="card-sizes"><span class="size-chip">8b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull aloe:8b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull aloe:8b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Finance ── -->
+    <div class="family-section fade-in" data-family="finance-models">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(250,204,21,0.12)"><i data-lucide="trending-up" style="width:24px;height:24px;color:var(--green)"></i></div>
+        <div class="family-name">Finance Models</div>
+        <div class="family-count">FinGPT, Finance-LLM</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="finance" data-name="fingpt 7b 13b finance llm">
+          <div class="card-top"><div class="card-name">FinGPT</div><div class="card-tags"><span class="tag tag-finance">Finance</span></div></div>
+          <div class="card-desc">Open-source financial LLM. Fine-tuned for sentiment analysis, financial QA, stock prediction, and news summarization.</div>
+          <div class="card-sizes"><span class="size-chip">13b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull fingpt:13b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull fingpt:13b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Roleplay / Creative ── -->
+    <div class="family-section fade-in" data-family="roleplay-models">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(232,67,147,0.12)"><i data-lucide="drama" style="width:24px;height:24px;color:var(--accent2)"></i></div>
+        <div class="family-name">Roleplay &amp; Creative</div>
+        <div class="family-count">Euryale, Lumimaid, Midnight Miqu, Magnum, MythoMax</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat roleplay general" data-name="euryale 70b roleplay creative">
+          <div class="card-top"><div class="card-name">Euryale v2</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-roleplay">Roleplay</span></div></div>
+          <div class="card-desc">Community's top roleplay model at 70B. Rich character consistency, nuanced storytelling, and immersive narrative.</div>
+          <div class="card-sizes"><span class="size-chip">70b</span><span class="size-chip">8b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull euryale:70b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull euryale:70b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat roleplay general" data-name="midnight miqu 70b roleplay creative writing">
+          <div class="card-top"><div class="card-name">Midnight Miqu</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-roleplay">Roleplay</span></div></div>
+          <div class="card-desc">Premium creative writing model based on the leaked Miqu weights. Exceptional prose quality and character depth.</div>
+          <div class="card-sizes"><span class="size-chip">70b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull midnight-miqu:70b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull midnight-miqu:70b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat roleplay general" data-name="magnum 72b roleplay">
+          <div class="card-top"><div class="card-name">Magnum v4</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-roleplay">Roleplay</span></div></div>
+          <div class="card-desc">Kquant's premier creative writing merge at 72B. Balanced between helpfulness and immersive roleplay with strong prose.</div>
+          <div class="card-sizes"><span class="size-chip">72b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull magnum:72b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull magnum:72b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat roleplay" data-name="mythomax 13b roleplay creative">
+          <div class="card-top"><div class="card-name">MythoMax</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-roleplay">Roleplay</span></div></div>
+          <div class="card-desc">Gryphe's legendary Llama 2 merge. Community-favorite for years — balanced chat, roleplay, and creative writing.</div>
+          <div class="card-sizes"><span class="size-chip">13b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull mythomax:13b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull mythomax:13b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Reasoning Extended ── -->
+    <div class="family-section fade-in" data-family="reasoning-ext">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(96,165,250,0.12)"><i data-lucide="brain" style="width:24px;height:24px;color:var(--blue)"></i></div>
+        <div class="family-name">Reasoning Models</div>
+        <div class="family-count">S1, Open-Thoughts, Marco-o1, Seed-Thinking</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="reasoning" data-name="s1 32b reasoning thinking">
+          <div class="card-top"><div class="card-name">S1</div><div class="card-tags"><span class="tag tag-reasoning">Reasoning</span></div></div>
+          <div class="card-desc">Stanford's "budget forcing" reasoning model. Matches o1-preview on competition math using just 1K curated examples.</div>
+          <div class="card-sizes"><span class="size-chip">32b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull s1:32b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull s1:32b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="reasoning" data-name="marco o1 7b reasoning">
+          <div class="card-top"><div class="card-name">Marco-o1</div><div class="card-tags"><span class="tag tag-reasoning">Reasoning</span></div></div>
+          <div class="card-desc">Alibaba's open reasoning model. Uses MCTS-enhanced chain-of-thought to explore solution paths for complex problems.</div>
+          <div class="card-sizes"><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull marco-o1:7b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull marco-o1:7b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="reasoning" data-name="open-thoughts 32b reasoning">
+          <div class="card-top"><div class="card-name">Open-Thoughts</div><div class="card-tags"><span class="tag tag-reasoning">Reasoning</span></div></div>
+          <div class="card-desc">Community o1-style reasoning model. Synthetically generated long CoT training data for transparent step-by-step thinking.</div>
+          <div class="card-sizes"><span class="size-chip">32b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull open-thoughts:32b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull open-thoughts:32b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="reasoning" data-name="seed thinking 20b reasoning">
+          <div class="card-top"><div class="card-name">Seed-Thinking</div><div class="card-tags"><span class="tag tag-reasoning">Reasoning</span></div></div>
+          <div class="card-desc">ByteDance's open reasoning model. Strong competition math and logical deduction with efficient inference at 20B.</div>
+          <div class="card-sizes"><span class="size-chip">20b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull seed-thinking:20b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull seed-thinking:20b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Research / Classic Base Models ── -->
+    <div class="family-section fade-in" data-family="research-base">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(136,136,136,0.12)"><i data-lucide="flask-conical" style="width:24px;height:24px;color:var(--muted)"></i></div>
+        <div class="family-name">Research &amp; Classic Base Models</div>
+        <div class="family-count">GPT-J, GPT-NeoX, OPT, Pythia, MPT, Bloom</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat research" data-name="gpt-j 6b eleutherai research">
+          <div class="card-top"><div class="card-name">GPT-J 6B</div><div class="card-tags"><span class="tag" style="background:rgba(136,136,136,0.15);color:#aaa;border-color:rgba(136,136,136,0.3)">Research</span></div></div>
+          <div class="card-desc">EleutherAI's landmark 6B open-source model. The model that proved open-source LLMs were viable — a historic milestone.</div>
+          <div class="card-sizes"><span class="size-chip">6b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull gpt-j:6b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull gpt-j:6b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat research" data-name="gpt-neox 20b eleutherai research">
+          <div class="card-top"><div class="card-name">GPT-NeoX 20B</div><div class="card-tags"><span class="tag" style="background:rgba(136,136,136,0.15);color:#aaa;border-color:rgba(136,136,136,0.3)">Research</span></div></div>
+          <div class="card-desc">EleutherAI's 20B open model. Influential architecture paper and weights used in countless research studies.</div>
+          <div class="card-sizes"><span class="size-chip">20b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull neox:20b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull neox:20b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat research" data-name="opt 13b 6.7b facebook meta research">
+          <div class="card-top"><div class="card-name">OPT</div><div class="card-tags"><span class="tag" style="background:rgba(136,136,136,0.15);color:#aaa;border-color:rgba(136,136,136,0.3)">Research</span></div></div>
+          <div class="card-desc">Meta's Open Pretrained Transformer series. Released fully open for research — instrumental in democratizing LLM access.</div>
+          <div class="card-sizes"><span class="size-chip">13b</span><span class="size-chip">6.7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull opt-6.7b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull opt-6.7b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat research" data-name="mpt 30b 7b mosaic research">
+          <div class="card-top"><div class="card-name">MPT</div><div class="card-tags"><span class="tag" style="background:rgba(136,136,136,0.15);color:#aaa;border-color:rgba(136,136,136,0.3)">Research</span></div></div>
+          <div class="card-desc">MosaicML's open transformer series. MPT-7B-StoryWriter was a breakthrough in long-context generation at release.</div>
+          <div class="card-sizes"><span class="size-chip">30b</span><span class="size-chip">7b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull mpt:7b-chat</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull mpt:7b-chat')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DBRX / Snowflake Arctic ── -->
+    <div class="family-section fade-in" data-family="enterprise-moe">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(96,165,250,0.12)"><i data-lucide="building-2" style="width:24px;height:24px;color:var(--blue)"></i></div>
+        <div class="family-name">Enterprise MoE Giants</div>
+        <div class="family-count">DBRX, Snowflake Arctic, WizardLM-2</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat moe general" data-name="dbrx 132b databricks moe">
+          <div class="card-top"><div class="card-name">DBRX</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">Databricks' 132B MoE model. State-of-the-art when released — powerful general assistant trained on enterprise data.</div>
+          <div class="card-sizes"><span class="size-chip">132b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull dbrx:132b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull dbrx:132b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat moe general" data-name="snowflake arctic 480b moe code">
+          <div class="card-top"><div class="card-name">Snowflake Arctic</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">Snowflake's 480B dense-MoE hybrid. Exceptionally strong SQL and enterprise coding with cost-efficient inference.</div>
+          <div class="card-sizes"><span class="size-chip">480b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull snowflake-arctic:480b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull snowflake-arctic:480b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat moe general" data-name="wizardlm2 8x22b moe">
+          <div class="card-top"><div class="card-name">WizardLM-2 8x22B</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">Microsoft's WizardLM-2 on Mixtral 8x22B. Exceptional multilingual instruction following and complex reasoning.</div>
+          <div class="card-sizes"><span class="size-chip">141b-a39b</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull wizardlm2:8x22b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull wizardlm2:8x22b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Llama 4 ── -->
+    <div class="family-section fade-in" data-family="llama4">
+      <div class="family-header">
+        <div class="family-icon" style="background:rgba(250,204,21,0.12)"><img src="https://cdn.simpleicons.org/meta/e84393" width="28" height="28" alt="Meta"></div>
+        <div class="family-name">Llama 4</div>
+        <div class="family-count">Meta AI — 2025 MoE multimodal</div>
+      </div>
+      <div class="models-grid">
+        <div class="model-card" data-tags="chat moe vision" data-name="llama4 scout 17b moe vision">
+          <div class="card-top"><div class="card-name">Llama 4 Scout</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-vision">Vision</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">Meta's efficient MoE — 17B active / 16 experts. 10M context window. Best-in-class vision-language at this compute level.</div>
+          <div class="card-sizes"><span class="size-chip">17b-16e</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull llama4:scout:17b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull llama4:scout:17b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+        <div class="model-card" data-tags="chat moe vision general" data-name="llama4 maverick 17b 128e moe vision">
+          <div class="card-top"><div class="card-name">Llama 4 Maverick</div><div class="card-tags"><span class="tag tag-chat">Chat</span><span class="tag tag-vision">Vision</span><span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;border-color:rgba(167,139,250,0.3)">MoE</span></div></div>
+          <div class="card-desc">Meta's higher-capacity MoE — 17B active / 128 experts. Competitive with GPT-4o on multimodal benchmarks.</div>
+          <div class="card-sizes"><span class="size-chip">17b-128e</span></div>
+          <div class="card-footer"><div class="pull-cmd">lychee pull llama4:maverick:17b</div><button class="copy-btn" onclick="copyCmd(this,'lychee pull llama4:maverick:17b')" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="28" height="28" viewBox="0 0 200 200" fill="none"><defs><filter id="mf-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="mf-bump"><feGaussianBlur stdDeviation="0.5"/></filter><radialGradient id="mf-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF8DC7"/><stop offset="40%" stop-color="#E84393"/><stop offset="78%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient><radialGradient id="mf-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#C93578"/><stop offset="55%" stop-color="#A01E5F"/><stop offset="100%" stop-color="#6A1238"/></radialGradient><radialGradient id="mf-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#901850"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient><radialGradient id="mf-spec" cx="34%" cy="27%" r="28%"><stop offset="0%" stop-color="rgba(255,255,255,0.72)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><linearGradient id="mf-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient><linearGradient id="mf-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient><clipPath id="mf-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath></defs><ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#mf-top)" filter="url(#mf-glow)"/><path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#mf-top)" opacity="0.88"/><path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#mf-right)" opacity="0.92"/><path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#mf-right)" opacity="0.82"/><path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#mf-bot)" opacity="0.88"/><path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#mf-bot)" opacity="0.78"/><g opacity="0.5" clip-path="url(#mf-clip)"><circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#mf-bump)"/><circle cx="100" cy="70" r="4.5" fill="#FF6DB3" filter="url(#mf-bump)"/><circle cx="100" cy="90" r="5" fill="#FF6DB3" filter="url(#mf-bump)"/><circle cx="86" cy="84" r="5" fill="#FF6DB3" filter="url(#mf-bump)"/><circle cx="114" cy="84" r="4.5" fill="#D44A8A" filter="url(#mf-bump)"/></g><ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#mf-spec)" opacity="0.88"/><ellipse cx="75" cy="77" rx="3.5" ry="2.5" fill="white" opacity="0.55"/><path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#mf-stem)" stroke-width="3.5" stroke-linecap="round" fill="none"/><ellipse cx="99" cy="64" rx="5" ry="3.5" fill="#3D7A25"/><path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#mf-leaf)"/><path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#mf-leaf)" opacity="0.88"/></svg>
+    Lychee
+  </div>
+  <div class="footer-links">
+    <a href="docs.html">Docs</a>
+    <a href="blog.html">Blog</a>
+    <a href="https://github.com/lychee/lychee" target="_blank">GitHub</a>
+    <a href="#">Discord</a>
+    <a href="models.html">Models</a>
+    <a href="docs.html#api">API</a>
+  </div>
+  <div class="footer-copy">© 2025 Lychee. Open source.</div>
+</footer>
+
+<script>
+  // Filter tabs
+  const filterTabs = document.querySelectorAll('.filter-tab');
+  const familySections = document.querySelectorAll('.family-section');
+  const allCards = document.querySelectorAll('.model-card');
+  let activeFilter = 'all';
+
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      filterTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeFilter = tab.dataset.filter;
+      applyFilters();
+    });
+  });
+
+  // Search
+  const searchInput = document.getElementById('model-search');
+  searchInput.addEventListener('input', applyFilters);
+
+  function applyFilters() {
+    const query = searchInput.value.toLowerCase().trim();
+    let visibleCount = 0;
+
+    allCards.forEach(card => {
+      const tags = (card.dataset.tags || '').toLowerCase();
+      const name = (card.dataset.name || '').toLowerCase();
+      const cardText = card.textContent.toLowerCase();
+
+      const matchesFilter = activeFilter === 'all' || tags.includes(activeFilter);
+      const matchesSearch = !query || name.includes(query) || cardText.includes(query);
+
+      card.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
+      if (matchesFilter && matchesSearch) visibleCount++;
+    });
+
+    // Show/hide family sections
+    familySections.forEach(section => {
+      const visibleCards = section.querySelectorAll('.model-card:not([style*="display: none"])');
+      const sectionFamily = section.dataset.family;
+      const sectionVisible = visibleCards.length > 0;
+      section.style.display = sectionVisible ? '' : 'none';
+    });
+
+    document.getElementById('no-results').classList.toggle('visible', visibleCount === 0);
+    const vc = document.getElementById('visible-count'); if(vc) vc.textContent = visibleCount;
+  }
+
+  // Copy command
+  function copyCmd(btn, cmd) {
+    navigator.clipboard.writeText(cmd).then(() => {
+      btn.classList.add('copied');
+      const origHTML = btn.innerHTML;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = origHTML;
+      }, 1800);
+    });
+  }
+
+  // Scroll animations
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Random model picker
+  function pickRandom() {
+    const cards = [...document.querySelectorAll('.model-card')].filter(c => c.style.display !== 'none');
+    if (!cards.length) return;
+    const card = cards[Math.floor(Math.random() * cards.length)];
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.borderColor = 'var(--accent)';
+    setTimeout(() => card.style.borderColor = '', 2000);
+  }
+
+  // HF badge on pull-cmd elements
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.pull-cmd').forEach(el => {
+      if (el.textContent.includes('hf pull')) el.classList.add('hf');
+    });
+    if (window.lucide) lucide.createIcons();
+  });
+</script>
+</body>
+</html>

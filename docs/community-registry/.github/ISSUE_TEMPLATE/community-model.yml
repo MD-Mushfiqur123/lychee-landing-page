@@ -1,0 +1,42 @@
+name: "Community Model Submission"
+description: "Submit a new model to the Lychee community showcase"
+title: "Community Model: [Model Name]"
+labels: ["model-card"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for submitting a model to the Lychee Community Registry!
+        Please fill out the form below. A GitHub Actions workflow will review and auto-merge this submission if it passes validation.
+  - type: input
+    id: model_name
+    attributes:
+      label: Model Name
+      description: The unique identifier of your model.
+      placeholder: e.g. my-awesome-model
+    validations:
+      required: true
+  - type: input
+    id: author
+    attributes:
+      label: Author Handle
+      description: Your GitHub username (without @).
+      placeholder: e.g. octocat
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What makes this model configuration special?
+      placeholder: e.g. Fine-tuned for Python autocomplete with 8k context length.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Repository URL
+      description: Link to the model repository (HuggingFace, GitHub, etc.)
+      placeholder: e.g. https://huggingface.co/octocat/my-awesome-model
+    validations:
+      required: true

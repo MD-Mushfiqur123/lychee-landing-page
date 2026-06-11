@@ -14,21 +14,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/cmd/config"
-	"github.com/ollama/ollama/cmd/internal/fileutil"
+	"github.com/lychee/lychee/cmd/config"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
 	"golang.org/x/term"
 )
 
 const (
 	claudeDesktopIntegrationName = "claude-desktop"
-	claudeDesktopProfileName     = "Ollama"
+	claudeDesktopProfileName     = "Lychee"
 	claudeDesktopProfileID       = "00000000-0000-4000-8000-000000000114"
-	claudeDesktopGatewayBaseURL  = "https://ollama.com"
-	claudeDesktopAPIKeyURL       = "https://ollama.com/settings/keys"
-	claudeDesktopModelLabel      = "Ollama Cloud"
-	claudeDesktopUnsupported     = "Claude Desktop is no longer supported. Existing installations can be restored with 'ollama launch claude-desktop --restore'."
-	claudeDesktopSuccessMessage  = "Claude Desktop profile changed to Ollama Cloud."
-	claudeDesktopRestoreMessage  = "To restore the usual Claude profile, run: ollama launch claude-desktop --restore"
+	claudeDesktopGatewayBaseURL  = "https://lychee.com"
+	claudeDesktopAPIKeyURL       = "https://lychee.com/settings/keys"
+	claudeDesktopModelLabel      = "Lychee Cloud"
+	claudeDesktopUnsupported     = "Claude Desktop is no longer supported. Existing installations can be restored with 'lychee launch claude-desktop --restore'."
+	claudeDesktopSuccessMessage  = "Claude Desktop profile changed to Lychee Cloud."
+	claudeDesktopRestoreMessage  = "To restore the usual Claude profile, run: lychee launch claude-desktop --restore"
 	claudeDesktopRestoredMessage = "Claude Desktop restored to the usual Claude profile."
 )
 
@@ -49,7 +49,7 @@ var (
 )
 
 // ClaudeDesktop configures and launches Claude Desktop in third-party
-// inference mode using Ollama Cloud as the gateway.
+// inference mode using Lychee Cloud as the gateway.
 type ClaudeDesktop struct{}
 
 func (c *ClaudeDesktop) String() string { return "Claude Desktop" }
@@ -155,7 +155,7 @@ func (c *ClaudeDesktop) Restore() error {
 		if err := restoreClaudeDesktopMeta(target.meta); err != nil {
 			return err
 		}
-		if err := restoreClaudeDesktopOllamaProfile(target.profile); err != nil {
+		if err := restoreClaudeDesktopLycheeProfile(target.profile); err != nil {
 			return err
 		}
 	}
@@ -457,7 +457,7 @@ func claudeDesktopValidatedAPIKey(ctx context.Context, profilePaths []string) (s
 }
 
 func claudeDesktopAPIKey(profilePaths []string) (string, claudeDesktopAPIKeySource, error) {
-	if key := strings.TrimSpace(os.Getenv("OLLAMA_API_KEY")); key != "" {
+	if key := strings.TrimSpace(os.Getenv("LYCHEE_API_KEY")); key != "" {
 		return key, claudeDesktopAPIKeySourceEnv, nil
 	}
 	for _, profilePath := range profilePaths {
@@ -500,7 +500,7 @@ func promptClaudeDesktopAPIKeyValue() (string, error) {
 }
 
 func missingClaudeDesktopAPIKeyError() error {
-	return fmt.Errorf("OLLAMA_API_KEY is required for Claude Desktop. Create an API key at %s, then re-run with OLLAMA_API_KEY set", claudeDesktopAPIKeyURL)
+	return fmt.Errorf("LYCHEE_API_KEY is required for Claude Desktop. Create an API key at %s, then re-run with LYCHEE_API_KEY set", claudeDesktopAPIKeyURL)
 }
 
 func promptClaudeDesktopAPIKey() (string, error) {
@@ -514,7 +514,7 @@ func promptClaudeDesktopAPIKey() (string, error) {
 }
 
 func claudeDesktopAPIKeyPrompt() string {
-	return fmt.Sprintf("Create an Ollama API key at %s\nEnter Ollama API key (input hidden): ", claudeDesktopAPIKeyURL)
+	return fmt.Sprintf("Create an Lychee API key at %s\nEnter Lychee API key (input hidden): ", claudeDesktopAPIKeyURL)
 }
 
 func readClaudeDesktopGatewayAPIKey(path string) string {
@@ -550,11 +550,11 @@ func validateClaudeDesktopAPIKey(ctx context.Context, key string) error {
 
 	switch {
 	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
-		return fmt.Errorf("Ollama API key was rejected; create a valid key at %s", claudeDesktopAPIKeyURL)
+		return fmt.Errorf("Lychee API key was rejected; create a valid key at %s", claudeDesktopAPIKeyURL)
 	case resp.StatusCode >= 200 && resp.StatusCode < 300:
 		return nil
 	default:
-		return fmt.Errorf("could not verify Ollama API key; ollama.com returned status %d, try again later", resp.StatusCode)
+		return fmt.Errorf("could not verify Lychee API key; lychee.com returned status %d, try again later", resp.StatusCode)
 	}
 }
 
@@ -565,7 +565,7 @@ func claudeDesktopAPIKeyHasInvalidHeaderChars(key string) bool {
 }
 
 func claudeDesktopAPIKeyVerificationError() error {
-	return fmt.Errorf("could not verify Ollama API key; copy a key from %s and try again", claudeDesktopAPIKeyURL)
+	return fmt.Errorf("could not verify Lychee API key; copy a key from %s and try again", claudeDesktopAPIKeyURL)
 }
 
 func writeClaudeDesktopDeploymentMode(path, mode string) error {
@@ -607,7 +607,7 @@ func writeClaudeDesktopMeta(path, id, name string) error {
 func writeClaudeDesktopGatewayProfile(path string, apiKey string, forceChooser bool) error {
 	cfg, err := readClaudeDesktopJSONAllowMissing(path)
 	if err != nil {
-		return fmt.Errorf("parse Claude Desktop Ollama profile: %w", err)
+		return fmt.Errorf("parse Claude Desktop Lychee profile: %w", err)
 	}
 	cfg["inferenceProvider"] = "gateway"
 	cfg["inferenceGatewayBaseUrl"] = claudeDesktopGatewayBaseURL
@@ -653,10 +653,10 @@ func restoreClaudeDesktopMeta(path string) error {
 	return writeClaudeDesktopJSON(path, meta)
 }
 
-func restoreClaudeDesktopOllamaProfile(path string) error {
+func restoreClaudeDesktopLycheeProfile(path string) error {
 	cfg, err := readClaudeDesktopJSONAllowMissing(path)
 	if err != nil {
-		return fmt.Errorf("parse Claude Desktop Ollama profile: %w", err)
+		return fmt.Errorf("parse Claude Desktop Lychee profile: %w", err)
 	}
 	if len(cfg) == 0 {
 		return nil
@@ -837,7 +837,7 @@ func defaultClaudeDesktopOpenApp() error {
 		if path := claudeDesktopRunningAppPath(); path != "" {
 			return claudeDesktopOpenAppPath(path)
 		}
-		return fmt.Errorf("Claude Desktop executable was not found; open Claude Desktop manually once and re-run 'ollama launch claude-desktop --restore'")
+		return fmt.Errorf("Claude Desktop executable was not found; open Claude Desktop manually once and re-run 'lychee launch claude-desktop --restore'")
 	case "darwin":
 		return openClaudeDesktopDarwin()
 	default:

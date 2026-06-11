@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ollama/ollama/x/imagegen/mlx"
+	"github.com/lychee/lychee/x/imagegen/mlx"
 )
 
 func TestLoadModelWeights(t *testing.T) {

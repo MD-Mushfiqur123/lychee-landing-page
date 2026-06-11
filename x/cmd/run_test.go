@@ -85,22 +85,22 @@ func TestIsLocalServer(t *testing.T) {
 		},
 		{
 			name:     "remote host",
-			host:     "http://ollama.example.com:11434",
+			host:     "http://lychee.example.com:11434",
 			expected: true, // has :11434
 		},
 		{
 			name:     "remote host different port",
-			host:     "http://ollama.example.com:8080",
+			host:     "http://lychee.example.com:8080",
 			expected: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("OLLAMA_HOST", tt.host)
+			t.Setenv("LYCHEE_HOST", tt.host)
 			result := isLocalServer()
 			if result != tt.expected {
-				t.Errorf("isLocalServer() with OLLAMA_HOST=%q = %v, expected %v", tt.host, result, tt.expected)
+				t.Errorf("isLocalServer() with LYCHEE_HOST=%q = %v, expected %v", tt.host, result, tt.expected)
 			}
 		})
 	}
@@ -169,7 +169,7 @@ func TestTruncateToolOutput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("OLLAMA_HOST", tt.host)
+			t.Setenv("LYCHEE_HOST", tt.host)
 			result := truncateToolOutput(tt.output, tt.modelName)
 
 			if tt.shouldTrim {

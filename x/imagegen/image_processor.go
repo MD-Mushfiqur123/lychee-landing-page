@@ -7,7 +7,7 @@ import (
 	_ "image/png"
 	"os"
 
-	"github.com/ollama/ollama/x/imagegen/mlx"
+	"github.com/lychee/lychee/x/imagegen/mlx"
 	"golang.org/x/image/draw"
 )
 

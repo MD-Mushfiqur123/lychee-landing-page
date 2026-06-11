@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,24 +8,18 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/auth"
-	internalcloud "github.com/ollama/ollama/internal/cloud"
+	"github.com/lychee/lychee/api"
 )
 
 const (
-	webSearchAPI     = "https://ollama.com/api/web_search"
 	webSearchTimeout = 15 * time.Second
 )
 
-// ErrWebSearchAuthRequired is returned when web search requires authentication
-var ErrWebSearchAuthRequired = errors.New("web search requires authentication")
-
-// WebSearchTool implements web search using Ollama's hosted API.
+// WebSearchTool implements web search using local requests.
 type WebSearchTool struct{}
 
 // Name returns the tool name.
@@ -57,17 +50,6 @@ func (w *WebSearchTool) Schema() api.ToolFunction {
 	}
 }
 
-// webSearchRequest is the request body for the web search API.
-type webSearchRequest struct {
-	Query      string `json:"query"`
-	MaxResults int    `json:"max_results,omitempty"`
-}
-
-// webSearchResponse is the response from the web search API.
-type webSearchResponse struct {
-	Results []webSearchResult `json:"results"`
-}
-
 // webSearchResult is a single search result.
 type webSearchResult struct {
 	Title   string `json:"title"`
@@ -76,92 +58,42 @@ type webSearchResult struct {
 }
 
 // Execute performs the web search.
-// Uses Ollama key signing for authentication - this makes requests via ollama.com API.
 func (w *WebSearchTool) Execute(args map[string]any) (string, error) {
-	if internalcloud.Disabled() {
-		return "", errors.New(internalcloud.DisabledError("web search is unavailable"))
-	}
-
 	query, ok := args["query"].(string)
 	if !ok || query == "" {
 		return "", fmt.Errorf("query parameter is required")
 	}
 
-	// Prepare request
-	reqBody := webSearchRequest{
-		Query:      query,
-		MaxResults: 5,
-	}
-
-	jsonBody, err := json.Marshal(reqBody)
-	if err != nil {
-		return "", fmt.Errorf("marshaling request: %w", err)
-	}
-
-	// Parse URL and add timestamp for signing
-	searchURL, err := url.Parse(webSearchAPI)
-	if err != nil {
-		return "", fmt.Errorf("parsing search URL: %w", err)
-	}
-
-	q := searchURL.Query()
-	q.Add("ts", strconv.FormatInt(time.Now().Unix(), 10))
-	searchURL.RawQuery = q.Encode()
-
-	// Sign the request using Ollama key (~/.ollama/id_ed25519)
-	// This authenticates with ollama.com using the local signing key
 	ctx := context.Background()
-	data := fmt.Appendf(nil, "%s,%s", http.MethodPost, searchURL.RequestURI())
-	signature, err := auth.Sign(ctx, data)
+
+	// Check if a search API key is provided for Brave Search
+	apiKey := os.Getenv("LYCHEE_SEARCH_API_KEY")
+	if apiKey == "" {
+		apiKey = os.Getenv("BRAVE_SEARCH_API_KEY")
+	}
+
+	var results []webSearchResult
+	var err error
+
+	if apiKey != "" {
+		results, err = braveSearch(ctx, query, apiKey)
+	} else {
+		results, err = duckDuckGoSearch(ctx, query)
+	}
+
 	if err != nil {
-		return "", fmt.Errorf("signing request: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, searchURL.String(), bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return "", fmt.Errorf("creating request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	if signature != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", signature))
-	}
-
-	// Send request
-	client := &http.Client{Timeout: webSearchTimeout}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("sending request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("reading response: %w", err)
-	}
-
-	if resp.StatusCode == http.StatusUnauthorized {
-		return "", ErrWebSearchAuthRequired
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("web search API returned status %d: %s", resp.StatusCode, string(body))
-	}
-
-	// Parse response
-	var searchResp webSearchResponse
-	if err := json.Unmarshal(body, &searchResp); err != nil {
-		return "", fmt.Errorf("parsing response: %w", err)
+		return "", fmt.Errorf("web search failed: %w", err)
 	}
 
 	// Format results
-	if len(searchResp.Results) == 0 {
+	if len(results) == 0 {
 		return "No results found for query: " + query, nil
 	}
 
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Search results for: %s\n\n", query))
 
-	for i, result := range searchResp.Results {
+	for i, result := range results {
 		sb.WriteString(fmt.Sprintf("%d. %s\n", i+1, result.Title))
 		sb.WriteString(fmt.Sprintf("   URL: %s\n", result.URL))
 		if result.Content != "" {
@@ -177,4 +109,160 @@ func (w *WebSearchTool) Execute(args map[string]any) (string, error) {
 	}
 
 	return sb.String(), nil
+}
+
+func braveSearch(ctx context.Context, query, apiKey string) ([]webSearchResult, error) {
+	searchURL := "https://api.search.brave.com/res/v1/web/search?q=" + url.QueryEscape(query)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, searchURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("X-Subscription-Token", apiKey)
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{Timeout: webSearchTimeout}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("Brave API returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var braveResp struct {
+		Web struct {
+			Results []struct {
+				Title       string `json:"title"`
+				URL         string `json:"url"`
+				Description string `json:"description"`
+			} `json:"results"`
+		} `json:"web"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&braveResp); err != nil {
+		return nil, err
+	}
+
+	var results []webSearchResult
+	for _, r := range braveResp.Web.Results {
+		results = append(results, webSearchResult{
+			Title:   r.Title,
+			URL:     r.URL,
+			Content: r.Description,
+		})
+		if len(results) >= 5 {
+			break
+		}
+	}
+	return results, nil
+}
+
+func duckDuckGoSearch(ctx context.Context, query string) ([]webSearchResult, error) {
+	searchURL := "https://html.duckduckgo.com/html/?q=" + url.QueryEscape(query)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, searchURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+	client := &http.Client{Timeout: webSearchTimeout}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("DuckDuckGo HTML API returned status %d", resp.StatusCode)
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	html := string(bodyBytes)
+
+	var results []webSearchResult
+	searchPos := 0
+	for len(results) < 5 {
+		idx := strings.Index(html[searchPos:], "class=\"result__a\"")
+		if idx == -1 {
+			break
+		}
+		absoluteIdx := searchPos + idx
+		tagStart := strings.LastIndex(html[:absoluteIdx], "<a ")
+		if tagStart == -1 {
+			searchPos = absoluteIdx + len("class=\"result__a\"")
+			continue
+		}
+		tagEnd := strings.Index(html[tagStart:], ">")
+		if tagEnd == -1 {
+			searchPos = absoluteIdx + len("class=\"result__a\"")
+			continue
+		}
+		tagContent := html[tagStart : tagStart+tagEnd]
+
+		hrefIdx := strings.Index(tagContent, "href=\"")
+		if hrefIdx == -1 {
+			searchPos = absoluteIdx + len("class=\"result__a\"")
+			continue
+		}
+		hrefValue := tagContent[hrefIdx+len("href=\""):]
+		quoteEnd := strings.Index(hrefValue, "\"")
+		if quoteEnd == -1 {
+			searchPos = absoluteIdx + len("class=\"result__a\"")
+			continue
+		}
+		rawURL := hrefValue[:quoteEnd]
+
+		actualURL := rawURL
+		if strings.Contains(rawURL, "uddg=") {
+			u, err := url.Parse(rawURL)
+			if err == nil {
+				actualURL = u.Query().Get("uddg")
+			}
+		} else if strings.HasPrefix(rawURL, "//") {
+			actualURL = "https:" + rawURL
+		}
+
+		titleEnd := strings.Index(html[tagStart+tagEnd:], "</a>")
+		if titleEnd == -1 {
+			searchPos = absoluteIdx + len("class=\"result__a\"")
+			continue
+		}
+		rawTitle := html[tagStart+tagEnd+1 : tagStart+tagEnd+titleEnd]
+		title := cleanHTML(rawTitle)
+
+		snippet := ""
+		snippetIdx := strings.Index(html[tagStart+tagEnd+titleEnd:], "class=\"result__snippet\"")
+		if snippetIdx != -1 {
+			nextResultIdx := strings.Index(html[tagStart+tagEnd+titleEnd:], "class=\"result__a\"")
+			if nextResultIdx == -1 || snippetIdx < nextResultIdx {
+				snippetStart := tagStart + tagEnd + titleEnd + snippetIdx
+				snippetTagEnd := strings.Index(html[snippetStart:], ">")
+				if snippetTagEnd != -1 {
+					snippetContentEnd := strings.Index(html[snippetStart+snippetTagEnd:], "</a>")
+					if snippetContentEnd != -1 {
+						rawSnippet := html[snippetStart+snippetTagEnd+1 : snippetStart+snippetTagEnd+snippetContentEnd]
+						snippet = cleanHTML(rawSnippet)
+					}
+				}
+			}
+		}
+
+		if actualURL != "" && title != "" {
+			results = append(results, webSearchResult{
+				Title:   title,
+				URL:     actualURL,
+				Content: snippet,
+			})
+		}
+
+		searchPos = tagStart + tagEnd + titleEnd + len("</a>")
+	}
+
+	return results, nil
 }

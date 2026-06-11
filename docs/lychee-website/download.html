@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Download — Lychee</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;--border:#2a2a2a;
+      --text:#f0f0f0;--muted:#888;--accent:#e84393;--accent2:#ff6db3;
+      --green:#4ade80;--yellow:#facc15;--blue:#60a5fa;--purple:#a78bfa;
+      --radius:12px;--font:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono','Fira Code',monospace;
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;overflow-x:hidden}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+    .nav-logo svg{width:32px;height:32px}
+    .nav-logo span{font-size:1.2rem;font-weight:700;letter-spacing:-.5px}
+    .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-cta{background:var(--text);color:var(--bg)!important;padding:7px 18px;border-radius:8px;font-weight:600;font-size:.85rem!important}
+
+    /* HERO */
+    .hero{padding:120px 2rem 60px;text-align:center;position:relative;overflow:hidden}
+    .hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(232,67,147,.12) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);pointer-events:none}
+    .hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-2px;line-height:1.1;margin-bottom:1rem;background:linear-gradient(135deg,#fff 30%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero p{color:var(--muted);font-size:1.15rem;max-width:500px;margin:0 auto 2rem}
+    .version-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:100px;padding:6px 16px;font-size:.8rem;color:var(--green);margin-bottom:2rem;font-family:var(--mono)}
+
+    /* OS DETECT BANNER */
+    .detect-banner{background:linear-gradient(135deg,rgba(232,67,147,.1),rgba(96,165,250,.08));border:1px solid rgba(232,67,147,.2);border-radius:var(--radius);padding:1.5rem 2rem;max-width:700px;margin:0 auto 3rem;display:flex;align-items:center;gap:1.5rem;text-align:left}
+    .detect-icon{font-size:2.5rem;flex-shrink:0}
+    .detect-info h3{font-size:1.1rem;font-weight:700;margin-bottom:.25rem}
+    .detect-info p{color:var(--muted);font-size:.9rem;margin-bottom:.75rem}
+    .btn-detect{background:var(--accent);color:#fff;padding:10px 24px;border-radius:9px;font-weight:700;font-size:.95rem;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;transition:opacity .2s}
+    .btn-detect:hover{opacity:.85}
+
+    /* PLATFORM CARDS */
+    .container{max-width:1100px;margin:0 auto;padding:0 2rem}
+    .platforms{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin:3rem 0}
+    .platform-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;transition:border-color .3s,transform .3s;position:relative;overflow:hidden}
+    .platform-card.active{border-color:var(--accent)}
+    .platform-card.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    .platform-card:hover{transform:translateY(-4px);border-color:#444}
+    .platform-icon{font-size:2.5rem;margin-bottom:1rem}
+    .platform-name{font-size:1.3rem;font-weight:700;margin-bottom:.25rem}
+    .platform-ver{display:inline-block;background:rgba(74,222,128,.12);color:var(--green);font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:100px;font-family:var(--mono);margin-bottom:1rem}
+    .platform-reqs{margin:1rem 0;color:var(--muted);font-size:.85rem}
+    .platform-reqs li{margin:.2rem 0;list-style:none;padding-left:1rem;position:relative}
+    .platform-reqs li::before{content:'·';position:absolute;left:0;color:var(--accent)}
+    .btn-dl{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--text);color:var(--bg);padding:12px 20px;border-radius:9px;font-weight:700;font-size:.95rem;text-decoration:none;transition:opacity .2s;margin-bottom:.75rem;width:100%}
+    .btn-dl:hover{opacity:.85}
+    .btn-dl-alt{display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 20px;border-radius:9px;font-size:.85rem;text-decoration:none;transition:all .2s;width:100%}
+    .btn-dl-alt:hover{border-color:#555;color:var(--text)}
+
+    /* INSTALL SCRIPT */
+    .install-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;margin:3rem 0}
+    .install-section h2{font-size:1.4rem;font-weight:700;margin-bottom:.5rem}
+    .install-section p{color:var(--muted);margin-bottom:1.5rem;font-size:.95rem}
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0}
+    .tab{padding:10px 20px;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono)}
+    .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+    .code-panel{display:none;background:var(--bg3);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius)}
+    .code-panel.active{display:block}
+    pre{padding:1.5rem;font-family:var(--mono);font-size:.85rem;line-height:1.7;overflow-x:auto;color:var(--green)}
+    .cm{color:#6272a4}.kw{color:#ff79c6}.str{color:#f1fa8c}.muted-code{color:var(--muted)}
+
+    /* DOCKER */
+    .docker-section{margin:3rem 0;padding:2rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius)}
+    .docker-section h2{font-size:1.3rem;font-weight:700;margin-bottom:.5rem}
+    .docker-section p{color:var(--muted);margin-bottom:1.25rem;font-size:.9rem}
+    .code-block{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:1.25rem 1.5rem;font-family:var(--mono);font-size:.85rem;line-height:1.6;color:var(--green);overflow-x:auto;position:relative}
+    .copy-btn{position:absolute;top:.75rem;right:.75rem;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.7rem;color:var(--muted);cursor:pointer;transition:all .2s;font-family:var(--font)}
+    .copy-btn:hover{border-color:#555;color:var(--text)}
+
+    /* CHANGELOG */
+    .changelog{margin:3rem 0}
+    .changelog h2{font-size:1.6rem;font-weight:700;letter-spacing:-1px;margin-bottom:2rem}
+    .release{border-left:2px solid var(--border);padding-left:1.5rem;margin-bottom:2rem;position:relative}
+    .release::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--border);position:absolute;left:-6px;top:6px}
+    .release.latest::before{background:var(--accent)}
+    .release.latest{border-left-color:var(--accent)}
+    .release-header{display:flex;align-items:center;gap:1rem;margin-bottom:.75rem;flex-wrap:wrap}
+    .release-ver{font-size:1.1rem;font-weight:700;font-family:var(--mono)}
+    .release-date{color:var(--muted);font-size:.85rem}
+    .release-tag{display:inline-block;padding:3px 10px;border-radius:100px;font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+    .tag-latest{background:rgba(232,67,147,.15);color:var(--accent)}
+    .tag-stable{background:rgba(74,222,128,.1);color:var(--green)}
+    .release-notes{list-style:none;color:var(--muted);font-size:.9rem}
+    .release-notes li{padding:.2rem 0;padding-left:1.2rem;position:relative}
+    .release-notes li::before{content:'→';position:absolute;left:0;color:var(--accent);font-size:.8rem}
+
+    /* SOURCE */
+    .source-section{background:linear-gradient(135deg,rgba(232,67,147,.06),rgba(96,165,250,.04));border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;margin:3rem 0;text-align:center}
+    .source-section h2{font-size:1.4rem;font-weight:700;margin-bottom:.5rem}
+    .source-section p{color:var(--muted);margin-bottom:1.5rem}
+
+    /* SECTION */
+    section{padding:4rem 0}
+    .section-label{font-size:.8rem;font-weight:600;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:.75rem}
+    .section-title{font-size:clamp(1.8rem,3.5vw,2.5rem);font-weight:800;letter-spacing:-1px;margin-bottom:.75rem}
+
+    /* FADE */
+    .fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+    .fade-in.visible{opacity:1;transform:none}
+
+    /* FOOTER */
+    footer{padding:3rem 2rem;border-top:1px solid var(--border);max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
+    .footer-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.1rem}
+    .footer-links{display:flex;gap:2rem;flex-wrap:wrap}
+    .footer-links a{color:var(--muted);text-decoration:none;font-size:.85rem;transition:color .2s}
+    .footer-links a:hover{color:var(--text)}
+    .footer-copy{color:var(--muted);font-size:.8rem}
+
+    @media(max-width:600px){.nav-links{display:none}.detect-banner{flex-direction:column;text-align:center}.platforms{grid-template-columns:1fr}}
+    .platform-card { transition: border-color .3s, transform .3s, box-shadow .3s; }
+    .platform-card.active { box-shadow: 0 0 40px rgba(232,67,147,.15); }
+    .platform-card:hover { box-shadow: 0 8px 40px rgba(0,0,0,.4); }
+  </style>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <svg viewBox="0 0 200 200" fill="none"><defs><filter id="dl-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="dl-bump"><feGaussianBlur stdDeviation="0.5"/></filter><radialGradient id="dl-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF8DC7"/><stop offset="40%" stop-color="#E84393"/><stop offset="78%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient><radialGradient id="dl-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#C93578"/><stop offset="55%" stop-color="#A01E5F"/><stop offset="100%" stop-color="#6A1238"/></radialGradient><radialGradient id="dl-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#901850"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient><radialGradient id="dl-spec" cx="34%" cy="27%" r="28%"><stop offset="0%" stop-color="rgba(255,255,255,0.72)"/><stop offset="65%" stop-color="rgba(255,255,255,0.12)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><linearGradient id="dl-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="55%" stop-color="#4CAF35"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient><linearGradient id="dl-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient><radialGradient id="dl-bglow" cx="50%" cy="55%" r="50%"><stop offset="0%" stop-color="rgba(232,67,147,0.2)"/><stop offset="100%" stop-color="rgba(232,67,147,0)"/></radialGradient><clipPath id="dl-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath></defs><ellipse cx="100" cy="108" rx="78" ry="70" fill="url(#dl-bglow)"/><ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#dl-top)" filter="url(#dl-glow)"/><path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#dl-top)" opacity="0.88"/><path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#dl-right)" opacity="0.92"/><path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#dl-right)" opacity="0.82"/><path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#dl-bot)" opacity="0.88"/><path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#dl-bot)" opacity="0.78"/><g opacity="0.5" clip-path="url(#dl-clip)"><circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#dl-bump)"/><circle cx="100" cy="70" r="4.5" fill="#FF6DB3" filter="url(#dl-bump)"/><circle cx="128" cy="78" r="4" fill="#D44A8A" filter="url(#dl-bump)"/><circle cx="60" cy="92" r="4" fill="#E84393" filter="url(#dl-bump)"/><circle cx="86" cy="84" r="5" fill="#FF6DB3" filter="url(#dl-bump)"/><circle cx="114" cy="84" r="4.5" fill="#D44A8A" filter="url(#dl-bump)"/><circle cx="140" cy="92" r="4" fill="#B83070" filter="url(#dl-bump)"/><circle cx="70" cy="97" r="5" fill="#FF6DB3" filter="url(#dl-bump)"/><circle cx="100" cy="90" r="5" fill="#FF6DB3" filter="url(#dl-bump)"/><circle cx="128" cy="97" r="5" fill="#C94080" filter="url(#dl-bump)"/><circle cx="86" cy="105" r="5" fill="#FF6DB3" filter="url(#dl-bump)"/><circle cx="100" cy="103" r="5" fill="#FF85BB" filter="url(#dl-bump)"/><circle cx="114" cy="105" r="5" fill="#E84393" filter="url(#dl-bump)"/></g><ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#dl-spec)" opacity="0.88"/><ellipse cx="75" cy="77" rx="3.5" ry="2.5" fill="white" opacity="0.55"/><path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#dl-stem)" stroke-width="3.5" stroke-linecap="round" fill="none"/><ellipse cx="99" cy="64" rx="5" ry="3.5" fill="#3D7A25"/><path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#dl-leaf)"/><path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#dl-leaf)" opacity="0.88"/><path d="M99,44 Q92,28 86,18 Q94,24 100,36 Q102,40 100,46 Z" fill="#3D9A28" opacity="0.72"/></svg>
+    <span>Lychee</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="models.html">Models</a></li>
+    <li><a href="docs.html">Docs</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="index.html#integrations">Integrations</a></li>
+    <li><a href="https://github.com/lychee/lychee" target="_blank">GitHub</a></li>
+    <li><a href="download.html" class="nav-cta" style="color:#0a0a0a!important">Download</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="version-badge">🏷 Latest: v1.0.0 — June 2025</div>
+  <h1>Download Lychee</h1>
+  <p>Free, open source, and runs entirely on your machine. Pick your platform below.</p>
+</div>
+
+<div class="container">
+
+  <!-- AUTO DETECT -->
+  <div class="detect-banner fade-in" id="detect-banner">
+    <div class="detect-icon" id="detect-icon">💻</div>
+    <div class="detect-info">
+      <h3 id="detect-title">Detecting your OS…</h3>
+      <p id="detect-desc">We'll recommend the right installer for your system.</p>
+      <a href="#" class="btn-detect" id="detect-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download for your OS
+      </a>
+    </div>
+  </div>
+
+  <!-- PLATFORMS -->
+  <div class="section-label fade-in" style="text-align:center;margin-top:1rem">All Platforms</div>
+  <div class="platforms fade-in" id="platforms">
+
+    <!-- macOS -->
+    <div class="platform-card" id="card-mac">
+      <div class="platform-icon"><img src="https://cdn.simpleicons.org/apple/f0f0f0" width="40" height="40" alt="macOS"></div>
+      <div class="platform-name">macOS</div>
+      <div class="platform-ver">v1.0.0</div>
+      <ul class="platform-reqs">
+        <li>macOS 12 (Monterey) or later</li>
+        <li>Apple Silicon (M1+) or Intel x64</li>
+        <li>4 GB RAM minimum (8 GB+ recommended)</li>
+        <li>2 GB free disk space</li>
+      </ul>
+      <a href="#" class="btn-dl" onclick="return false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Lychee.dmg
+      </a>
+      <a href="#install-script" class="btn-dl-alt">Install via Terminal →</a>
+    </div>
+
+    <!-- Windows -->
+    <div class="platform-card" id="card-win">
+      <div class="platform-icon"><img src="https://cdn.simpleicons.org/windows/f0f0f0" width="40" height="40" alt="Windows"></div>
+      <div class="platform-name">Windows</div>
+      <div class="platform-ver">v1.0.0</div>
+      <ul class="platform-reqs">
+        <li>Windows 10 / 11 (64-bit)</li>
+        <li>NVIDIA GPU (recommended) or CPU</li>
+        <li>4 GB RAM minimum</li>
+        <li>2 GB free disk space</li>
+      </ul>
+      <a href="#" class="btn-dl" onclick="return false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download LycheeSetup.exe
+      </a>
+      <a href="#install-script" class="btn-dl-alt">Install via PowerShell →</a>
+    </div>
+
+    <!-- Linux -->
+    <div class="platform-card" id="card-linux">
+      <div class="platform-icon"><img src="https://cdn.simpleicons.org/linux/f0f0f0" width="40" height="40" alt="Linux"></div>
+      <div class="platform-name">Linux</div>
+      <div class="platform-ver">v1.0.0</div>
+      <ul class="platform-reqs">
+        <li>Ubuntu 20.04 / Debian 11 or later</li>
+        <li>NVIDIA GPU with CUDA, AMD ROCm, or CPU</li>
+        <li>4 GB RAM minimum</li>
+        <li>2 GB free disk space</li>
+      </ul>
+      <a href="#" class="btn-dl" onclick="return false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download lychee-linux-amd64
+      </a>
+      <a href="#install-script" class="btn-dl-alt">One-line install →</a>
+    </div>
+
+  </div><!-- /platforms -->
+
+  <!-- INSTALL SCRIPTS -->
+  <div class="install-section fade-in" id="install-script">
+    <h2>Install via Terminal</h2>
+    <p>The fastest way to install Lychee — one command and you're running.</p>
+    <div class="tabs">
+      <button class="tab active" onclick="switchInstall('linux',event)">Linux / macOS</button>
+      <button class="tab" onclick="switchInstall('windows',event)">Windows (PowerShell)</button>
+      <button class="tab" onclick="switchInstall('homebrew',event)">Homebrew</button>
+    </div>
+    <div id="install-linux" class="code-panel active"><pre><span class="cm"># Install Lychee with one command</span>
+curl -fsSL https://lychee.ai/install.sh | sh
+
+<span class="cm"># Then run your first model</span>
+lychee run llama3.1:8b</pre></div>
+    <div id="install-windows" class="code-panel"><pre><span class="cm"># Run in PowerShell as Administrator</span>
+Invoke-WebRequest -Uri https://lychee.ai/install.ps1 -OutFile install.ps1
+.\install.ps1
+
+<span class="cm"># Then run your first model</span>
+lychee run llama3.1:8b</pre></div>
+    <div id="install-homebrew" class="code-panel"><pre><span class="cm"># Install via Homebrew (macOS / Linux)</span>
+brew tap lychee/tap
+brew install lychee
+
+<span class="cm"># Then run your first model</span>
+lychee run llama3.1:8b</pre></div>
+  </div>
+
+  <!-- DOCKER -->
+  <div class="docker-section fade-in">
+    <h2><img src="https://cdn.simpleicons.org/docker/60a5fa" width="28" height="28" alt="Docker" style="vertical-align:middle;margin-right:8px">Docker</h2>
+    <p>Run Lychee in a container — perfect for servers, CI, and cloud deployments.</p>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div>
+        <div style="color:var(--muted);font-size:.8rem;margin-bottom:.4rem;font-family:var(--mono)">CPU only</div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          docker run -d -v lychee:/root/.lychee -p 11434:11434 --name lychee lychee/lychee
+        </div>
+      </div>
+      <div>
+        <div style="color:var(--muted);font-size:.8rem;margin-bottom:.4rem;font-family:var(--mono)">NVIDIA GPU</div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          docker run -d --gpus=all -v lychee:/root/.lychee -p 11434:11434 --name lychee lychee/lychee
+        </div>
+      </div>
+      <div>
+        <div style="color:var(--muted);font-size:.8rem;margin-bottom:.4rem;font-family:var(--mono)">Docker Compose</div>
+        <div class="code-block" style="color:var(--text)">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <span style="color:#ff79c6">services</span><span style="color:#f1fa8c">:</span><br>
+          &nbsp;&nbsp;<span style="color:#ff79c6">lychee</span><span style="color:#f1fa8c">:</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#50fa7b">image</span>: lychee/lychee<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#50fa7b">ports</span>: ["11434:11434"]<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#50fa7b">volumes</span>: [lychee:/root/.lychee]<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#50fa7b">restart</span>: unless-stopped
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SYSTEM REQUIREMENTS -->
+  <section class="fade-in" id="requirements">
+    <div class="section-label">System Requirements</div>
+    <h2 class="section-title" style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;letter-spacing:-1px;margin-bottom:2rem">Hardware Requirements by Model Size</h2>
+
+    <div style="overflow-x:auto;margin-bottom:2rem">
+      <table style="width:100%;border-collapse:collapse;font-size:.875rem">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:10px 14px;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:var(--bg3)">Model Size</th>
+            <th style="text-align:left;padding:10px 14px;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:var(--bg3)">VRAM (GPU)</th>
+            <th style="text-align:left;padding:10px 14px;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:var(--bg3)">RAM (CPU)</th>
+            <th style="text-align:left;padding:10px 14px;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:var(--bg3)">Example Models</th>
+            <th style="text-align:left;padding:10px 14px;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700;background:var(--bg3)">Speed (M2 Pro)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:11px 14px;color:var(--green);font-family:var(--mono);font-size:.82rem">1B – 3B</td>
+            <td style="padding:11px 14px;color:var(--text)">1–2 GB</td>
+            <td style="padding:11px 14px;color:var(--text)">4 GB</td>
+            <td style="padding:11px 14px;color:var(--muted)">llama3.2:1b, qwen3:1.7b, phi3:mini</td>
+            <td style="padding:11px 14px;color:var(--green)">~80–120 tok/s</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:11px 14px;color:var(--green);font-family:var(--mono);font-size:.82rem">7B – 9B</td>
+            <td style="padding:11px 14px;color:var(--text)">4–6 GB</td>
+            <td style="padding:11px 14px;color:var(--text)">8 GB</td>
+            <td style="padding:11px 14px;color:var(--muted)">llama3.1:8b, mistral:7b, qwen3:8b</td>
+            <td style="padding:11px 14px;color:var(--green)">~35–55 tok/s</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:11px 14px;color:var(--yellow);font-family:var(--mono);font-size:.82rem">13B – 14B</td>
+            <td style="padding:11px 14px;color:var(--text)">8–10 GB</td>
+            <td style="padding:11px 14px;color:var(--text)">16 GB</td>
+            <td style="padding:11px 14px;color:var(--muted)">phi4:14b, qwen3:14b, codestral:22b</td>
+            <td style="padding:11px 14px;color:var(--yellow)">~20–30 tok/s</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:11px 14px;color:var(--yellow);font-family:var(--mono);font-size:.82rem">30B – 35B</td>
+            <td style="padding:11px 14px;color:var(--text)">18–24 GB</td>
+            <td style="padding:11px 14px;color:var(--text)">32 GB</td>
+            <td style="padding:11px 14px;color:var(--muted)">qwen3:32b, command-r:35b</td>
+            <td style="padding:11px 14px;color:var(--yellow)">~10–15 tok/s</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+            <td style="padding:11px 14px;color:#f87171;font-family:var(--mono);font-size:.82rem">70B</td>
+            <td style="padding:11px 14px;color:var(--text)">40+ GB (or 2× GPU)</td>
+            <td style="padding:11px 14px;color:var(--text)">64 GB</td>
+            <td style="padding:11px 14px;color:var(--muted)">llama3.3:70b, qwen3:72b</td>
+            <td style="padding:11px 14px;color:#f87171">~5–8 tok/s</td>
+          </tr>
+          <tr>
+            <td style="padding:11px 14px;color:#f87171;font-family:var(--mono);font-size:.82rem">405B+</td>
+            <td style="padding:11px 14px;color:var(--text)">80+ GB (A100/H100)</td>
+            <td style="padding:11px 14px;color:var(--text)">128 GB+</td>
+            <td style="padding:11px 14px;color:var(--muted)">llama3.1:405b, mistral-large</td>
+            <td style="padding:11px 14px;color:#f87171">~1–3 tok/s</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:1.1rem 1.5rem;font-size:.875rem;color:var(--muted)">
+      <strong style="color:var(--text)">Tip:</strong> Not sure what fits your hardware? Run <code style="font-family:var(--mono);font-size:.82em;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--green)">lychee scan</code> after installing and get a personalized recommendation list.
+    </div>
+  </section>
+
+  <!-- VERIFY CHECKSUMS -->
+  <section class="fade-in">
+    <div class="section-label">Integrity</div>
+    <h2 class="section-title" style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;letter-spacing:-1px;margin-bottom:1.5rem">Verify Your Download</h2>
+    <p style="color:var(--muted);margin-bottom:1.5rem;font-size:.95rem">All Lychee binaries are signed. When pulling from HuggingFace, <code style="font-family:var(--mono);font-size:.85em;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--green)">lychee hf pull</code> automatically verifies SHA256 checksums.</p>
+    <div class="docker-section" style="margin:0">
+      <div style="display:flex;flex-direction:column;gap:1rem">
+        <div>
+          <div style="color:var(--muted);font-size:.8rem;margin-bottom:.4rem;font-family:var(--mono)">Verify binary hash (Linux/macOS)</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre style="color:var(--green);font-family:var(--mono);font-size:.82rem;line-height:1.6;padding:1rem 1.25rem">sha256sum lychee-linux-amd64
+<span style="color:#6272a4"># Compare with the .sha256 file from the release page</span></pre>
+          </div>
+        </div>
+        <div>
+          <div style="color:var(--muted);font-size:.8rem;margin-bottom:.4rem;font-family:var(--mono)">HuggingFace model auto-verification (built-in)</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre style="color:var(--green);font-family:var(--mono);font-size:.82rem;line-height:1.6;padding:1rem 1.25rem">lychee hf pull bartowski/Meta-Llama-3.1-8B-Instruct-GGUF
+<span style="color:#6272a4"># SHA256 is automatically verified against HuggingFace LFS checksums</span>
+<span style="color:#4ade80">✓ SHA256 verified: Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERIFY CHECKSUM ACCORDION -->
+  <section class="fade-in">
+    <details style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin:0 0 3rem">
+      <summary style="cursor:pointer;display:flex;align-items:center;gap:10px;font-size:1.05rem;font-weight:700;list-style:none;user-select:none">
+        <i data-lucide="shield-check" style="color:var(--accent);width:20px;height:20px;flex-shrink:0"></i>
+        How to Verify Your Download Checksum
+        <i data-lucide="chevron-down" style="color:var(--muted);width:16px;height:16px;margin-left:auto;transition:transform .3s" class="details-chevron"></i>
+      </summary>
+      <div style="margin-top:1.25rem;color:var(--muted);font-size:.9rem;line-height:1.8">
+        <p style="margin-bottom:1rem">Every Lychee release ships with a <code style="font-family:var(--mono);font-size:.82em;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--green)">.sha256</code> file. Compare it against your downloaded binary to confirm it hasn't been tampered with.</p>
+        <div style="display:flex;flex-direction:column;gap:.75rem">
+          <div>
+            <div style="color:var(--muted);font-size:.78rem;margin-bottom:.35rem;font-family:var(--mono)">Linux / macOS</div>
+            <div class="code-block" style="font-size:.82rem">sha256sum -c lychee-linux-amd64.sha256</div>
+          </div>
+          <div>
+            <div style="color:var(--muted);font-size:.78rem;margin-bottom:.35rem;font-family:var(--mono)">macOS (shasum)</div>
+            <div class="code-block" style="font-size:.82rem">shasum -a 256 -c lychee-darwin-arm64.sha256</div>
+          </div>
+          <div>
+            <div style="color:var(--muted);font-size:.78rem;margin-bottom:.35rem;font-family:var(--mono)">Windows (PowerShell)</div>
+            <div class="code-block" style="font-size:.82rem">(Get-FileHash LycheeSetup.exe -Algorithm SHA256).Hash</div>
+          </div>
+        </div>
+        <p style="margin-top:1rem;font-size:.82rem">A <code style="font-family:var(--mono);font-size:.82em;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--green)">OK</code> or matching hash confirms the file is authentic. GPG signature verification is also available on the <a href="https://github.com/lychee/lychee/releases" target="_blank" style="color:var(--accent2);text-decoration:none">releases page</a>.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- CHANGELOG -->
+  <section class="fade-in">
+    <div class="section-label">Release History</div>
+    <h2 class="section-title">What's New</h2>
+
+    <div class="changelog">
+      <div class="release latest">
+        <div class="release-header">
+          <span class="release-ver">v1.0.0</span>
+          <span class="release-date">June 8, 2025</span>
+          <span class="release-tag tag-latest">Latest</span>
+        </div>
+        <ul class="release-notes">
+          <li>Initial Lychee release — full rebrand from upstream</li>
+          <li>275+ models in built-in HuggingFace catalog</li>
+          <li>Direct HuggingFace downloads — no token required for public models</li>
+          <li>Resumable downloads with SHA256 integrity verification</li>
+          <li><code style="font-family:var(--mono);font-size:.8rem;background:var(--bg3);padding:1px 6px;border-radius:4px">lychee hf pull / search / list</code> commands</li>
+          <li><code style="font-family:var(--mono);font-size:.8rem;background:var(--bg3);padding:1px 6px;border-radius:4px">lychee embed</code> — vector embedding generation (text/JSON/CSV output)</li>
+          <li><code style="font-family:var(--mono);font-size:.8rem;background:var(--bg3);padding:1px 6px;border-radius:4px">lychee scan</code> — hardware detection + model recommendations</li>
+          <li><code style="font-family:var(--mono);font-size:.8rem;background:var(--bg3);padding:1px 6px;border-radius:4px">lychee compare</code> — side-by-side dual-model output comparison</li>
+          <li><code style="font-family:var(--mono);font-size:.8rem;background:var(--bg3);padding:1px 6px;border-radius:4px">lychee stats</code> — live VRAM/RAM/tok-s dashboard</li>
+          <li>OpenAI-compatible REST API on port 11434</li>
+          <li>Auto GGUF quantization selection (Q4_K_M priority)</li>
+          <li>Apple Silicon, NVIDIA CUDA, AMD ROCm, Vulkan support</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-header">
+          <span class="release-ver">v0.9.0</span>
+          <span class="release-date">May 14, 2025</span>
+          <span class="release-tag tag-stable">Stable</span>
+        </div>
+        <ul class="release-notes">
+          <li>Vision model support (LLaVA, Llama 3.2 Vision, Phi-4 Multimodal)</li>
+          <li>Streaming embeddings API</li>
+          <li>Structured output / JSON schema enforcement</li>
+          <li>Tool calling support for compatible models</li>
+          <li>VS Code / Cline / Zed integrations</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-header">
+          <span class="release-ver">v0.8.0</span>
+          <span class="release-date">April 2, 2025</span>
+          <span class="release-tag tag-stable">Stable</span>
+        </div>
+        <ul class="release-notes">
+          <li>Multi-GPU inference support</li>
+          <li>Context length improvements (up to 128k tokens)</li>
+          <li>Improved model quantization pipeline</li>
+          <li>Web search tool calling capability</li>
+          <li>Performance improvements for Apple M3/M4</li>
+        </ul>
+      </div>
+
+      <div class="release">
+        <div class="release-header">
+          <span class="release-ver">v0.7.0</span>
+          <span class="release-date">February 20, 2025</span>
+          <span class="release-tag tag-stable">Stable</span>
+        </div>
+        <ul class="release-notes">
+          <li>Windows native app with system tray</li>
+          <li>AMD GPU (ROCm) support on Linux</li>
+          <li>Modelfile inheritance and template system</li>
+          <li>REST API pagination for model listing</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUILD FROM SOURCE -->
+  <div class="source-section fade-in">
+    <h2>Build from Source</h2>
+    <p>Want to build Lychee yourself? You'll need Go 1.22+ and CMake 3.24+.</p>
+    <div style="text-align:left;max-width:640px;margin:0 auto">
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <span style="color:var(--green)">git clone https://github.com/lychee/lychee</span><br>
+        <span style="color:var(--green)">cd lychee</span><br>
+        <span style="color:var(--green)">go build -o lychee .</span><br>
+        <span style="color:var(--muted)"># Or with GPU support:</span><br>
+        <span style="color:var(--green)">cmake -B build . &amp;&amp; cmake --build build</span>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="docs.html" style="color:var(--accent2);text-decoration:none;font-size:.9rem">→ Full build docs</a>
+      <a href="https://github.com/lychee/lychee" target="_blank" style="color:var(--accent2);text-decoration:none;font-size:.9rem">→ GitHub repository</a>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- SOCIAL PROOF -->
+<div style="text-align:center;padding:3rem 2rem;border-top:1px solid var(--border)">
+  <p style="color:var(--muted);font-size:.85rem;margin-bottom:1.5rem">Join thousands of developers running AI locally</p>
+  <div style="display:flex;align-items:center;justify-content:center;gap:2rem;flex-wrap:wrap">
+    <a href="https://github.com/lychee/lychee" target="_blank" style="display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'"><img src="https://cdn.simpleicons.org/github/888888" width="18" height="18" alt=""> GitHub</a>
+    <a href="#" style="display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'"><img src="https://cdn.simpleicons.org/discord/888888" width="18" height="18" alt=""> Discord</a>
+    <a href="#" style="display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'"><img src="https://cdn.simpleicons.org/x/888888" width="18" height="18" alt=""> Twitter/X</a>
+    <a href="#" style="display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'"><img src="https://cdn.simpleicons.org/reddit/888888" width="18" height="18" alt=""> Reddit</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="26" height="26" viewBox="0 0 200 200" fill="none"><defs><filter id="dlf-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="dlf-bump"><feGaussianBlur stdDeviation="0.5"/></filter><radialGradient id="dlf-top" cx="38%" cy="28%" r="65%"><stop offset="0%" stop-color="#FF8DC7"/><stop offset="40%" stop-color="#E84393"/><stop offset="78%" stop-color="#C41E6B"/><stop offset="100%" stop-color="#8B1A4A"/></radialGradient><radialGradient id="dlf-right" cx="62%" cy="38%" r="58%"><stop offset="0%" stop-color="#C93578"/><stop offset="55%" stop-color="#A01E5F"/><stop offset="100%" stop-color="#6A1238"/></radialGradient><radialGradient id="dlf-bot" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="#901850"/><stop offset="100%" stop-color="#5A0E30"/></radialGradient><radialGradient id="dlf-spec" cx="34%" cy="27%" r="28%"><stop offset="0%" stop-color="rgba(255,255,255,0.72)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><linearGradient id="dlf-leaf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6DD35A"/><stop offset="100%" stop-color="#2D7A1B"/></linearGradient><linearGradient id="dlf-stem" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5A8A3A"/><stop offset="100%" stop-color="#2D5A1B"/></linearGradient><clipPath id="dlf-clip"><ellipse cx="100" cy="108" rx="58" ry="52"/></clipPath></defs><ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#dlf-top)" filter="url(#dlf-glow)"/><path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#dlf-top)" opacity="0.88"/><path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#dlf-right)" opacity="0.92"/><path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#dlf-right)" opacity="0.82"/><path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#dlf-bot)" opacity="0.88"/><path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#dlf-bot)" opacity="0.78"/><g opacity="0.5" clip-path="url(#dlf-clip)"><circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#dlf-bump)"/><circle cx="100" cy="70" r="4.5" fill="#FF6DB3" filter="url(#dlf-bump)"/><circle cx="100" cy="90" r="5" fill="#FF6DB3" filter="url(#dlf-bump)"/><circle cx="86" cy="84" r="5" fill="#FF6DB3" filter="url(#dlf-bump)"/><circle cx="114" cy="84" r="4.5" fill="#D44A8A" filter="url(#dlf-bump)"/></g><ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#dlf-spec)" opacity="0.88"/><ellipse cx="75" cy="77" rx="3.5" ry="2.5" fill="white" opacity="0.55"/><path d="M98,63 Q97,52 96,44 Q95,37 98,33" stroke="url(#dlf-stem)" stroke-width="3.5" stroke-linecap="round" fill="none"/><ellipse cx="99" cy="64" rx="5" ry="3.5" fill="#3D7A25"/><path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#dlf-leaf)"/><path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#dlf-leaf)" opacity="0.88"/></svg>
+    Lychee
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="docs.html">Docs</a>
+    <a href="models.html">Models</a>
+    <a href="blog.html">Blog</a>
+    <a href="https://github.com/lychee/lychee" target="_blank">GitHub</a>
+    <a href="#">Discord</a>
+  </div>
+  <div class="footer-copy">© 2025 Lychee. Open source.</div>
+</footer>
+
+<script>
+// OS Detection
+(function(){
+  const ua = navigator.userAgent.toLowerCase();
+  const platform = navigator.platform.toLowerCase();
+  let os = 'linux', icon = '🐧', title = 'Linux detected', desc = 'Download the Linux binary or use the one-line install script.';
+
+  if(/mac|iphone|ipad|ipod/.test(platform) || /mac/.test(ua)){
+    os='mac'; icon='🍎'; title='macOS detected'; desc='Download the .dmg installer or install via Terminal with curl.';
+    document.getElementById('card-mac').classList.add('active');
+  } else if(/win/.test(platform) || /windows/.test(ua)){
+    os='win'; icon='🪟'; title='Windows detected'; desc='Download the .exe installer or install via PowerShell.';
+    document.getElementById('card-win').classList.add('active');
+  } else {
+    document.getElementById('card-linux').classList.add('active');
+  }
+
+  document.getElementById('detect-icon').textContent = icon;
+  document.getElementById('detect-title').textContent = title;
+  document.getElementById('detect-desc').textContent = desc;
+})();
+
+// Tab switcher
+function switchInstall(id, e) {
+  document.querySelectorAll('.install-section .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.install-section .code-panel').forEach(p=>p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('install-'+id).classList.add('active');
+}
+
+// Copy button
+function copyCode(btn) {
+  const block = btn.closest('.code-block');
+  const text = block.innerText.replace('Copy','').trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent = 'Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(()=>{ btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+  });
+}
+
+// Detect OS and show install toast
+setTimeout(() => {
+  const ua = navigator.userAgent;
+  let os = 'Linux', cmd = 'curl -fsSL https://lychee.sh/install.sh | sh';
+  if (/Mac/.test(ua)) { os = 'macOS'; cmd = 'brew install lychee'; }
+  else if (/Win/.test(ua)) { os = 'Windows'; cmd = 'winget install lychee.lychee'; }
+  document.getElementById('toast-os').textContent = os;
+  document.getElementById('toast-cmd').textContent = cmd;
+  document.getElementById('install-toast').style.transform = 'translateY(0)';
+}, 3000);
+</script>
+
+<div id="install-toast" style="position:fixed;bottom:2rem;right:2rem;background:var(--bg2);border:1px solid rgba(232,67,147,.4);border-radius:var(--radius);padding:1.25rem 1.5rem;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.6);transform:translateY(120px);transition:transform .5s cubic-bezier(.22,1,.36,1);z-index:200;display:flex;align-items:flex-start;gap:12px">
+  <i data-lucide="terminal" style="color:var(--accent);width:20px;height:20px;flex-shrink:0;margin-top:2px"></i>
+  <div>
+    <div style="font-weight:700;font-size:.9rem;margin-bottom:.35rem">Quick Install</div>
+    <div id="toast-cmd" style="font-family:var(--mono);font-size:.78rem;color:var(--green);background:var(--bg3);padding:6px 10px;border-radius:6px;margin-bottom:.5rem">curl -fsSL https://lychee.sh/install.sh | sh</div>
+    <div style="font-size:.75rem;color:var(--muted)">Detected: <span id="toast-os" style="color:var(--text);font-weight:600">your system</span></div>
+  </div>
+  <button onclick="document.getElementById('install-toast').style.transform='translateY(120px)'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1;margin-left:auto;padding:0">×</button>
+</div>
+<script>lucide.createIcons();</script>
+</body>
+</html>

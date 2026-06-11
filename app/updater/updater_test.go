@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/app/store"
+	"github.com/lychee/lychee/app/store"
 )
 
 func TestUpdateStagePathRejectsUnsafeFilename(t *testing.T) {
@@ -30,14 +30,14 @@ func TestUpdateStagePathRejectsUnsafeFilename(t *testing.T) {
 		{"empty", ""},
 		{"dot", "."},
 		{"dotdot", ".."},
-		{"posix_parent", "../OllamaSetup.exe"},
-		{"windows_parent", `..\OllamaSetup.exe`},
-		{"posix_absolute_tmp", "/tmp/OllamaSetup.exe"},
-		{"darwin_absolute_app", "/Applications/Ollama.app"},
-		{"darwin_bundle_path", "Ollama.app/Contents/MacOS/Ollama"},
-		{"darwin_user_download", "~/Downloads/Ollama-darwin.zip"},
-		{"windows_absolute", `C:\Users\Public\OllamaSetup.exe`},
-		{"colon", "Ollama:Setup.exe"},
+		{"posix_parent", "../LycheeSetup.exe"},
+		{"windows_parent", `..\LycheeSetup.exe`},
+		{"posix_absolute_tmp", "/tmp/LycheeSetup.exe"},
+		{"darwin_absolute_app", "/Applications/Lychee.app"},
+		{"darwin_bundle_path", "Lychee.app/Contents/MacOS/Lychee"},
+		{"darwin_user_download", "~/Downloads/Lychee-darwin.zip"},
+		{"windows_absolute", `C:\Users\Public\LycheeSetup.exe`},
+		{"colon", "Lychee:Setup.exe"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			if _, err := updateStagePath(stageDir, "etag", tt.filename); err == nil {
@@ -49,7 +49,7 @@ func TestUpdateStagePathRejectsUnsafeFilename(t *testing.T) {
 
 func TestUpdateStagePathHashesETag(t *testing.T) {
 	stageDir := t.TempDir()
-	stageFilename, err := updateStagePath(stageDir, `../escaped`, "OllamaSetup.exe")
+	stageFilename, err := updateStagePath(stageDir, `../escaped`, "LycheeSetup.exe")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestDownloadNewReleaseRejectsUnsafeHeaderFilename(t *testing.T) {
 		VerifyDownload = oldVerifyDownload
 		UpdateDownloaded = oldUpdateDownloaded
 	}()
-	Installer = "OllamaSetup.exe"
+	Installer = "LycheeSetup.exe"
 	UpdateDownloaded = false
 	VerifyDownload = func() error {
 		t.Fatal("verification should not run for rejected downloads")
@@ -116,7 +116,7 @@ func TestDownloadNewReleaseRejectsUnsafeHeaderFilename(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodHead {
 			w.Header().Set("ETag", `"safe"`)
-			w.Header().Set("Content-Disposition", `attachment; filename="../OllamaSetup.exe"`)
+			w.Header().Set("Content-Disposition", `attachment; filename="../LycheeSetup.exe"`)
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -133,7 +133,7 @@ func TestDownloadNewReleaseRejectsUnsafeHeaderFilename(t *testing.T) {
 	if getAttempted.Load() {
 		t.Fatal("download should not continue after unsafe filename")
 	}
-	if _, err := os.Stat(filepath.Join(filepath.Dir(UpdateStageDir), "OllamaSetup.exe")); err == nil {
+	if _, err := os.Stat(filepath.Join(filepath.Dir(UpdateStageDir), "LycheeSetup.exe")); err == nil {
 		t.Fatal("download escaped update stage dir")
 	}
 }
@@ -148,7 +148,7 @@ func TestDownloadNewReleaseDoesNotUseRawETagAsPathComponent(t *testing.T) {
 		VerifyDownload = oldVerifyDownload
 		UpdateDownloaded = oldUpdateDownloaded
 	}()
-	Installer = "OllamaSetup.exe"
+	Installer = "LycheeSetup.exe"
 	UpdateDownloaded = false
 	VerifyDownload = func() error {
 		return nil
@@ -206,7 +206,7 @@ func TestBackgroundCheckerSkipsAlreadyStagedETagDownload(t *testing.T) {
 		UpdateCheckInterval = oldUpdateCheckInterval
 		UpdateCheckURLBase = oldUpdateCheckURLBase
 	}()
-	Installer = "OllamaSetup.exe"
+	Installer = "LycheeSetup.exe"
 	UpdateDownloaded = false
 	UpdateCheckInitialDelay = time.Millisecond
 	UpdateCheckInterval = 5 * time.Millisecond
@@ -230,7 +230,7 @@ func TestBackgroundCheckerSkipsAlreadyStagedETagDownload(t *testing.T) {
 				fmt.Sprintf(`{"version": "9.9.9", "url": "%s"}`,
 					server.URL+"/9.9.9/"+Installer)))
 		case "/9.9.9/" + Installer:
-			w.Header().Set("Content-Disposition", `attachment; filename="OllamaSetup.exe"`)
+			w.Header().Set("Content-Disposition", `attachment; filename="LycheeSetup.exe"`)
 			switch r.Method {
 			case http.MethodHead:
 				etag := headETag

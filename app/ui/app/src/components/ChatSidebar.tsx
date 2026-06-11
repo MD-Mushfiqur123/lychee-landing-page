@@ -12,7 +12,7 @@ import { CogIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
 // holding shift and clicking this many times within this many seconds
 const DEBUG_SHIFT_CLICKS_REQUIRED = 5;
 const DEBUG_SHIFT_CLICK_WINDOW_MS = 7000; // 7 seconds
-const launchSidebarRequestedKey = "ollama.launchSidebarRequested";
+const launchSidebarRequestedKey = "lychee.launchSidebarRequested";
 
 interface ChatSidebarProps {
   currentChatId?: string;

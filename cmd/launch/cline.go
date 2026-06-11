@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/envconfig"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/envconfig"
 )
 
-const clineLaunchProvider = "ollama"
+const clineLaunchProvider = "lychee"
 
 // Cline implements Runner and Editor for the Cline CLI integration
 type Cline struct{}
@@ -40,7 +40,7 @@ func ensureClineInstalled() (string, error) {
 	}
 
 	if _, err := exec.LookPath("npm"); err != nil {
-		return "", fmt.Errorf("cline is not installed and required dependencies are missing\n\nInstall the following first:\n  npm (Node.js): https://nodejs.org/\n\nThen re-run:\n  ollama launch cline")
+		return "", fmt.Errorf("cline is not installed and required dependencies are missing\n\nInstall the following first:\n  npm (Node.js): https://nodejs.org/\n\nThen re-run:\n  lychee launch cline")
 	}
 
 	ok, err := ConfirmPrompt("Cline is not installed. Install with npm?")
@@ -126,12 +126,12 @@ func clineLegacyGlobalStatePath(home string) string {
 	return filepath.Join(home, ".cline", "data", "globalState.json")
 }
 
-func clineOllamaRootURL() string {
+func clineRootURL() string {
 	return strings.TrimRight(envconfig.ConnectableHost().String(), "/")
 }
 
 func clineProviderBaseURL() string {
-	return clineOllamaRootURL() + "/v1"
+	return clineRootURL() + "/v1"
 }
 
 func readClineConfig(configPath string) (map[string]any, error) {
@@ -200,14 +200,14 @@ func writeClineLegacyGlobalState(configPath string, config map[string]any, model
 		return err
 	}
 
-	baseURL := clineOllamaRootURL()
-	config["ollamaBaseUrl"] = baseURL
+	baseURL := clineRootURL()
+	config["lycheeBaseUrl"] = baseURL
 	config["actModeApiProvider"] = clineLaunchProvider
-	config["actModeOllamaModelId"] = model
-	config["actModeOllamaBaseUrl"] = baseURL
+	config["actModeModelId"] = model
+	config["actModeBaseUrl"] = baseURL
 	config["planModeApiProvider"] = clineLaunchProvider
-	config["planModeOllamaModelId"] = model
-	config["planModeOllamaBaseUrl"] = baseURL
+	config["planModeModelId"] = model
+	config["planModeBaseUrl"] = baseURL
 
 	config["welcomeViewCompleted"] = true
 
@@ -234,12 +234,12 @@ func (c *Cline) Models() []string {
 	}
 
 	switch config["actModeApiProvider"] {
-	case "ollama":
+	case "lychee":
 	default:
 		return nil
 	}
 
-	modelID, _ := config["actModeOllamaModelId"].(string)
+	modelID, _ := config["actModeModelId"].(string)
 	if modelID == "" {
 		return nil
 	}

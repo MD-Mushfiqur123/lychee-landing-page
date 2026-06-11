@@ -13,11 +13,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/logutil"
-	"github.com/ollama/ollama/x/internal/mlxthread"
-	"github.com/ollama/ollama/x/mlxrunner/mlx"
-	"github.com/ollama/ollama/x/mlxrunner/sample"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/logutil"
+	"github.com/lychee/lychee/x/internal/mlxthread"
+	"github.com/lychee/lychee/x/mlxrunner/mlx"
+	"github.com/lychee/lychee/x/mlxrunner/sample"
 )
 
 func Execute(args []string) error {

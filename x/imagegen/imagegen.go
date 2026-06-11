@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ollama/ollama/x/imagegen/manifest"
-	"github.com/ollama/ollama/x/imagegen/mlx"
-	"github.com/ollama/ollama/x/imagegen/models/flux2"
-	"github.com/ollama/ollama/x/imagegen/models/zimage"
+	"github.com/lychee/lychee/x/imagegen/manifest"
+	"github.com/lychee/lychee/x/imagegen/mlx"
+	"github.com/lychee/lychee/x/imagegen/models/flux2"
+	"github.com/lychee/lychee/x/imagegen/models/zimage"
 )
 
 // ImageModel is the interface for image generation models.
@@ -86,8 +86,14 @@ func (s *server) handleImageCompletion(w http.ResponseWriter, r *http.Request, r
 	// Progress callback streams step updates
 	progress := func(step, total int) {
 		resp := Response{Step: step, Total: total}
-		enc.Encode(resp)
-		w.Write([]byte("\n"))
+		if err := enc.Encode(resp); err != nil {
+			slog.Error("failed to encode progress response", "error", err)
+			return
+		}
+		if _, err := w.Write([]byte("\n")); err != nil {
+			slog.Error("failed to write progress newline", "error", err)
+			return
+		}
 		flusher.Flush()
 	}
 
@@ -99,9 +105,17 @@ func (s *server) handleImageCompletion(w http.ResponseWriter, r *http.Request, r
 			return
 		}
 		resp := Response{Content: fmt.Sprintf("error: %v", err), Done: true}
-		data, _ := json.Marshal(resp)
-		w.Write(data)
-		w.Write([]byte("\n"))
+		data, err := json.Marshal(resp)
+		if err != nil {
+			slog.Error("failed to marshal error response", "error", err)
+			return
+		}
+		if _, err := w.Write(data); err != nil {
+			slog.Error("failed to write error response", "error", err)
+		}
+		if _, err := w.Write([]byte("\n")); err != nil {
+			slog.Error("failed to write error newline", "error", err)
+		}
 		return
 	}
 
@@ -109,9 +123,17 @@ func (s *server) handleImageCompletion(w http.ResponseWriter, r *http.Request, r
 	imageData, err := EncodeImageBase64(img)
 	if err != nil {
 		resp := Response{Content: fmt.Sprintf("error encoding: %v", err), Done: true}
-		data, _ := json.Marshal(resp)
-		w.Write(data)
-		w.Write([]byte("\n"))
+		data, err := json.Marshal(resp)
+		if err != nil {
+			slog.Error("failed to marshal encode error response", "error", err)
+			return
+		}
+		if _, err := w.Write(data); err != nil {
+			slog.Error("failed to write encode error response", "error", err)
+		}
+		if _, err := w.Write([]byte("\n")); err != nil {
+			slog.Error("failed to write encode error newline", "error", err)
+		}
 		return
 	}
 
@@ -125,8 +147,16 @@ func (s *server) handleImageCompletion(w http.ResponseWriter, r *http.Request, r
 		Image: imageData,
 		Done:  true,
 	}
-	data, _ := json.Marshal(resp)
-	w.Write(data)
-	w.Write([]byte("\n"))
+	data, err := json.Marshal(resp)
+	if err != nil {
+		slog.Error("failed to marshal final response", "error", err)
+		return
+	}
+	if _, err := w.Write(data); err != nil {
+		slog.Error("failed to write final response", "error", err)
+	}
+	if _, err := w.Write([]byte("\n")); err != nil {
+		slog.Error("failed to write final response newline", "error", err)
+	}
 	flusher.Flush()
 }

@@ -1,4 +1,4 @@
-#include "llama-ollama-compat-util.h"
+#include "llama-lychee-compat-util.h"
 
 #include "llama-impl.h"
 #include "llama-model-loader.h"
@@ -14,7 +14,7 @@
 #include <sys/types.h>
 #endif
 
-namespace llama_ollama_compat::detail {
+namespace llama_lychee_compat::detail {
 
 // -------------------------------------------------------------------------
 // gguf_context KV helpers
@@ -409,4 +409,4 @@ void register_concat_load_to_f32(const gguf_context * meta,
     });
 }
 
-} // namespace llama_ollama_compat::detail
+} // namespace llama_lychee_compat::detail

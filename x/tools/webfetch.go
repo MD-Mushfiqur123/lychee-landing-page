@@ -1,32 +1,22 @@
 package tools
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/auth"
-	internalcloud "github.com/ollama/ollama/internal/cloud"
+	"github.com/lychee/lychee/api"
 )
 
 const (
-	webFetchAPI     = "https://ollama.com/api/web_fetch"
 	webFetchTimeout = 30 * time.Second
 )
 
-// ErrWebFetchAuthRequired is returned when web fetch requires authentication
-var ErrWebFetchAuthRequired = errors.New("web fetch requires authentication")
-
-// WebFetchTool implements web page fetching using Ollama's hosted API.
+// WebFetchTool implements web page fetching locally.
 type WebFetchTool struct{}
 
 // Name returns the tool name.
@@ -57,108 +47,56 @@ func (w *WebFetchTool) Schema() api.ToolFunction {
 	}
 }
 
-// webFetchRequest is the request body for the web fetch API.
-type webFetchRequest struct {
-	URL string `json:"url"`
-}
-
-// webFetchResponse is the response from the web fetch API.
-type webFetchResponse struct {
-	Title   string   `json:"title"`
-	Content string   `json:"content"`
-	Links   []string `json:"links,omitempty"`
-}
-
 // Execute fetches content from a web page.
-// Uses Ollama key signing for authentication - this makes requests via ollama.com API.
 func (w *WebFetchTool) Execute(args map[string]any) (string, error) {
-	if internalcloud.Disabled() {
-		return "", errors.New(internalcloud.DisabledError("web fetch is unavailable"))
-	}
-
 	urlStr, ok := args["url"].(string)
 	if !ok || urlStr == "" {
 		return "", fmt.Errorf("url parameter is required")
 	}
 
 	// Validate URL
-	if _, err := url.Parse(urlStr); err != nil {
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil {
 		return "", fmt.Errorf("invalid URL: %w", err)
 	}
 
-	// Prepare request
-	reqBody := webFetchRequest{
-		URL: urlStr,
-	}
-
-	jsonBody, err := json.Marshal(reqBody)
-	if err != nil {
-		return "", fmt.Errorf("marshaling request: %w", err)
-	}
-
-	// Parse URL and add timestamp for signing
-	fetchURL, err := url.Parse(webFetchAPI)
-	if err != nil {
-		return "", fmt.Errorf("parsing fetch URL: %w", err)
-	}
-
-	q := fetchURL.Query()
-	q.Add("ts", strconv.FormatInt(time.Now().Unix(), 10))
-	fetchURL.RawQuery = q.Encode()
-
-	// Sign the request using Ollama key (~/.ollama/id_ed25519)
+	// Send request directly
 	ctx := context.Background()
-	data := fmt.Appendf(nil, "%s,%s", http.MethodPost, fetchURL.RequestURI())
-	signature, err := auth.Sign(ctx, data)
-	if err != nil {
-		return "", fmt.Errorf("signing request: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fetchURL.String(), bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, parsedURL.String(), nil)
 	if err != nil {
 		return "", fmt.Errorf("creating request: %w", err)
 	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
-	req.Header.Set("Content-Type", "application/json")
-	if signature != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", signature))
-	}
-
-	// Send request
+	// Allow proxy configuration via environment standard proxy support in default client
 	client := &http.Client{Timeout: webFetchTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("sending request: %w", err)
+		return "", fmt.Errorf("fetching URL: %w", err)
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("web page returned status %d", resp.StatusCode)
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("reading response: %w", err)
 	}
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		return "", ErrWebFetchAuthRequired
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("web fetch API returned status %d: %s", resp.StatusCode, string(body))
-	}
+	htmlContent := string(bodyBytes)
+	title := extractTitle(htmlContent)
+	content := cleanHTML(htmlContent)
 
-	// Parse response
-	var fetchResp webFetchResponse
-	if err := json.Unmarshal(body, &fetchResp); err != nil {
-		return "", fmt.Errorf("parsing response: %w", err)
-	}
-
-	// Format result
 	var sb strings.Builder
-	if fetchResp.Title != "" {
-		sb.WriteString(fmt.Sprintf("Title: %s\n\n", fetchResp.Title))
+	if title != "" {
+		sb.WriteString(fmt.Sprintf("Title: %s\n\n", title))
 	}
 
-	if fetchResp.Content != "" {
+	if content != "" {
 		sb.WriteString("Content:\n")
-		sb.WriteString(fetchResp.Content)
+		sb.WriteString(content)
 	} else {
 		sb.WriteString("No content could be extracted from the page.")
 	}

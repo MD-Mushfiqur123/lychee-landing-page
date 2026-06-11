@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/ollama/ollama/x/mlxrunner/mlx"
+	"github.com/lychee/lychee/x/mlxrunner/mlx"
 )
 
 func skipIfNoMLX(t *testing.T) {

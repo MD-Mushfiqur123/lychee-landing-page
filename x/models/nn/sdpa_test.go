@@ -4,8 +4,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/ollama/ollama/x/mlxrunner/batch"
-	"github.com/ollama/ollama/x/mlxrunner/mlx"
+	"github.com/lychee/lychee/x/mlxrunner/batch"
+	"github.com/lychee/lychee/x/mlxrunner/mlx"
 )
 
 // newBatch constructs a synthetic batch for mask/SDPA tests.

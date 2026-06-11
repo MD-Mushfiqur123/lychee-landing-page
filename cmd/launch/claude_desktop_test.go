@@ -92,9 +92,9 @@ func TestClaudeDesktopIntegration(t *testing.T) {
 	t.Run("implements managed autodiscovery integration", func(t *testing.T) {
 		var _ ManagedAutodiscoveryIntegration = c
 	})
-	t.Run("does not use local Ollama Cloud auth gate", func(t *testing.T) {
+	t.Run("does not use local Lychee Cloud auth gate", func(t *testing.T) {
 		if _, ok := any(c).(ManagedAutodiscoveryCloudIntegration); ok {
-			t.Fatal("Claude Desktop should validate OLLAMA_API_KEY directly instead of requiring local Ollama Cloud sign-in")
+			t.Fatal("Claude Desktop should validate LYCHEE_API_KEY directly instead of requiring local Lychee Cloud sign-in")
 		}
 	})
 	t.Run("implements restore", func(t *testing.T) {
@@ -112,7 +112,7 @@ func TestClaudeDesktopIntegration(t *testing.T) {
 	t.Run("has success messages", func(t *testing.T) {
 		var _ ConfigurationSuccessIntegration = c
 		var _ RestoreSuccessIntegration = c
-		if got := c.ConfigurationSuccessMessage(); got != "Claude Desktop profile changed to Ollama Cloud.\nTo restore the usual Claude profile, run: ollama launch claude-desktop --restore" {
+		if got := c.ConfigurationSuccessMessage(); got != "Claude Desktop profile changed to Lychee Cloud.\nTo restore the usual Claude profile, run: lychee launch claude-desktop --restore" {
 			t.Fatalf("configuration success message = %q", got)
 		}
 		if got := c.RestoreSuccessMessage(); got != "Claude Desktop restored to the usual Claude profile." {
@@ -137,7 +137,7 @@ func TestLaunchIntegration_ClaudeDesktopLaunchReturnsUnsupported(t *testing.T) {
 			if !strings.Contains(err.Error(), "Claude Desktop is no longer supported") {
 				t.Fatalf("expected unsupported guidance, got %v", err)
 			}
-			if !strings.Contains(err.Error(), "ollama launch claude-desktop --restore") {
+			if !strings.Contains(err.Error(), "lychee launch claude-desktop --restore") {
 				t.Fatalf("expected restore guidance, got %v", err)
 			}
 		})
@@ -161,10 +161,10 @@ func TestLaunchIntegration_ClaudeDesktopRestoreStillWorks(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(paths.profile), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(paths.meta, []byte(`{"appliedId":"`+claudeDesktopProfileID+`","entries":[{"id":"`+claudeDesktopProfileID+`","name":"Ollama"}]}`), 0o644); err != nil {
+	if err := os.WriteFile(paths.meta, []byte(`{"appliedId":"`+claudeDesktopProfileID+`","entries":[{"id":"`+claudeDesktopProfileID+`","name":"Lychee"}]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(paths.profile, []byte(`{"disableDeploymentModeChooser":true,"inferenceGatewayApiKey":"keep","inferenceProvider":"gateway","inferenceGatewayBaseUrl":"https://ollama.com","inferenceGatewayAuthScheme":"bearer"}`), 0o644); err != nil {
+	if err := os.WriteFile(paths.profile, []byte(`{"disableDeploymentModeChooser":true,"inferenceGatewayApiKey":"keep","inferenceProvider":"gateway","inferenceGatewayBaseUrl":"https://lychee.com","inferenceGatewayAuthScheme":"bearer"}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -183,11 +183,11 @@ func TestLaunchIntegration_ClaudeDesktopRestoreStillWorks(t *testing.T) {
 	}
 }
 
-func TestClaudeDesktopConfigureWritesOllamaCloudProfile(t *testing.T) {
+func TestClaudeDesktopConfigureWritesLycheeCloudProfile(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "darwin")
-	t.Setenv("OLLAMA_API_KEY", "test-api-key")
+	t.Setenv("LYCHEE_API_KEY", "test-api-key")
 
 	var validatedKey string
 	withClaudeDesktopValidation(t, func(_ context.Context, key string) error {
@@ -265,7 +265,7 @@ func TestClaudeDesktopConfigureAutodiscoveryRemovesExistingModelCatalog(t *testi
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "darwin")
-	t.Setenv("OLLAMA_API_KEY", "test-api-key")
+	t.Setenv("LYCHEE_API_KEY", "test-api-key")
 	withClaudeDesktopValidation(t, func(context.Context, string) error { return nil })
 
 	paths, err := claudeDesktopConfigPaths()
@@ -334,7 +334,7 @@ func TestClaudeDesktopAutodiscoveryConfiguredOnWindows(t *testing.T) {
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "windows")
 	t.Setenv("LOCALAPPDATA", filepath.Join(tmpDir, "LocalAppData"))
-	t.Setenv("OLLAMA_API_KEY", "test-api-key")
+	t.Setenv("LYCHEE_API_KEY", "test-api-key")
 	withClaudeDesktopValidation(t, func(context.Context, string) error { return nil })
 
 	c := &ClaudeDesktop{}
@@ -352,7 +352,7 @@ func TestClaudeDesktopConfigureAutodiscoveryTouchesAllWindowsProfileCandidates(t
 	withClaudeDesktopPlatform(t, "windows")
 	local := filepath.Join(tmpDir, "LocalAppData")
 	t.Setenv("LOCALAPPDATA", local)
-	t.Setenv("OLLAMA_API_KEY", "test-api-key")
+	t.Setenv("LYCHEE_API_KEY", "test-api-key")
 	withClaudeDesktopValidation(t, func(context.Context, string) error { return nil })
 
 	targets, err := claudeDesktopTargetPaths()
@@ -482,7 +482,7 @@ func TestClaudeDesktopWindowsRestoreRestartUsesCapturedDesktopPath(t *testing.T)
 	if err := os.MkdirAll(filepath.Dir(paths.profile), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(paths.meta, []byte(`{"appliedId":"`+claudeDesktopProfileID+`","entries":[{"id":"`+claudeDesktopProfileID+`","name":"Ollama"}]}`), 0o644); err != nil {
+	if err := os.WriteFile(paths.meta, []byte(`{"appliedId":"`+claudeDesktopProfileID+`","entries":[{"id":"`+claudeDesktopProfileID+`","name":"Lychee"}]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(paths.profile, []byte(`{"disableDeploymentModeChooser":true,"inferenceGatewayApiKey":"keep"}`), 0o644); err != nil {
@@ -537,7 +537,7 @@ func TestClaudeDesktopConfigureStopsBeforeWriteWhenKeyValidationFails(t *testing
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "darwin")
-	t.Setenv("OLLAMA_API_KEY", "bad-key")
+	t.Setenv("LYCHEE_API_KEY", "bad-key")
 	withClaudeDesktopValidation(t, func(context.Context, string) error {
 		return errors.New("invalid key")
 	})
@@ -588,13 +588,13 @@ func TestValidateClaudeDesktopAPIKeyHidesInvalidHeaderDetails(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected validation error for key with newline")
 	}
-	if !strings.Contains(err.Error(), "could not verify Ollama API key") {
+	if !strings.Contains(err.Error(), "could not verify Lychee API key") {
 		t.Fatalf("validation error = %v, want friendly verification message", err)
 	}
 	if strings.Contains(err.Error(), "invalid header") || strings.Contains(err.Error(), "net/http") {
 		t.Fatalf("validation error should not expose transport internals: %v", err)
 	}
-	if !strings.Contains(err.Error(), "https://ollama.com/settings/keys") {
+	if !strings.Contains(err.Error(), "https://lychee.com/settings/keys") {
 		t.Fatalf("validation error should include settings link: %v", err)
 	}
 }
@@ -603,24 +603,24 @@ func TestClaudeDesktopConfigureRequiresAPIKey(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "darwin")
-	t.Setenv("OLLAMA_API_KEY", "")
+	t.Setenv("LYCHEE_API_KEY", "")
 	withClaudeDesktopValidation(t, func(context.Context, string) error {
 		t.Fatal("validation should not run without an API key")
 		return nil
 	})
 
 	err := (&ClaudeDesktop{}).ConfigureAutodiscovery()
-	if err == nil || !strings.Contains(err.Error(), "OLLAMA_API_KEY is required") {
+	if err == nil || !strings.Contains(err.Error(), "LYCHEE_API_KEY is required") {
 		t.Fatalf("Configure error = %v, want missing key guidance", err)
 	}
 }
 
 func TestClaudeDesktopAPIKeyPromptIncludesSettingsLink(t *testing.T) {
 	prompt := claudeDesktopAPIKeyPrompt()
-	if !strings.Contains(prompt, "Enter Ollama API key") {
+	if !strings.Contains(prompt, "Enter Lychee API key") {
 		t.Fatalf("prompt should ask for the API key, got %q", prompt)
 	}
-	if !strings.Contains(prompt, "https://ollama.com/settings/keys") {
+	if !strings.Contains(prompt, "https://lychee.com/settings/keys") {
 		t.Fatalf("prompt should include API key settings link, got %q", prompt)
 	}
 }
@@ -629,7 +629,7 @@ func TestClaudeDesktopConfigureReusesExistingAPIKey(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "darwin")
-	t.Setenv("OLLAMA_API_KEY", "")
+	t.Setenv("LYCHEE_API_KEY", "")
 
 	paths, err := claudeDesktopConfigPaths()
 	if err != nil {
@@ -661,7 +661,7 @@ func TestClaudeDesktopConfigureReplacesInvalidExistingAPIKey(t *testing.T) {
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "darwin")
 	withInteractiveSession(t, true)
-	t.Setenv("OLLAMA_API_KEY", "")
+	t.Setenv("LYCHEE_API_KEY", "")
 
 	paths, err := claudeDesktopConfigPaths()
 	if err != nil {
@@ -704,7 +704,7 @@ func TestClaudeDesktopConfigureReusesExistingAPIKeyFromAnyWindowsProfile(t *test
 	withClaudeDesktopPlatform(t, "windows")
 	local := filepath.Join(tmpDir, "LocalAppData")
 	t.Setenv("LOCALAPPDATA", local)
-	t.Setenv("OLLAMA_API_KEY", "")
+	t.Setenv("LYCHEE_API_KEY", "")
 
 	targets, err := claudeDesktopTargetPaths()
 	if err != nil {
@@ -738,11 +738,11 @@ func TestClaudeDesktopConfigureReusesExistingAPIKeyFromAnyWindowsProfile(t *test
 	}
 }
 
-func TestClaudeDesktopAutodiscoveryConfiguredRequiresAppliedOllamaProfile(t *testing.T) {
+func TestClaudeDesktopAutodiscoveryConfiguredRequiresAppliedLycheeProfile(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "darwin")
-	t.Setenv("OLLAMA_API_KEY", "test-api-key")
+	t.Setenv("LYCHEE_API_KEY", "test-api-key")
 	withClaudeDesktopValidation(t, func(context.Context, string) error { return nil })
 
 	c := &ClaudeDesktop{}
@@ -769,7 +769,7 @@ func TestClaudeDesktopAutodiscoveryConfiguredRequiresAPIKey(t *testing.T) {
 	tmpDir := t.TempDir()
 	setTestHome(t, tmpDir)
 	withClaudeDesktopPlatform(t, "darwin")
-	t.Setenv("OLLAMA_API_KEY", "test-api-key")
+	t.Setenv("LYCHEE_API_KEY", "test-api-key")
 	withClaudeDesktopValidation(t, func(context.Context, string) error { return nil })
 
 	c := &ClaudeDesktop{}
@@ -809,10 +809,10 @@ func TestClaudeDesktopRestoreSwitchesBackToFirstPartyMode(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(paths.profile), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(paths.meta, []byte(`{"appliedId":"`+claudeDesktopProfileID+`","entries":[{"id":"`+claudeDesktopProfileID+`","name":"Ollama"}]}`), 0o644); err != nil {
+	if err := os.WriteFile(paths.meta, []byte(`{"appliedId":"`+claudeDesktopProfileID+`","entries":[{"id":"`+claudeDesktopProfileID+`","name":"Lychee"}]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(paths.profile, []byte(`{"disableDeploymentModeChooser":true,"inferenceGatewayApiKey":"keep","inferenceProvider":"gateway","inferenceGatewayBaseUrl":"https://ollama.com","inferenceGatewayAuthScheme":"bearer","inferenceModels":["legacy"]}`), 0o644); err != nil {
+	if err := os.WriteFile(paths.profile, []byte(`{"disableDeploymentModeChooser":true,"inferenceGatewayApiKey":"keep","inferenceProvider":"gateway","inferenceGatewayBaseUrl":"https://lychee.com","inferenceGatewayAuthScheme":"bearer","inferenceModels":["legacy"]}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -833,16 +833,16 @@ func TestClaudeDesktopRestoreSwitchesBackToFirstPartyMode(t *testing.T) {
 		t.Fatalf("disableDeploymentModeChooser = %v, want false", profile["disableDeploymentModeChooser"])
 	}
 	if profile["inferenceGatewayApiKey"] != "keep" {
-		t.Fatal("restore should leave existing Ollama profile credentials in place")
+		t.Fatal("restore should leave existing Lychee profile credentials in place")
 	}
 	for _, key := range []string{"inferenceProvider", "inferenceGatewayBaseUrl", "inferenceGatewayAuthScheme", "inferenceModels"} {
 		if _, ok := profile[key]; ok {
-			t.Fatalf("restore should clear stale %s from the Ollama profile: %v", key, profile)
+			t.Fatalf("restore should clear stale %s from the Lychee profile: %v", key, profile)
 		}
 	}
 	meta := claudeDesktopReadJSON(t, paths.meta)
 	if _, ok := meta["appliedId"]; ok {
-		t.Fatalf("restore should clear the applied Ollama third-party profile: %v", meta)
+		t.Fatalf("restore should clear the applied Lychee third-party profile: %v", meta)
 	}
 	if (&ClaudeDesktop{}).AutodiscoveryConfigured() {
 		t.Fatal("restore should leave Claude Desktop autodiscovery unconfigured")
@@ -871,10 +871,10 @@ func TestClaudeDesktopRestoreTouchesAllWindowsProfileCandidates(t *testing.T) {
 		if err := os.MkdirAll(filepath.Dir(target.profile), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(target.meta, []byte(`{"appliedId":"`+claudeDesktopProfileID+`","entries":[{"id":"`+claudeDesktopProfileID+`","name":"Ollama"}]}`), 0o644); err != nil {
+		if err := os.WriteFile(target.meta, []byte(`{"appliedId":"`+claudeDesktopProfileID+`","entries":[{"id":"`+claudeDesktopProfileID+`","name":"Lychee"}]}`), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(target.profile, []byte(`{"disableDeploymentModeChooser":true,"inferenceGatewayApiKey":"keep","inferenceProvider":"gateway","inferenceGatewayBaseUrl":"https://ollama.com","inferenceGatewayAuthScheme":"bearer","inferenceModels":["legacy"]}`), 0o644); err != nil {
+		if err := os.WriteFile(target.profile, []byte(`{"disableDeploymentModeChooser":true,"inferenceGatewayApiKey":"keep","inferenceProvider":"gateway","inferenceGatewayBaseUrl":"https://lychee.com","inferenceGatewayAuthScheme":"bearer","inferenceModels":["legacy"]}`), 0o644); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -896,7 +896,7 @@ func TestClaudeDesktopRestoreTouchesAllWindowsProfileCandidates(t *testing.T) {
 		}
 		meta := claudeDesktopReadJSON(t, target.meta)
 		if _, ok := meta["appliedId"]; ok {
-			t.Fatalf("%s should not keep the Ollama applied profile: %v", target.meta, meta)
+			t.Fatalf("%s should not keep the Lychee applied profile: %v", target.meta, meta)
 		}
 		profile := claudeDesktopReadJSON(t, target.profile)
 		if profile["disableDeploymentModeChooser"] != false {
@@ -939,7 +939,7 @@ func TestClaudeDesktopRunReturnsUnsupported(t *testing.T) {
 		if !strings.Contains(err.Error(), "Claude Desktop is no longer supported") {
 			t.Fatalf("expected unsupported guidance, got %v", err)
 		}
-		if !strings.Contains(err.Error(), "ollama launch claude-desktop --restore") {
+		if !strings.Contains(err.Error(), "lychee launch claude-desktop --restore") {
 			t.Fatalf("expected restore guidance, got %v", err)
 		}
 	}

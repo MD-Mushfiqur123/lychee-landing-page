@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/ollama/ollama/fs/ggml"
+	"github.com/lychee/lychee/fs/ggml"
 )
 
 func TestQwen3VLTextAndProjectorKV(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 // argsComparer provides cmp options for comparing ToolCallFunctionArguments

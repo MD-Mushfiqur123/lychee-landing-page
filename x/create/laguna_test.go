@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	st "github.com/ollama/ollama/x/safetensors"
+	st "github.com/lychee/lychee/x/safetensors"
 )
 
 func TestCreateSafetensorsModel_LagunaHFFP8RespectsSourceTensorPrecision(t *testing.T) {
@@ -74,7 +74,7 @@ func TestCreateSafetensorsModel_LagunaHFFP8RespectsSourceTensorPrecision(t *test
 					return nil, err
 				}
 				quantizeByName[name] = quantize
-				return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+				return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 			}
 			writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
 
@@ -182,7 +182,7 @@ func TestCreateSafetensorsModel_LagunaBF16QuantizesOnlyRoutedExperts(t *testing.
 					return nil, err
 				}
 				quantizeByName[name] = quantize
-				return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.ollama.image.tensor"}}, nil
+				return []LayerInfo{{Name: name, Digest: "sha256:tensor_" + name, MediaType: "application/vnd.lychee.image.tensor"}}, nil
 			}
 			writeManifest := func(modelName string, config LayerInfo, layers []LayerInfo) error { return nil }
 

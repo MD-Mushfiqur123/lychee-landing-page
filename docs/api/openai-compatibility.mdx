@@ -2,7 +2,7 @@
 title: OpenAI compatibility
 ---
 
-Ollama provides compatibility with parts of the [OpenAI API](https://platform.openai.com/docs/api-reference) to help connect existing applications to Ollama.
+Lychee provides compatibility with parts of the [OpenAI API](https://platform.openai.com/docs/api-reference) to help connect existing applications to Lychee.
 
 ## Usage
 
@@ -15,7 +15,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url='http://localhost:11434/v1/',
-    api_key='ollama',  # required but ignored
+    api_key='lychee',  # required but ignored
 )
 
 chat_completion = client.chat.completions.create(
@@ -35,7 +35,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
   baseURL: "http://localhost:11434/v1/",
-  apiKey: "ollama", // required but ignored
+  apiKey: "lychee", // required but ignored
 });
 
 const chatCompletion = await openai.chat.completions.create({
@@ -66,7 +66,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url='http://localhost:11434/v1/',
-    api_key='ollama',  # required but ignored
+    api_key='lychee',  # required but ignored
 )
 
 responses_result = client.responses.create(
@@ -81,7 +81,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
   baseURL: "http://localhost:11434/v1/",
-  apiKey: "ollama", // required but ignored
+  apiKey: "lychee", // required but ignored
 });
 
 const responsesResult = await openai.responses.create({
@@ -112,7 +112,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url='http://localhost:11434/v1/',
-    api_key='ollama',  # required but ignored
+    api_key='lychee',  # required but ignored
 )
 
 response = client.chat.completions.create(
@@ -139,7 +139,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
   baseURL: "http://localhost:11434/v1/",
-  apiKey: "ollama", // required but ignored
+  apiKey: "lychee", // required but ignored
 });
 
 const response = await openai.chat.completions.create({
@@ -256,14 +256,14 @@ curl -X POST http://localhost:11434/v1/chat/completions \
 #### Notes
 
 - `created` corresponds to when the model was last modified
-- `owned_by` corresponds to the ollama username, defaulting to `"library"`
+- `owned_by` corresponds to the lychee username, defaulting to `"library"`
 
 ### `/v1/models/{model}`
 
 #### Notes
 
 - `created` corresponds to when the model was last modified
-- `owned_by` corresponds to the ollama username, defaulting to `"library"`
+- `owned_by` corresponds to the lychee username, defaulting to `"library"`
 
 ### `/v1/embeddings`
 
@@ -292,7 +292,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url='http://localhost:11434/v1/',
-    api_key='ollama',  # required but ignored
+    api_key='lychee',  # required but ignored
 )
 
 response = client.images.generate(
@@ -309,7 +309,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
   baseURL: "http://localhost:11434/v1/",
-  apiKey: "ollama", // required but ignored
+  apiKey: "lychee", // required but ignored
 });
 
 const response = await openai.images.generate({
@@ -348,9 +348,9 @@ curl -X POST http://localhost:11434/v1/images/generations \
 
 ### `/v1/responses`
 
-> Note: Added in Ollama v0.13.3
+> Note: Added in Lychee v0.13.3
 
-Ollama supports the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses). Only the non-stateful flavor is supported (i.e., there is no `previous_response_id` or `conversation` support).
+Lychee supports the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses). Only the non-stateful flavor is supported (i.e., there is no `previous_response_id` or `conversation` support).
 
 #### Supported features
 
@@ -375,18 +375,18 @@ Ollama supports the [OpenAI Responses API](https://platform.openai.com/docs/api-
 
 ## Models
 
-Before using a model, pull it locally `ollama pull`:
+Before using a model, pull it locally `lychee pull`:
 
 ```shell
-ollama pull llama3.2
+lychee pull llama3.2
 ```
 
 ### Default model names
 
-For tooling that relies on default OpenAI model names such as `gpt-3.5-turbo`, use `ollama cp` to copy an existing model name to a temporary name:
+For tooling that relies on default OpenAI model names such as `gpt-3.5-turbo`, use `lychee cp` to copy an existing model name to a temporary name:
 
 ```shell
-ollama cp llama3.2 gpt-3.5-turbo
+lychee cp llama3.2 gpt-3.5-turbo
 ```
 
 Afterwards, this new model name can be specified the `model` field:
@@ -414,7 +414,7 @@ FROM <some model>
 PARAMETER num_ctx <context size>
 ```
 
-Use the `ollama create mymodel` command to create a new model with the updated context size. Call the API with the updated model name:
+Use the `lychee create mymodel` command to create a new model with the updated context size. Call the API with the updated model name:
 
 ```shell
 curl http://localhost:11434/v1/chat/completions \

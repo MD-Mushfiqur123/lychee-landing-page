@@ -20,7 +20,7 @@ import (
 	"github.com/pdevine/tensor/native"
 	"github.com/x448/float16"
 
-	"github.com/ollama/ollama/fs/ggml"
+	"github.com/lychee/lychee/fs/ggml"
 )
 
 type qwen3NextRopeScaling struct {

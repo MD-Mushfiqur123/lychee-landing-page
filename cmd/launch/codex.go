@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/types/model"
 	"github.com/pelletier/go-toml/v2"
 	"golang.org/x/mod/semver"
 )
@@ -21,8 +21,8 @@ type Codex struct{}
 func (c *Codex) String() string { return "Codex" }
 
 const (
-	codexProfileName           = "ollama-launch"
-	codexProviderName          = "Ollama"
+	codexProfileName           = "lychee-launch"
+	codexProviderName          = "Lychee"
 	codexFallbackContextWindow = 128_000
 	codexRestoreSuccess        = "Codex launch configuration removed."
 
@@ -72,7 +72,7 @@ func (c *Codex) Run(model string, models []LaunchModel, args []string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Env = append(os.Environ(),
-		"OPENAI_API_KEY=ollama",
+		"OPENAI_API_KEY=lychee",
 	)
 	return cmd.Run()
 }
@@ -147,24 +147,24 @@ func codexValidateExtraArgs(args []string) error {
 	for i, arg := range args {
 		switch {
 		case arg == "-p", strings.HasPrefix(arg, "-p"):
-			return fmt.Errorf("conflicting extra argument %q: ollama launch codex manages --profile", arg)
+			return fmt.Errorf("conflicting extra argument %q: lychee launch codex manages --profile", arg)
 		case arg == "--profile", strings.HasPrefix(arg, "--profile="):
-			return fmt.Errorf("conflicting extra argument %q: ollama launch codex manages --profile", arg)
+			return fmt.Errorf("conflicting extra argument %q: lychee launch codex manages --profile", arg)
 		case arg == "-m", strings.HasPrefix(arg, "-m"):
-			return fmt.Errorf("conflicting extra argument %q: ollama launch codex manages --model", arg)
+			return fmt.Errorf("conflicting extra argument %q: lychee launch codex manages --model", arg)
 		case arg == "--model", strings.HasPrefix(arg, "--model="):
-			return fmt.Errorf("conflicting extra argument %q: ollama launch codex manages --model", arg)
+			return fmt.Errorf("conflicting extra argument %q: lychee launch codex manages --model", arg)
 		case arg == "-c", arg == "--config":
 			if i+1 < len(args) && codexConfigOverrideConflicts(args[i+1]) {
-				return fmt.Errorf("conflicting extra config %q: ollama launch codex manages provider and model catalog config", args[i+1])
+				return fmt.Errorf("conflicting extra config %q: lychee launch codex manages provider and model catalog config", args[i+1])
 			}
 		case strings.HasPrefix(arg, "-c") && len(arg) > len("-c"):
 			if codexConfigOverrideConflicts(strings.TrimPrefix(arg, "-c")) {
-				return fmt.Errorf("conflicting extra config %q: ollama launch codex manages provider and model catalog config", arg)
+				return fmt.Errorf("conflicting extra config %q: lychee launch codex manages provider and model catalog config", arg)
 			}
 		case strings.HasPrefix(arg, "--config="):
 			if codexConfigOverrideConflicts(strings.TrimPrefix(arg, "--config=")) {
-				return fmt.Errorf("conflicting extra config %q: ollama launch codex manages provider and model catalog config", arg)
+				return fmt.Errorf("conflicting extra config %q: lychee launch codex manages provider and model catalog config", arg)
 			}
 		}
 	}
@@ -204,7 +204,7 @@ func codexConfigOverrideConflicts(value string) bool {
 }
 
 // ensureCodexConfig writes a Codex profile file and model catalog so Codex uses
-// the local Ollama server without changing app-visible root config.
+// the local Lychee server without changing app-visible root config.
 func ensureCodexConfig(modelName string, models []LaunchModel) error {
 	configPath, err := codexConfigPath()
 	if err != nil {
@@ -294,8 +294,8 @@ func cleanupCodexLegacyProfileConfig(configPath string) error {
 	return fileutil.WriteWithBackup(configPath, []byte(updated), "")
 }
 
-// writeCodexProfileConfig ensures ~/.codex/ollama-launch.config.toml selects
-// the Ollama provider and catalog for CLI launches without changing root config.
+// writeCodexProfileConfig ensures ~/.codex/lychee-launch.config.toml selects
+// the Lychee provider and catalog for CLI launches without changing root config.
 func writeCodexProfileConfig(profilePath, model, modelCatalogPath string) error {
 	return writeCodexNamedProfileConfig(profilePath, codexProfileName, model, modelCatalogPath, "")
 }
@@ -569,7 +569,7 @@ func codexTableHeaderPath(header string) ([]string, bool) {
 		return nil, false
 	}
 
-	const probeKey = "__ollama_launch_probe"
+	const probeKey = "__lychee_launch_probe"
 	cfg := map[string]any{}
 	if err := toml.Unmarshal([]byte(trimmed+"\n"+probeKey+" = true\n"), &cfg); err != nil {
 		return nil, false

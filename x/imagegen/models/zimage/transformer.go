@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ollama/ollama/x/imagegen/cache"
-	"github.com/ollama/ollama/x/imagegen/manifest"
-	"github.com/ollama/ollama/x/imagegen/mlx"
-	"github.com/ollama/ollama/x/imagegen/nn"
-	"github.com/ollama/ollama/x/imagegen/safetensors"
+	"github.com/lychee/lychee/x/imagegen/cache"
+	"github.com/lychee/lychee/x/imagegen/manifest"
+	"github.com/lychee/lychee/x/imagegen/mlx"
+	"github.com/lychee/lychee/x/imagegen/nn"
+	"github.com/lychee/lychee/x/imagegen/safetensors"
 )
 
 // TransformerConfig holds Z-Image transformer configuration
@@ -397,7 +397,7 @@ type Transformer struct {
 	*TransformerConfig
 }
 
-// Load loads the Z-Image transformer from ollama blob storage.
+// Load loads the Z-Image transformer from lychee blob storage.
 func (m *Transformer) Load(modelManifest *manifest.ModelManifest) error {
 	fmt.Print("  Loading transformer... ")
 

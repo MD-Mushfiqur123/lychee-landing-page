@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 // TestAPIToolCallingStress tests tool calling with complex, agent-style prompts
@@ -522,7 +522,7 @@ func checkNoLeakedTags(t *testing.T, content string) {
 }
 
 func contextLength(defaultVal int) int {
-	if s := os.Getenv("OLLAMA_CONTEXT_LENGTH"); s != "" {
+	if s := os.Getenv("LYCHEE_CONTEXT_LENGTH"); s != "" {
 		if n, err := strconv.Atoi(s); err == nil {
 			return n
 		}

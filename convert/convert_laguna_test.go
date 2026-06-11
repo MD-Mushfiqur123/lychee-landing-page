@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/ollama/ollama/fs/ggml"
+	"github.com/lychee/lychee/fs/ggml"
 )
 
 type lagunaTestTensor struct {

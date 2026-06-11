@@ -3,8 +3,8 @@ package runner
 import (
 	"fmt"
 
-	"github.com/ollama/ollama/x/imagegen"
-	"github.com/ollama/ollama/x/mlxrunner"
+	"github.com/lychee/lychee/x/imagegen"
+	"github.com/lychee/lychee/x/mlxrunner"
 )
 
 func Execute(args []string) error {

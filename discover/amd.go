@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ollama/ollama/ml"
+	"github.com/lychee/lychee/ml"
 )
 
 // gfxTargetRegex matches ROCm stderr lines like:

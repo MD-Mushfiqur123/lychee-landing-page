@@ -20,10 +20,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/progress"
-	"github.com/ollama/ollama/readline"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/progress"
+	"github.com/lychee/lychee/readline"
 )
 
 // ImageGenOptions holds options for image generation.

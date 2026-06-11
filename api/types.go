@@ -14,9 +14,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/internal/orderedmap"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/internal/orderedmap"
+	"github.com/lychee/lychee/types/model"
 )
 
 // StatusError is an error with an HTTP status code and message.
@@ -36,7 +36,7 @@ func (e StatusError) Error() string {
 		return e.ErrorMessage
 	default:
 		// this should not happen
-		return "something went wrong, please see the ollama server logs for details"
+		return "something went wrong, please see the lychee server logs for details"
 	}
 }
 
@@ -50,7 +50,7 @@ func (e AuthorizationError) Error() string {
 	if e.Status != "" {
 		return e.Status
 	}
-	return "something went wrong, please see the ollama server logs for details"
+	return "something went wrong, please see the lychee server logs for details"
 }
 
 // ImageData represents the raw binary data of an image file.
@@ -60,8 +60,8 @@ type ImageData []byte
 // have to specify the Model and Prompt fields, all the other fields have
 // reasonable defaults for basic uses.
 type GenerateRequest struct {
-	// Model is the model name; it should be a name familiar to Ollama from
-	// the library at https://ollama.com/library
+	// Model is the model name; it should be a name familiar to Lychee from
+	// the library at https://lychee.com/library
 	Model string `json:"model"`
 
 	// Prompt is the textual prompt to send to the model.
@@ -115,6 +115,12 @@ type GenerateRequest struct {
 	// Shift is a boolean that, when set to true, shifts the chat history
 	// when hitting the context length limit instead of erroring.
 	Shift *bool `json:"shift,omitempty"`
+
+	// CacheControl configures ephemeral caching for prompt fragments.
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
+
+	// ValidateOutput specifies whether to validate output against JSON Schema.
+	ValidateOutput bool `json:"validate_output,omitempty"`
 
 	// DebugRenderOnly is a debug option that, when set to true, returns the rendered
 	// template instead of calling the model.
@@ -180,6 +186,12 @@ type ChatRequest struct {
 	// when hitting the context length limit instead of erroring.
 	Shift *bool `json:"shift,omitempty"`
 
+	// CacheControl configures ephemeral caching for prompt fragments.
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
+
+	// ValidateOutput specifies whether to validate output against JSON Schema.
+	ValidateOutput bool `json:"validate_output,omitempty"`
+
 	// DebugRenderOnly is a debug option that, when set to true, returns the rendered
 	// template instead of calling the model.
 	DebugRenderOnly bool `json:"_debug_render_only,omitempty"`
@@ -218,6 +230,13 @@ type Message struct {
 	ToolCalls  []ToolCall  `json:"tool_calls,omitempty"`
 	ToolName   string      `json:"tool_name,omitempty"`
 	ToolCallID string      `json:"tool_call_id,omitempty"`
+	
+	// CacheControl configures ephemeral caching for prompt fragments.
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
+}
+
+type CacheControl struct {
+	Type string `json:"type"` // always "ephemeral"
 }
 
 func (m *Message) UnmarshalJSON(b []byte) error {
@@ -538,7 +557,7 @@ type ChatResponse struct {
 	// RemoteModel is the name of the upstream model that generated the response.
 	RemoteModel string `json:"remote_model,omitempty"`
 
-	// RemoteHost is the URL of the upstream Ollama host that generated the response.
+	// RemoteHost is the URL of the upstream Lychee host that generated the response.
 	RemoteHost string `json:"remote_host,omitempty"`
 
 	// CreatedAt is the timestamp of the response.
@@ -600,13 +619,14 @@ type Options struct {
 
 // Runner options which must be set when the model is loaded into memory
 type Runner struct {
-	NumCtx          int   `json:"num_ctx,omitempty"`
-	NumBatch        int   `json:"num_batch,omitempty"`
-	NumGPU          int   `json:"num_gpu,omitempty"`
-	MainGPU         *int  `json:"main_gpu,omitempty"`
-	UseMMap         *bool `json:"use_mmap,omitempty"`
-	NumThread       int   `json:"num_thread,omitempty"`
-	DraftNumPredict int   `json:"draft_num_predict,omitempty"`
+	NumCtx          int    `json:"num_ctx,omitempty"`
+	NumBatch        int    `json:"num_batch,omitempty"`
+	NumGPU          int    `json:"num_gpu,omitempty"`
+	MainGPU         *int   `json:"main_gpu,omitempty"`
+	UseMMap         *bool  `json:"use_mmap,omitempty"`
+	NumThread       int    `json:"num_thread,omitempty"`
+	DraftNumPredict int    `json:"draft_num_predict,omitempty"`
+	DraftModel      string `json:"draft_model,omitempty"`
 }
 
 // EmbedRequest is the request passed to [Client.Embed].
@@ -679,7 +699,7 @@ type CreateRequest struct {
 	// From is the name of the model or file to use as the source.
 	From string `json:"from,omitempty"`
 
-	// RemoteHost is the URL of the upstream ollama API for the model (if any).
+	// RemoteHost is the URL of the upstream lychee API for the model (if any).
 	RemoteHost string `json:"remote_host,omitempty"`
 
 	// Files is a map of files include when creating the model.
@@ -709,7 +729,7 @@ type CreateRequest struct {
 	Renderer string `json:"renderer,omitempty"`
 	Parser   string `json:"parser,omitempty"`
 
-	// Requires is the minimum version of Ollama required by the model.
+	// Requires is the minimum version of Lychee required by the model.
 	Requires string `json:"requires,omitempty"`
 
 	// Info is a map of additional information for the model
@@ -876,7 +896,7 @@ type GenerateResponse struct {
 	// RemoteModel is the name of the upstream model that generated the response.
 	RemoteModel string `json:"remote_model,omitempty"`
 
-	// RemoteHost is the URL of the upstream Ollama host that generated the response.
+	// RemoteHost is the URL of the upstream Lychee host that generated the response.
 	RemoteHost string `json:"remote_host,omitempty"`
 
 	// CreatedAt is the timestamp of the response.

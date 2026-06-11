@@ -18,18 +18,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/klauspost/compress/zstd"
 
-	"github.com/ollama/ollama/auth"
-	"github.com/ollama/ollama/envconfig"
-	internalcloud "github.com/ollama/ollama/internal/cloud"
-	"github.com/ollama/ollama/version"
+	"github.com/lychee/lychee/auth"
+	"github.com/lychee/lychee/envconfig"
+	internalcloud "github.com/lychee/lychee/internal/cloud"
+	"github.com/lychee/lychee/version"
 )
 
 const (
-	defaultCloudProxyBaseURL      = "https://ollama.com:443"
-	defaultCloudProxySigningHost  = "ollama.com"
-	cloudProxyBaseURLEnv          = "OLLAMA_CLOUD_BASE_URL"
+	defaultCloudProxyBaseURL      = "https://lychee.com:443"
+	defaultCloudProxySigningHost  = "lychee.com"
+	cloudProxyBaseURLEnv          = "LYCHEE_CLOUD_BASE_URL"
 	legacyCloudAnthropicKey       = "legacy_cloud_anthropic_web_search"
-	cloudProxyClientVersionHeader = "X-Ollama-Client-Version"
+	cloudProxyClientVersionHeader = "X-Lychee-Client-Version"
 
 	// maxDecompressedBodySize limits the size of a decompressed request body
 	maxDecompressedBodySize = 20 << 20

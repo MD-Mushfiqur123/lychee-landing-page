@@ -1,0 +1,195 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Outer glow -->
+    <filter id="glow-outer" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Soft inner shadow -->
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Bump texture blur -->
+    <filter id="bump" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="0.6"/>
+    </filter>
+    <!-- Skin gradient - front face -->
+    <radialGradient id="skin-top" cx="40%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#FF8DC7"/>
+      <stop offset="40%" stop-color="#E84393"/>
+      <stop offset="75%" stop-color="#C41E6B"/>
+      <stop offset="100%" stop-color="#8B1A4A"/>
+    </radialGradient>
+    <!-- Skin gradient - right face -->
+    <radialGradient id="skin-right" cx="60%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#D13580"/>
+      <stop offset="50%" stop-color="#B01E5F"/>
+      <stop offset="100%" stop-color="#7A1240"/>
+    </radialGradient>
+    <!-- Skin gradient - bottom face -->
+    <radialGradient id="skin-bottom" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#9B1E50"/>
+      <stop offset="100%" stop-color="#6A0F35"/>
+    </radialGradient>
+    <!-- Leaf gradient -->
+    <linearGradient id="leaf-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6DD35A"/>
+      <stop offset="50%" stop-color="#4CAF35"/>
+      <stop offset="100%" stop-color="#2D7A1B"/>
+    </linearGradient>
+    <!-- Leaf vein gradient -->
+    <linearGradient id="leaf-vein" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8FE87A"/>
+      <stop offset="100%" stop-color="#3D9A28"/>
+    </linearGradient>
+    <!-- Stem gradient -->
+    <linearGradient id="stem-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5A8A3A"/>
+      <stop offset="100%" stop-color="#2D5A1B"/>
+    </linearGradient>
+    <!-- Specular highlight -->
+    <radialGradient id="specular" cx="35%" cy="28%" r="30%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.7)"/>
+      <stop offset="60%" stop-color="rgba(255,255,255,0.15)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <!-- Secondary specular -->
+    <radialGradient id="specular2" cx="65%" cy="65%" r="25%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <!-- Background glow -->
+    <radialGradient id="bg-glow" cx="50%" cy="55%" r="50%">
+      <stop offset="0%" stop-color="rgba(232,67,147,0.18)"/>
+      <stop offset="100%" stop-color="rgba(232,67,147,0)"/>
+    </radialGradient>
+    <!-- Ambient occlusion under fruit -->
+    <radialGradient id="shadow-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.45)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+    <!-- Clip path for fruit body -->
+    <clipPath id="fruit-clip">
+      <ellipse cx="100" cy="108" rx="58" ry="52"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background ambient glow -->
+  <ellipse cx="100" cy="130" rx="72" ry="22" fill="url(#shadow-grad)" opacity="0.6"/>
+  <ellipse cx="100" cy="108" rx="80" ry="72" fill="url(#bg-glow)"/>
+
+  <!-- ── FRUIT BODY ── -->
+  <!-- Base sphere shape -->
+  <ellipse cx="100" cy="108" rx="58" ry="52" fill="url(#skin-top)" filter="url(#glow-outer)"/>
+
+  <!-- Isometric facet overlays for 3D voxel feel -->
+  <!-- Top-left face -->
+  <path d="M100,62 L48,88 L48,118 L100,92 Z" fill="url(#skin-top)" opacity="0.9"/>
+  <!-- Top-right face -->
+  <path d="M100,62 L152,88 L152,118 L100,92 Z" fill="url(#skin-right)" opacity="0.95"/>
+  <!-- Bottom-left face -->
+  <path d="M48,118 L100,144 L100,92 L48,88 Z" fill="url(#skin-right)" opacity="0.85"/>
+  <!-- Bottom-right face -->
+  <path d="M152,118 L100,144 L100,92 L152,88 Z" fill="url(#skin-bottom)" opacity="0.9"/>
+  <!-- Bottom cap -->
+  <path d="M48,118 L100,144 L152,118 L100,132 Z" fill="url(#skin-bottom)" opacity="0.8"/>
+
+  <!-- ── SKIN TEXTURE — bumps/scales ── -->
+  <!-- Top face bumps -->
+  <g opacity="0.55" clip-path="url(#fruit-clip)">
+    <!-- Row 1 -->
+    <circle cx="72" cy="78" r="4.5" fill="#FF6DB3" filter="url(#bump)"/>
+    <circle cx="86" cy="72" r="4" fill="#FF6DB3" filter="url(#bump)"/>
+    <circle cx="100" cy="69" r="4.5" fill="#FF6DB3" filter="url(#bump)"/>
+    <circle cx="114" cy="72" r="4" fill="#D44A8A" filter="url(#bump)"/>
+    <circle cx="128" cy="78" r="4.5" fill="#C94080" filter="url(#bump)"/>
+    <!-- Row 2 -->
+    <circle cx="62" cy="90" r="4" fill="#FF6DB3" filter="url(#bump)"/>
+    <circle cx="76" cy="84" r="5" fill="#FF85BB" filter="url(#bump)"/>
+    <circle cx="90" cy="80" r="4.5" fill="#FF6DB3" filter="url(#bump)"/>
+    <circle cx="104" cy="78" r="5" fill="#FF85BB" filter="url(#bump)"/>
+    <circle cx="118" cy="82" r="4.5" fill="#D44A8A" filter="url(#bump)"/>
+    <circle cx="132" cy="88" r="4" fill="#C03878" filter="url(#bump)"/>
+    <!-- Row 3 -->
+    <circle cx="56" cy="102" r="4.5" fill="#E84393" filter="url(#bump)"/>
+    <circle cx="70" cy="96" r="5" fill="#FF6DB3" filter="url(#bump)"/>
+    <circle cx="84" cy="91" r="4.5" fill="#FF85BB" filter="url(#bump)"/>
+    <circle cx="98" cy="89" r="5" fill="#FF6DB3" filter="url(#bump)"/>
+    <circle cx="112" cy="91" r="4.5" fill="#E84393" filter="url(#bump)"/>
+    <circle cx="126" cy="96" r="5" fill="#C94080" filter="url(#bump)"/>
+    <circle cx="140" cy="102" r="4.5" fill="#B03070" filter="url(#bump)"/>
+    <!-- Row 4 -->
+    <circle cx="55" cy="115" r="4" fill="#D44A8A" filter="url(#bump)"/>
+    <circle cx="68" cy="108" r="4.5" fill="#E84393" filter="url(#bump)"/>
+    <circle cx="82" cy="103" r="5" fill="#FF6DB3" filter="url(#bump)"/>
+    <circle cx="96" cy="101" r="5" fill="#FF85BB" filter="url(#bump)"/>
+    <circle cx="110" cy="103" r="5" fill="#E84393" filter="url(#bump)"/>
+    <circle cx="124" cy="108" r="4.5" fill="#C94080" filter="url(#bump)"/>
+    <circle cx="138" cy="115" r="4" fill="#A02868" filter="url(#bump)"/>
+    <!-- Row 5 -->
+    <circle cx="60" cy="127" r="4" fill="#C41E6B" filter="url(#bump)"/>
+    <circle cx="74" cy="121" r="4.5" fill="#D44A8A" filter="url(#bump)"/>
+    <circle cx="88" cy="116" r="5" fill="#E84393" filter="url(#bump)"/>
+    <circle cx="102" cy="114" r="5" fill="#E84393" filter="url(#bump)"/>
+    <circle cx="116" cy="116" r="4.5" fill="#C94080" filter="url(#bump)"/>
+    <circle cx="130" cy="121" r="4" fill="#A82870" filter="url(#bump)"/>
+    <!-- Row 6 -->
+    <circle cx="72" cy="133" r="4" fill="#B01E5F" filter="url(#bump)"/>
+    <circle cx="86" cy="128" r="4.5" fill="#C41E6B" filter="url(#bump)"/>
+    <circle cx="100" cy="126" r="5" fill="#C94080" filter="url(#bump)"/>
+    <circle cx="114" cy="128" r="4.5" fill="#A82870" filter="url(#bump)"/>
+    <circle cx="128" cy="133" r="4" fill="#8B1A4A" filter="url(#bump)"/>
+  </g>
+
+  <!-- Bump ridge lines - scale texture -->
+  <g opacity="0.2" clip-path="url(#fruit-clip)">
+    <ellipse cx="82" cy="90" rx="6" ry="3" fill="none" stroke="#FF9FD0" stroke-width="1.2"/>
+    <ellipse cx="100" cy="85" rx="7" ry="3.5" fill="none" stroke="#FF9FD0" stroke-width="1.2"/>
+    <ellipse cx="118" cy="90" rx="6" ry="3" fill="none" stroke="#D06090" stroke-width="1.2"/>
+    <ellipse cx="72" cy="100" rx="5.5" ry="3" fill="none" stroke="#FF9FD0" stroke-width="1.2"/>
+    <ellipse cx="90" cy="96" rx="6.5" ry="3.5" fill="none" stroke="#FF9FD0" stroke-width="1.2"/>
+    <ellipse cx="108" cy="96" rx="6" ry="3" fill="none" stroke="#D06090" stroke-width="1.2"/>
+    <ellipse cx="126" cy="100" rx="5.5" ry="3" fill="none" stroke="#C05080" stroke-width="1.2"/>
+  </g>
+
+  <!-- ── SPECULAR HIGHLIGHTS ── -->
+  <ellipse cx="82" cy="85" rx="22" ry="16" fill="url(#specular)" opacity="0.85"/>
+  <ellipse cx="118" cy="118" rx="14" ry="10" fill="url(#specular2)" opacity="0.6"/>
+  <!-- Hard specular dot -->
+  <ellipse cx="78" cy="80" rx="7" ry="5" fill="white" opacity="0.3"/>
+  <ellipse cx="76" cy="78" rx="3.5" ry="2.5" fill="white" opacity="0.55"/>
+
+  <!-- ── EDGE SHADING (depth rim) ── -->
+  <ellipse cx="100" cy="108" rx="58" ry="52" fill="none" stroke="#5A0E2E" stroke-width="3" opacity="0.4"/>
+  <ellipse cx="100" cy="108" rx="55" ry="49" fill="none" stroke="#8B1A4A" stroke-width="1.5" opacity="0.25"/>
+
+  <!-- ── STEM ── -->
+  <path d="M98,62 Q97,52 96,44 Q95,38 98,34" stroke="url(#stem-grad)" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M100,62 Q100,52 100,44 Q100,37 101,33" stroke="url(#stem-grad)" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- Stem knob at fruit top -->
+  <ellipse cx="99" cy="63" rx="5" ry="3.5" fill="#3D7A25"/>
+  <ellipse cx="99" cy="62" rx="3.5" ry="2" fill="#5A9A35"/>
+
+  <!-- ── LEAVES ── -->
+  <!-- Left leaf -->
+  <path d="M97,48 Q78,30 62,28 Q70,38 80,44 Q88,50 97,52 Z" fill="url(#leaf-grad)"/>
+  <!-- Left leaf vein -->
+  <path d="M97,50 Q82,38 65,30" stroke="url(#leaf-vein)" stroke-width="1" fill="none" opacity="0.7"/>
+  <path d="M88,46 Q82,38 76,34" stroke="#7DC865" stroke-width="0.7" fill="none" opacity="0.5"/>
+  <!-- Left leaf shine -->
+  <path d="M97,48 Q82,32 68,30 Q74,36 82,42 Q88,47 97,50 Z" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Right leaf -->
+  <path d="M103,46 Q120,26 140,24 Q132,36 120,42 Q112,48 103,50 Z" fill="url(#leaf-grad)" opacity="0.9"/>
+  <!-- Right leaf vein -->
+  <path d="M103,48 Q118,36 137,26" stroke="url(#leaf-vein)" stroke-width="1" fill="none" opacity="0.65"/>
+  <path d="M112,44 Q118,38 124,32" stroke="#7DC865" stroke-width="0.7" fill="none" opacity="0.5"/>
+
+  <!-- Small back leaf -->
+  <path d="M99,44 Q92,28 86,18 Q94,24 100,36 Q102,40 100,46 Z" fill="#3D9A28" opacity="0.75"/>
+
+  <!-- ── GROUND SHADOW ── -->
+  <ellipse cx="100" cy="163" rx="42" ry="8" fill="rgba(0,0,0,0.35)"/>
+  <ellipse cx="100" cy="163" rx="28" ry="4.5" fill="rgba(0,0,0,0.25)"/>
+</svg>

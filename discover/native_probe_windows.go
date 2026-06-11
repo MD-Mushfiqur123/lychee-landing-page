@@ -12,7 +12,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/ollama/ollama/llm"
+	"github.com/lychee/lychee/llm"
 	"golang.org/x/sys/windows"
 )
 

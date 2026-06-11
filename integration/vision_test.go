@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/types/model"
 )
 
-// Default set of vision models to test. When OLLAMA_TEST_MODEL is set,
+// Default set of vision models to test. When LYCHEE_TEST_MODEL is set,
 // only that model is tested (with a capability check for vision).
 var defaultVisionModels = []string{
 	"nemotron3:33b",
@@ -25,7 +25,7 @@ var defaultVisionModels = []string{
 }
 
 // decodeTestImages returns the test images.
-func decodeTestImages(t *testing.T) (abbeyRoad, docs, ollamaHome api.ImageData) {
+func decodeTestImages(t *testing.T) (abbeyRoad, docs, lycheeHome api.ImageData) {
 	t.Helper()
 	var err error
 	abbeyRoad, err = base64.StdEncoding.DecodeString(imageEncoding)
@@ -36,15 +36,15 @@ func decodeTestImages(t *testing.T) (abbeyRoad, docs, ollamaHome api.ImageData) 
 	if err != nil {
 		t.Fatalf("decode docs image: %v", err)
 	}
-	ollamaHome, err = base64.StdEncoding.DecodeString(imageEncodingOllamaHome)
+	lycheeHome, err = base64.StdEncoding.DecodeString(imageEncodingLycheeHome)
 	if err != nil {
-		t.Fatalf("decode ollama home image: %v", err)
+		t.Fatalf("decode lychee home image: %v", err)
 	}
 	return
 }
 
 // skipIfNoVisionOverride skips the entire test (at parent level) when
-// OLLAMA_TEST_MODEL is set to a non-vision model. This prevents the parent
+// LYCHEE_TEST_MODEL is set to a non-vision model. This prevents the parent
 // test from reporting PASS when all subtests are skipped.
 func skipIfNoVisionOverride(t *testing.T) {
 	t.Helper()
@@ -358,7 +358,7 @@ func TestVisionMultiImage(t *testing.T) {
 }
 
 // TestVisionImageDescription verifies that the model can describe the contents
-// of the ollama homepage image (a cartoon llama with "Start building with
+// of the lychee homepage image (a cartoon llama with "Start building with
 // open models" text). Basic sanity check that the vision pipeline works.
 func TestVisionImageDescription(t *testing.T) {
 	skipUnderMinVRAM(t, 16)
@@ -372,7 +372,7 @@ func TestVisionImageDescription(t *testing.T) {
 			defer cleanup()
 
 			setupVisionModel(ctx, t, client, model)
-			_, _, ollamaHome := decodeTestImages(t)
+			_, _, lycheeHome := decodeTestImages(t)
 
 			req := api.ChatRequest{
 				Model: model,
@@ -380,7 +380,7 @@ func TestVisionImageDescription(t *testing.T) {
 					{
 						Role:    "user",
 						Content: "Describe what you see in this image briefly.",
-						Images:  []api.ImageData{ollamaHome},
+						Images:  []api.ImageData{lycheeHome},
 					},
 				},
 				Stream:    &stream,

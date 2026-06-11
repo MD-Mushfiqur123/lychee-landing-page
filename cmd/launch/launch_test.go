@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/ollama/ollama/cmd/config"
+	"github.com/lychee/lychee/cmd/config"
 )
 
 type launcherEditorRunner struct {
@@ -147,9 +147,9 @@ type launcherManagedAutodiscoveryRunner struct {
 	configSuccessMessage    string
 }
 
-func (r *launcherManagedAutodiscoveryRunner) AutodiscoveredModel() string { return "Ollama Cloud" }
+func (r *launcherManagedAutodiscoveryRunner) AutodiscoveredModel() string { return "Lychee Cloud" }
 
-func (r *launcherManagedAutodiscoveryRunner) UsesOllamaCloud() bool { return r.usesCloud }
+func (r *launcherManagedAutodiscoveryRunner) UsesLycheeCloud() bool { return r.usesCloud }
 
 func (r *launcherManagedAutodiscoveryRunner) RestoreHint() string { return r.restoreHint }
 
@@ -282,7 +282,7 @@ func TestBuildLauncherState_ManagedSingleIntegrationUsesCurrentModel(t *testing.
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	runner := &launcherManagedRunner{currentModel: "gemma4"}
 	withIntegrationOverride(t, "pi", runner)
@@ -317,7 +317,7 @@ func TestBuildLauncherState_ManagedSingleIntegrationShowsSavedModelWhenLiveConfi
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := config.SaveIntegration("pi", []string{"gemma4"}); err != nil {
 		t.Fatalf("failed to save managed integration config: %v", err)
@@ -358,7 +358,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationConfiguresOnboardsAndRuns(t *
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	runner := &launcherManagedRunner{
 		paths: nil,
@@ -417,7 +417,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationReOnboardsWhenSavedFlagIsStal
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	runner := &launcherManagedRunner{
 		currentModel:       "gemma4",
@@ -462,7 +462,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationConfigOnlySkipsFinalRun(t *te
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	runner := &launcherManagedRunner{
 		paths: nil,
@@ -549,7 +549,7 @@ func TestLaunchIntegration_QwenConfiguresSingleModel(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	binDir := filepath.Join(tmpDir, "bin")
 	if err := os.MkdirAll(binDir, 0o755); err != nil {
@@ -696,7 +696,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationSkipsRewriteWhenSavedMatches(
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := config.SaveIntegration("stubmanaged", []string{"gemma4"}); err != nil {
 		t.Fatalf("failed to save managed integration config: %v", err)
@@ -746,7 +746,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationRewritesWhenSavedMatchesButLi
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := config.SaveIntegration("stubmanaged", []string{"gemma4"}); err != nil {
 		t.Fatalf("failed to save managed integration config: %v", err)
@@ -797,7 +797,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationRewritesWhenSavedDiffers(t *t
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := config.SaveIntegration("stubmanaged", []string{"old-model"}); err != nil {
 		t.Fatalf("failed to save managed integration config: %v", err)
@@ -849,7 +849,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationRewritesWhenLiveConfigDrifts(
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := config.SaveIntegration("stubmanaged", []string{"gemma4"}); err != nil {
 		t.Fatalf("failed to save managed integration config: %v", err)
@@ -906,7 +906,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationStopsWhenRuntimeRefreshFails(
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	runner := &launcherManagedRunner{
 		refreshErr: fmt.Errorf("boom"),
@@ -954,7 +954,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationCanConfigureWithModelList(t *
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	runner := &launcherManagedListRunner{}
 	withIntegrationOverride(t, "stubmanaged", runner)
@@ -1002,14 +1002,14 @@ func TestLaunchIntegration_ManagedAutodiscoverySkipsModelPicker(t *testing.T) {
 	if runner.autodiscoveryConfigures != 1 {
 		t.Fatalf("expected one autodiscovery configure, got %d", runner.autodiscoveryConfigures)
 	}
-	if runner.ranModel != "Ollama Cloud" {
+	if runner.ranModel != "Lychee Cloud" {
 		t.Fatalf("expected launch to run autodiscovery label, got %q", runner.ranModel)
 	}
 	saved, err := config.LoadIntegration("stubmanaged")
 	if err != nil {
 		t.Fatalf("failed to reload managed integration config: %v", err)
 	}
-	if diff := compareStrings(saved.Models, []string{"Ollama Cloud"}); diff != "" {
+	if diff := compareStrings(saved.Models, []string{"Lychee Cloud"}); diff != "" {
 		t.Fatalf("saved models mismatch: %s", diff)
 	}
 }
@@ -1062,7 +1062,7 @@ func TestLaunchIntegration_ManagedAutodiscoveryPrintsRestoreHintWhenAlreadyConfi
 	}
 	withIntegrationOverride(t, "stubmanaged", runner)
 
-	if err := config.SaveIntegration("stubmanaged", []string{"Ollama Cloud"}); err != nil {
+	if err := config.SaveIntegration("stubmanaged", []string{"Lychee Cloud"}); err != nil {
 		t.Fatalf("failed to save managed integration config: %v", err)
 	}
 	if err := config.MarkIntegrationOnboarded("stubmanaged"); err != nil {
@@ -1078,7 +1078,7 @@ func TestLaunchIntegration_ManagedAutodiscoveryPrintsRestoreHintWhenAlreadyConfi
 	if runner.autodiscoveryConfigures != 0 {
 		t.Fatalf("expected configured autodiscovery integration not to reconfigure, got %d configures", runner.autodiscoveryConfigures)
 	}
-	if runner.ranModel != "Ollama Cloud" {
+	if runner.ranModel != "Lychee Cloud" {
 		t.Fatalf("expected launch to run autodiscovery label, got %q", runner.ranModel)
 	}
 	if !strings.Contains(stderr, "run restore command") {
@@ -1099,7 +1099,7 @@ func TestLaunchIntegration_ManagedAutodiscoveryPrintsConfigurationSuccessWhenAlr
 	}
 	withIntegrationOverride(t, "stubmanaged", runner)
 
-	if err := config.SaveIntegration("stubmanaged", []string{"Ollama Cloud"}); err != nil {
+	if err := config.SaveIntegration("stubmanaged", []string{"Lychee Cloud"}); err != nil {
 		t.Fatalf("failed to save managed integration config: %v", err)
 	}
 	if err := config.MarkIntegrationOnboarded("stubmanaged"); err != nil {
@@ -1164,7 +1164,7 @@ func TestLaunchIntegration_ManagedAutodiscoveryForceConfigureRerunsSetup(t *test
 	}
 	withIntegrationOverride(t, "stubmanaged", runner)
 
-	if err := config.SaveIntegration("stubmanaged", []string{"Ollama Cloud"}); err != nil {
+	if err := config.SaveIntegration("stubmanaged", []string{"Lychee Cloud"}); err != nil {
 		t.Fatalf("failed to save managed integration config: %v", err)
 	}
 	if err := config.MarkIntegrationOnboarded("stubmanaged"); err != nil {
@@ -1181,7 +1181,7 @@ func TestLaunchIntegration_ManagedAutodiscoveryForceConfigureRerunsSetup(t *test
 	if runner.autodiscoveryConfigures != 1 {
 		t.Fatalf("expected forced autodiscovery configure to rerun setup, got %d configures", runner.autodiscoveryConfigures)
 	}
-	if runner.ranModel != "Ollama Cloud" {
+	if runner.ranModel != "Lychee Cloud" {
 		t.Fatalf("expected launch to run autodiscovery label, got %q", runner.ranModel)
 	}
 }
@@ -1198,8 +1198,8 @@ func TestLaunchIntegration_CloudAutodiscoveryUsesSignInHook(t *testing.T) {
 	signInCalled := false
 	DefaultSignIn = func(modelName, signInURL string) (string, error) {
 		signInCalled = true
-		if modelName != "Ollama Cloud" {
-			t.Fatalf("sign-in model = %q, want Ollama Cloud", modelName)
+		if modelName != "Lychee Cloud" {
+			t.Fatalf("sign-in model = %q, want Lychee Cloud", modelName)
 		}
 		if signInURL != "https://example.com/signin" {
 			t.Fatalf("sign-in URL = %q, want test URL", signInURL)
@@ -1223,7 +1223,7 @@ func TestLaunchIntegration_CloudAutodiscoveryUsesSignInHook(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{Name: "stubmanaged"}); err != nil {
 		t.Fatalf("LaunchIntegration returned error: %v", err)
@@ -1235,7 +1235,7 @@ func TestLaunchIntegration_CloudAutodiscoveryUsesSignInHook(t *testing.T) {
 	if runner.autodiscoveryConfigures != 1 {
 		t.Fatalf("expected one autodiscovery configure, got %d", runner.autodiscoveryConfigures)
 	}
-	if runner.ranModel != "Ollama Cloud" {
+	if runner.ranModel != "Lychee Cloud" {
 		t.Fatalf("expected launch to run autodiscovery label, got %q", runner.ranModel)
 	}
 }
@@ -1263,7 +1263,7 @@ func TestBuildLauncherIntegrationState_CloudAutodiscoveryDoesNotCheckSignIn(t *t
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	launchClient, err := newLauncherClient(defaultLaunchPolicy(true, false))
 	if err != nil {
@@ -1277,8 +1277,8 @@ func TestBuildLauncherIntegrationState_CloudAutodiscoveryDoesNotCheckSignIn(t *t
 		t.Fatalf("buildLauncherIntegrationState returned error: %v", err)
 	}
 
-	if state.CurrentModel != "Ollama Cloud" {
-		t.Fatalf("current model = %q, want Ollama Cloud", state.CurrentModel)
+	if state.CurrentModel != "Lychee Cloud" {
+		t.Fatalf("current model = %q, want Lychee Cloud", state.CurrentModel)
 	}
 	if !state.ModelUsable {
 		t.Fatal("expected cloud autodiscovery config to stay usable until launch-time auth check")
@@ -1321,7 +1321,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationHeadlessNeedsInteractiveOnboa
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	runner := &launcherManagedRunner{
 		paths: nil,
@@ -1362,7 +1362,7 @@ func TestLaunchIntegration_ManagedSingleIntegrationHeadlessAllowsNonInteractiveO
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	runner := &launcherHeadlessManagedRunner{}
 	withIntegrationOverride(t, "stubmanaged", runner)
@@ -1417,7 +1417,7 @@ func TestBuildLauncherState_InstalledAndCloudDisabled(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	state, err := BuildLauncherState(context.Background())
 	if err != nil {
@@ -1469,7 +1469,7 @@ func TestBuildLauncherState_MigratesLegacyOpenclawAliasConfig(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	state, err := BuildLauncherState(context.Background())
 	if err != nil {
@@ -1521,7 +1521,7 @@ func TestBuildLauncherState_ToleratesInventoryFailure(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	state, err := BuildLauncherState(context.Background())
 	if err != nil {
@@ -1565,7 +1565,7 @@ func TestBuildLauncherState_UsesTagsInventoryWithoutShow(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	state, err := BuildLauncherState(context.Background())
 	if err != nil {
@@ -1613,7 +1613,7 @@ func TestResolveRunModel_UsesSavedModelWithoutSelector(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	model, err := ResolveRunModel(context.Background(), RunModelRequest{})
 	if err != nil {
@@ -1672,7 +1672,7 @@ func TestResolveRunModel_HeadlessYesAutoPicksLastModel(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	var model string
 	stderr := captureStderr(t, func() {
@@ -1736,7 +1736,7 @@ func TestResolveRunModel_UsesRequestPolicy(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	reqPolicy := LaunchPolicy{
 		Confirm:      LaunchConfirmAutoApprove,
@@ -1785,7 +1785,7 @@ func TestResolveRunModel_ForcePickerAlwaysUsesSelector(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	model, err := ResolveRunModel(context.Background(), RunModelRequest{ForcePicker: true})
 	if err != nil {
@@ -1837,7 +1837,7 @@ func TestResolveRunModel_ForcePicker_DoesNotReorderByLastModel(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	_, err := ResolveRunModel(context.Background(), RunModelRequest{ForcePicker: true})
 	if err != nil {
@@ -1895,7 +1895,7 @@ func TestResolveRunModel_UsesSignInHookForCloudModel(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	model, err := ResolveRunModel(context.Background(), RunModelRequest{ForcePicker: true})
 	if err != nil {
@@ -1955,7 +1955,7 @@ func TestResolveRunModel_MetadataSignedOutUsesSignInHook(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	model, err := ResolveRunModel(context.Background(), RunModelRequest{ForcePicker: true})
 	if err != nil {
@@ -2033,7 +2033,7 @@ func TestResolveRunModel_SubscriptionModelUsesUpgradeHook(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	model, err := ResolveRunModel(context.Background(), RunModelRequest{ForcePicker: true})
 	if err != nil {
@@ -2089,7 +2089,7 @@ func TestResolveRunModel_UpgradeCancelledReturnsToModelSelector(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	model, err := ResolveRunModel(context.Background(), RunModelRequest{ForcePicker: true})
 	if err != nil {
@@ -2133,7 +2133,7 @@ func TestResolveRunModel_SubscriptionModelUnavailableWhoamiFailsGracefully(t *te
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	_, err := ResolveRunModel(context.Background(), RunModelRequest{ForcePicker: true})
 	if err == nil {
@@ -2181,7 +2181,7 @@ func TestLaunchIntegration_EditorForceConfigure(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:           "droid",
@@ -2255,7 +2255,7 @@ func TestLaunchIntegration_EditorForceConfigure_FloatsCheckedModelsInPicker(t *t
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:           "droid",
@@ -2305,7 +2305,7 @@ func TestLaunchIntegration_EditorModelOverridePreservesExtras(t *testing.T) {
 		http.NotFound(w, r)
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:          "droid",
@@ -2367,7 +2367,7 @@ func TestLaunchIntegration_EditorCloudDisabledFallsBackToSelector(t *testing.T) 
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{Name: "droid"}); err != nil {
 		t.Fatalf("LaunchIntegration returned error: %v", err)
@@ -2428,7 +2428,7 @@ func TestLaunchIntegration_EditorConfigureMultiSkipsMissingLocalAndPersistsAccep
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	var launchErr error
 	stderr := captureStderr(t, func() {
@@ -2509,7 +2509,7 @@ func TestLaunchIntegration_EditorConfigureMultiSkipsUnauthedCloudAndPersistsAcce
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	var launchErr error
 	stderr := captureStderr(t, func() {
@@ -2598,7 +2598,7 @@ func TestLaunchIntegration_EditorConfigureUpgradeCancelledReturnsToModelSelector
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:           "droid",
@@ -2672,7 +2672,7 @@ func TestLaunchIntegration_EditorConfigureMultiRemovesReselectedFailingModel(t *
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	var launchErr error
 	stderr := captureStderr(t, func() {
@@ -2750,7 +2750,7 @@ func TestLaunchIntegration_EditorConfigureMultiAllFailuresKeepsExistingAndSkipsL
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	var launchErr error
 	stderr := captureStderr(t, func() {
@@ -2824,7 +2824,7 @@ func TestLaunchIntegration_ConfiguredEditorLaunchValidatesPrimaryOnly(t *testing
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{Name: "droid"}); err != nil {
 		t.Fatalf("LaunchIntegration returned error: %v", err)
@@ -2883,7 +2883,7 @@ func TestLaunchIntegration_ConfiguredEditorLaunchSkipsReconfigure(t *testing.T) 
 		http.NotFound(w, r)
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{Name: "droid"}); err != nil {
 		t.Fatalf("LaunchIntegration returned error: %v", err)
@@ -2930,7 +2930,7 @@ func TestLaunchIntegration_OpenclawPreservesExistingModelList(t *testing.T) {
 		http.NotFound(w, r)
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{Name: "openclaw"}); err != nil {
 		t.Fatalf("LaunchIntegration returned error: %v", err)
@@ -3054,7 +3054,7 @@ func TestLaunchIntegration_ConfigureOnlyDoesNotRequireInstalledBinary(t *testing
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:           "droid",
@@ -3104,7 +3104,7 @@ func TestLaunchIntegration_ClaudeSavesPrimaryModel(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:          "claude",
@@ -3159,7 +3159,7 @@ func TestLaunchIntegration_ClaudeForceConfigureReprompts(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:           "claude",
@@ -3223,7 +3223,7 @@ func TestLaunchIntegration_ClaudeForceConfigureMissingSelectionDoesNotSave(t *te
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:           "claude",
@@ -3282,7 +3282,7 @@ func TestLaunchIntegration_ClaudeModelOverrideSkipsSelector(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:          "claude",
@@ -3344,7 +3344,7 @@ func TestLaunchIntegration_ConfigureOnlyPrompt(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:           "stubsingle",
@@ -3395,7 +3395,7 @@ func TestLaunchIntegration_ModelOverrideHeadlessMissingFailsWithoutPrompt(t *tes
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:          "droid",
@@ -3404,7 +3404,7 @@ func TestLaunchIntegration_ModelOverrideHeadlessMissingFailsWithoutPrompt(t *tes
 	if err == nil {
 		t.Fatal("expected missing model to fail in headless mode")
 	}
-	if !strings.Contains(err.Error(), "ollama pull missing-model") {
+	if !strings.Contains(err.Error(), "lychee pull missing-model") {
 		t.Fatalf("expected actionable missing model error, got %v", err)
 	}
 	if confirmCalled {
@@ -3455,7 +3455,7 @@ func TestLaunchIntegration_ModelOverrideHeadlessCanOverrideMissingModelPolicy(t 
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	customPolicy := LaunchPolicy{MissingModel: LaunchMissingModelPromptToPull}
 	if err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
@@ -3513,7 +3513,7 @@ func TestLaunchIntegration_ModelOverrideInteractiveMissingPromptsAndPulls(t *tes
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:          "droid",
@@ -3575,7 +3575,7 @@ func TestLaunchIntegration_HeadlessSelectorFlowFailsWithoutPrompt(t *testing.T) 
 		}
 	}))
 	defer srv.Close()
-	t.Setenv("OLLAMA_HOST", srv.URL)
+	t.Setenv("LYCHEE_HOST", srv.URL)
 
 	err := LaunchIntegration(context.Background(), IntegrationLaunchRequest{
 		Name:           "droid",
@@ -3584,7 +3584,7 @@ func TestLaunchIntegration_HeadlessSelectorFlowFailsWithoutPrompt(t *testing.T) 
 	if err == nil {
 		t.Fatal("expected headless selector flow to fail on missing model")
 	}
-	if !strings.Contains(err.Error(), "ollama pull missing-model") {
+	if !strings.Contains(err.Error(), "lychee pull missing-model") {
 		t.Fatalf("expected actionable missing model error, got %v", err)
 	}
 	if confirmCalled {

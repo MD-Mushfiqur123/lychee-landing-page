@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	fsggml "github.com/ollama/ollama/fs/ggml"
+	fsggml "github.com/lychee/lychee/fs/ggml"
 )
 
 func TestLlamaQuantizeArgs(t *testing.T) {

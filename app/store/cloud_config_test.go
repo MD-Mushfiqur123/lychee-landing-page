@@ -30,14 +30,14 @@ func TestCloudDisabled(t *testing.T) {
 		},
 		{
 			name:          "config disables cloud",
-			configContent: `{"disable_ollama_cloud": true}`,
+			configContent: `{"disable_lychee_cloud": true}`,
 			wantDisabled:  true,
 			wantSource:    "config",
 		},
 		{
 			name:          "env and config",
 			envValue:      "1",
-			configContent: `{"disable_ollama_cloud": false}`,
+			configContent: `{"disable_lychee_cloud": false}`,
 			wantDisabled:  true,
 			wantSource:    "env",
 		},
@@ -53,10 +53,10 @@ func TestCloudDisabled(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpHome := t.TempDir()
 			setTestHome(t, tmpHome)
-			t.Setenv("OLLAMA_NO_CLOUD", tt.envValue)
+			t.Setenv("LYCHEE_NO_CLOUD", tt.envValue)
 
 			if tt.configContent != "" {
-				configDir := filepath.Join(tmpHome, ".ollama")
+				configDir := filepath.Join(tmpHome, ".lychee")
 				if err := os.MkdirAll(configDir, 0o755); err != nil {
 					t.Fatalf("mkdir config dir: %v", err)
 				}
@@ -95,12 +95,12 @@ func TestSetCloudEnabled(t *testing.T) {
 	tmpHome := t.TempDir()
 	setTestHome(t, tmpHome)
 
-	configDir := filepath.Join(tmpHome, ".ollama")
+	configDir := filepath.Join(tmpHome, ".lychee")
 	if err := os.MkdirAll(configDir, 0o755); err != nil {
 		t.Fatalf("mkdir config dir: %v", err)
 	}
 	configPath := filepath.Join(configDir, serverConfigFilename)
-	if err := os.WriteFile(configPath, []byte(`{"another_key":"value","disable_ollama_cloud":true}`), 0o644); err != nil {
+	if err := os.WriteFile(configPath, []byte(`{"another_key":"value","disable_lychee_cloud":true}`), 0o644); err != nil {
 		t.Fatalf("seed config: %v", err)
 	}
 
@@ -121,8 +121,8 @@ func TestSetCloudEnabled(t *testing.T) {
 		t.Fatalf("unmarshal config: %v", err)
 	}
 
-	if got["disable_ollama_cloud"] != false {
-		t.Fatalf("disable_ollama_cloud = %v, want false", got["disable_ollama_cloud"])
+	if got["disable_lychee_cloud"] != false {
+		t.Fatalf("disable_lychee_cloud = %v, want false", got["disable_lychee_cloud"])
 	}
 	if got["another_key"] != "value" {
 		t.Fatalf("another_key = %v, want value", got["another_key"])

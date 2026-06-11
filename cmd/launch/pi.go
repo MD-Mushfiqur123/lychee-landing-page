@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/envconfig"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/envconfig"
 )
 
 // Pi implements Runner and Editor for Pi (Pi Coding Agent) integration
@@ -25,8 +25,8 @@ type Pi struct{}
 const (
 	piNpmPackage       = "@earendil-works/pi-coding-agent"
 	piLegacyNpmPackage = "@mariozechner/pi-coding-agent"
-	piWebSearchSource  = "npm:@ollama/pi-web-search"
-	piWebSearchPkg     = "@ollama/pi-web-search"
+	piWebSearchSource  = "npm:@lychee/pi-web-search"
+	piWebSearchPkg     = "@lychee/pi-web-search"
 )
 
 func (p *Pi) String() string { return "Pi" }
@@ -58,7 +58,7 @@ func (p *Pi) Run(_ string, _ []LaunchModel, args []string) error {
 
 func ensureNpmInstalled() error {
 	if _, err := exec.LookPath("npm"); err != nil {
-		return fmt.Errorf("npm (Node.js) is required to launch pi\n\nInstall it first:\n  https://nodejs.org/\n\nThen re-run:\n  ollama launch pi")
+		return fmt.Errorf("npm (Node.js) is required to launch pi\n\nInstall it first:\n  https://nodejs.org/\n\nThen re-run:\n  lychee launch pi")
 	}
 	return nil
 }
@@ -85,7 +85,7 @@ func ensurePiInstalled() (string, error) {
 	}
 
 	if _, err := exec.LookPath("npm"); err != nil {
-		return "", fmt.Errorf("pi is not installed and required dependencies are missing\n\nInstall the following first:\n  npm (Node.js): https://nodejs.org/\n\nThen re-run:\n  ollama launch pi")
+		return "", fmt.Errorf("pi is not installed and required dependencies are missing\n\nInstall the following first:\n  npm (Node.js): https://nodejs.org/\n\nThen re-run:\n  lychee launch pi")
 	}
 
 	install, pkgErr := installedPiPackageInfo()
@@ -351,7 +351,7 @@ func npmArgs(prefix string, args ...string) []string {
 }
 
 func ensurePiWebSearchPackage(bin string) {
-	if !shouldManageOllamaWebSearch() {
+	if !shouldManageLycheeWebSearch() {
 		fmt.Fprintf(os.Stderr, "%sCloud is disabled; skipping %s setup.%s\n", ansiGray, piWebSearchPkg, ansiReset)
 		return
 	}
@@ -395,7 +395,7 @@ func ensurePiWebSearchPackage(bin string) {
 	fmt.Fprintf(os.Stderr, "%s  ✓ Updated %s%s\n", ansiGreen, piWebSearchPkg, ansiReset)
 }
 
-func shouldManageOllamaWebSearch() bool {
+func shouldManageLycheeWebSearch() bool {
 	client, err := api.ClientFromEnvironment()
 	if err != nil {
 		return true
@@ -555,16 +555,16 @@ func (p *Pi) Edit(models []LaunchModel) error {
 		providers = make(map[string]any)
 	}
 
-	ollama, ok := providers["ollama"].(map[string]any)
+	lychee, ok := providers["lychee"].(map[string]any)
 	if !ok {
-		ollama = map[string]any{
+		lychee = map[string]any{
 			"baseUrl": envconfig.Host().String() + "/v1",
 			"api":     "openai-completions",
-			"apiKey":  "ollama",
+			"apiKey":  "lychee",
 		}
 	}
 
-	existingModels, ok := ollama["models"].([]any)
+	existingModels, ok := lychee["models"].([]any)
 	if !ok {
 		existingModels = make([]any, 0)
 	}
@@ -577,15 +577,15 @@ func (p *Pi) Edit(models []LaunchModel) error {
 
 	// Build new models list:
 	// 1. Keep user-managed models (no _launch marker) - untouched
-	// 2. Keep ollama-managed models (_launch marker) that are still selected,
+	// 2. Keep lychee-managed models (_launch marker) that are still selected,
 	//    except stale cloud entries that should be rebuilt below
-	// 3. Add new ollama-managed models
+	// 3. Add new lychee-managed models
 	var newModels []any
 	for _, m := range existingModels {
 		if modelObj, ok := m.(map[string]any); ok {
 			if id, ok := modelObj["id"].(string); ok {
 				// User-managed model (no _launch marker) - always preserve
-				if !isPiOllamaModel(modelObj) {
+				if !isPiLycheeModel(modelObj) {
 					newModels = append(newModels, m)
 				} else if selectedSet[id] {
 					// Rebuild stale managed cloud entries so createConfig refreshes
@@ -609,8 +609,8 @@ func (p *Pi) Edit(models []LaunchModel) error {
 		}
 	}
 
-	ollama["models"] = newModels
-	providers["ollama"] = ollama
+	lychee["models"] = newModels
+	providers["lychee"] = lychee
 	config["providers"] = providers
 
 	configData, err := json.MarshalIndent(config, "", "  ")
@@ -628,7 +628,7 @@ func (p *Pi) Edit(models []LaunchModel) error {
 		_ = json.Unmarshal(data, &settings)
 	}
 
-	settings["defaultProvider"] = "ollama"
+	settings["defaultProvider"] = "lychee"
 	settings["defaultModel"] = models[0].Name
 
 	settingsData, err := json.MarshalIndent(settings, "", "  ")
@@ -651,8 +651,8 @@ func (p *Pi) Models() []string {
 	}
 
 	providers, _ := config["providers"].(map[string]any)
-	ollama, _ := providers["ollama"].(map[string]any)
-	models, _ := ollama["models"].([]any)
+	lychee, _ := providers["lychee"].(map[string]any)
+	models, _ := lychee["models"].([]any)
 
 	var result []string
 	for _, m := range models {
@@ -666,8 +666,8 @@ func (p *Pi) Models() []string {
 	return result
 }
 
-// isPiOllamaModel reports whether a model config entry is managed by ollama launch
-func isPiOllamaModel(cfg map[string]any) bool {
+// isPiLycheeModel reports whether a model config entry is managed by lychee launch
+func isPiLycheeModel(cfg map[string]any) bool {
 	if v, ok := cfg["_launch"].(bool); ok && v {
 		return true
 	}

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 // First run of this scenario on a target system will take a long time to download
@@ -22,7 +22,7 @@ func TestLibraryModelsChat(t *testing.T) {
 	defer cancel()
 	client, _, cleanup := InitServerConnection(ctx, t)
 	defer cleanup()
-	targetArch := os.Getenv("OLLAMA_TEST_ARCHITECTURE")
+	targetArch := os.Getenv("LYCHEE_TEST_ARCHITECTURE")
 
 	for _, model := range testModels(libraryChatModels) {
 		t.Run(model, func(t *testing.T) {

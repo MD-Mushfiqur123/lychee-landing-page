@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS messages (
     stream BOOLEAN NOT NULL DEFAULT 0,
     model_name TEXT,
     model_cloud BOOLEAN,
-    model_ollama_host BOOLEAN,
+    model_lychee_host BOOLEAN,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     thinking_time_start TIMESTAMP,

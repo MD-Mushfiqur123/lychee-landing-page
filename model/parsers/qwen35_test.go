@@ -3,7 +3,7 @@ package parsers
 import (
 	"testing"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 func TestQwen35ParserXMLToolCall(t *testing.T) {

@@ -34,7 +34,7 @@ type WebSearchResponse struct {
 	Results map[string][]WebSearchResult `json:"results"`
 }
 
-// BrowserWebSearch tool for searching the web using ollama.com search API
+// BrowserWebSearch tool for searching the web using lychee.com search API
 type BrowserWebSearch struct{}
 
 func (w *BrowserWebSearch) Name() string {
@@ -42,7 +42,7 @@ func (w *BrowserWebSearch) Name() string {
 }
 
 func (w *BrowserWebSearch) Description() string {
-	return "Search the web for real-time information using ollama.com search API."
+	return "Search the web for real-time information using lychee.com search API."
 }
 
 func (w *BrowserWebSearch) Prompt() string {
@@ -106,7 +106,7 @@ func (w *BrowserWebSearch) Execute(ctx context.Context, args map[string]any) (an
 	return w.performWebSearch(ctx, queries, maxResults)
 }
 
-// performWebSearch handles the actual HTTP request to ollama.com search API
+// performWebSearch handles the actual HTTP request to lychee.com search API
 func (w *BrowserWebSearch) performWebSearch(ctx context.Context, queries []string, maxResults int) (*WebSearchResponse, error) {
 	response := &WebSearchResponse{Results: make(map[string][]WebSearchResult, len(queries))}
 

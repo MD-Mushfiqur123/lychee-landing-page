@@ -9,18 +9,18 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/ollama/ollama/cmd/config"
-	"github.com/ollama/ollama/cmd/internal/fileutil"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/cmd/config"
+	"github.com/lychee/lychee/cmd/internal/fileutil"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/types/model"
 	"gopkg.in/yaml.v3"
 )
 
 const (
 	ompIntegrationName = "omp"
-	ompProviderName    = "ollama"
+	ompProviderName    = "lychee"
 	ompSetupVersion    = 1
-	ompWebSearchPlugin = "@ollama/pi-web-search"
+	ompWebSearchPlugin = "@lychee/pi-web-search"
 )
 
 // OMP implements Runner for the OMP coding-agent integration.
@@ -100,10 +100,10 @@ func (o *OMP) args(model string, extra []string) []string {
 }
 
 func ompModelName(model string) string {
-	if strings.HasPrefix(model, "ollama/") {
+	if strings.HasPrefix(model, "lychee/") {
 		return model
 	}
-	return "ollama/" + model
+	return "lychee/" + model
 }
 
 func (o *OMP) findPath() (string, error) {
@@ -152,7 +152,7 @@ func (o *OMP) Run(model string, _ []LaunchModel, args []string) error {
 }
 
 func ensureOMPWebSearchPlugin(bin string) {
-	if !shouldManageOllamaWebSearch() {
+	if !shouldManageLycheeWebSearch() {
 		fmt.Fprintf(os.Stderr, "%sCloud is disabled; skipping %s setup.%s\n", ansiGray, ompWebSearchPlugin, ansiReset)
 		return
 	}
@@ -365,7 +365,7 @@ func ensureOMPProvider(cfg map[string]any) map[string]any {
 	provider["baseUrl"] = ompBaseURL()
 	provider["api"] = "openai-responses"
 	provider["auth"] = "none"
-	provider["discovery"] = map[string]any{"type": "ollama"}
+	provider["discovery"] = map[string]any{"type": "lychee"}
 	return provider
 }
 
@@ -391,7 +391,7 @@ func ompProviderHealthy(provider map[string]any) bool {
 		return false
 	}
 	discoveryType, _ := discovery["type"].(string)
-	return discoveryType == "ollama"
+	return discoveryType == "lychee"
 }
 
 func ompProvider(cfg map[string]any) (map[string]any, bool) {

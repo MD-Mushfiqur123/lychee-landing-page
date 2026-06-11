@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ollama/ollama/api"
+	"github.com/lychee/lychee/api"
 )
 
 func TestBlueSky(t *testing.T) {
@@ -44,7 +44,7 @@ func TestUnicode(t *testing.T) {
 	// Set up the test data
 	req := api.ChatRequest{
 		// DeepSeek has a Unicode tokenizer regex, making it a unicode torture test
-		Model: "deepseek-coder-v2:16b-lite-instruct-q2_K", // TODO is there an ollama-engine model we can switch to and keep the coverage?
+		Model: "deepseek-coder-v2:16b-lite-instruct-q2_K", // TODO is there an lychee-engine model we can switch to and keep the coverage?
 		Messages: []api.Message{
 			{
 				Role:    "user",
@@ -114,18 +114,18 @@ func TestUnicodeModelDir(t *testing.T) {
 		t.Skip("Unicode test only applicable to windows")
 	}
 	// Only works for local testing
-	if os.Getenv("OLLAMA_TEST_EXISTING") != "" {
+	if os.Getenv("LYCHEE_TEST_EXISTING") != "" {
 		t.Skip("TestUnicodeModelDir only works for local testing, skipping")
 	}
 
-	modelDir, err := os.MkdirTemp("", "ollama_埃")
+	modelDir, err := os.MkdirTemp("", "lychee_埃")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(modelDir)
-	slog.Info("unicode", "OLLAMA_MODELS", modelDir)
+	slog.Info("unicode", "LYCHEE_MODELS", modelDir)
 
-	t.Setenv("OLLAMA_MODELS", modelDir)
+	t.Setenv("LYCHEE_MODELS", modelDir)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()

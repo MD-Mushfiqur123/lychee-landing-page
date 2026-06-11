@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(OllamaMLX C CXX)
+project(LycheeMLX C CXX)
 
 include(CheckLanguage)
 include(GNUInstallDirs)
@@ -25,32 +25,32 @@ if(APPLE)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 endif()
 
-if(NOT DEFINED OLLAMA_SOURCE_DIR OR "${OLLAMA_SOURCE_DIR}" STREQUAL "")
-    get_filename_component(OLLAMA_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+if(NOT DEFINED LYCHEE_SOURCE_DIR OR "${LYCHEE_SOURCE_DIR}" STREQUAL "")
+    get_filename_component(LYCHEE_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 endif()
-get_filename_component(OLLAMA_SOURCE_DIR "${OLLAMA_SOURCE_DIR}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
-set(OLLAMA_SOURCE_DIR "${OLLAMA_SOURCE_DIR}" CACHE PATH "Ollama repository root")
+get_filename_component(LYCHEE_SOURCE_DIR "${LYCHEE_SOURCE_DIR}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+set(LYCHEE_SOURCE_DIR "${LYCHEE_SOURCE_DIR}" CACHE PATH "Lychee repository root")
 
-set(OLLAMA_LIB_DIR "lib/ollama" CACHE STRING "Install destination for Ollama runtime payloads")
-set(OLLAMA_RUNNER_DIR "" CACHE STRING "Ollama runtime payload subdirectory")
-set(OLLAMA_BUILD_DIR ${CMAKE_BINARY_DIR}/lib/ollama)
-set(OLLAMA_INSTALL_DIR ${OLLAMA_LIB_DIR}/${OLLAMA_RUNNER_DIR})
+set(LYCHEE_LIB_DIR "lib/lychee" CACHE STRING "Install destination for Lychee runtime payloads")
+set(LYCHEE_RUNNER_DIR "" CACHE STRING "Lychee runtime payload subdirectory")
+set(LYCHEE_BUILD_DIR ${CMAKE_BINARY_DIR}/lib/lychee)
+set(LYCHEE_INSTALL_DIR ${LYCHEE_LIB_DIR}/${LYCHEE_RUNNER_DIR})
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY         ${OLLAMA_BUILD_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${OLLAMA_BUILD_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OLLAMA_BUILD_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY         ${OLLAMA_BUILD_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG   ${OLLAMA_BUILD_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${OLLAMA_BUILD_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY         ${LYCHEE_BUILD_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${LYCHEE_BUILD_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${LYCHEE_BUILD_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY         ${LYCHEE_BUILD_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG   ${LYCHEE_BUILD_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${LYCHEE_BUILD_DIR})
 
 if(MLX_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES)
     check_language(CUDA)
 endif()
 
-option(OLLAMA_MLX_GENERATE_WRAPPERS "Regenerate MLX Go wrappers" OFF)
+option(LYCHEE_MLX_GENERATE_WRAPPERS "Regenerate MLX Go wrappers" OFF)
 
 message(STATUS "Setting up MLX (this takes a while...)")
-add_subdirectory(${OLLAMA_SOURCE_DIR}/x/imagegen/mlx ${CMAKE_BINARY_DIR}/x/imagegen/mlx)
+add_subdirectory(${LYCHEE_SOURCE_DIR}/x/imagegen/mlx ${CMAKE_BINARY_DIR}/x/imagegen/mlx)
 
 # Find CUDA toolkit if MLX is built with CUDA support.
 find_package(CUDAToolkit)
@@ -70,7 +70,7 @@ if(_cudnn_root)
     list(APPEND MLX_RUNTIME_DIRS ${CUDNN_BIN_SUBDIRS})
 endif()
 # Add build output directory and MLX dependency build directories.
-list(APPEND MLX_RUNTIME_DIRS ${OLLAMA_BUILD_DIR})
+list(APPEND MLX_RUNTIME_DIRS ${LYCHEE_BUILD_DIR})
 # OpenBLAS DLL location (pre-built zip extracts into openblas-src/bin/).
 list(APPEND MLX_RUNTIME_DIRS ${CMAKE_BINARY_DIR}/_deps/openblas-src/bin)
 # NCCL: on Linux, if real NCCL is found, cmake bundles libnccl.so via the
@@ -90,23 +90,23 @@ endif()
 # applies to the binaries we build, not vendor DLLs/libs.
 install(TARGETS mlx mlxc
     RUNTIME_DEPENDENCY_SET mlx_runtime_deps
-    RUNTIME DESTINATION ${OLLAMA_INSTALL_DIR} COMPONENT MLX
-    LIBRARY DESTINATION ${OLLAMA_INSTALL_DIR} COMPONENT MLX
-    FRAMEWORK DESTINATION ${OLLAMA_INSTALL_DIR} COMPONENT MLX
+    RUNTIME DESTINATION ${LYCHEE_INSTALL_DIR} COMPONENT MLX
+    LIBRARY DESTINATION ${LYCHEE_INSTALL_DIR} COMPONENT MLX
+    FRAMEWORK DESTINATION ${LYCHEE_INSTALL_DIR} COMPONENT MLX
 )
 install(RUNTIME_DEPENDENCY_SET mlx_runtime_deps
     DIRECTORIES ${MLX_RUNTIME_DIRS}
     PRE_INCLUDE_REGEXES ${MLX_INCLUDE_REGEXES}
     PRE_EXCLUDE_REGEXES ".*"
-    RUNTIME DESTINATION ${OLLAMA_INSTALL_DIR} COMPONENT MLX_VENDOR
-    LIBRARY DESTINATION ${OLLAMA_INSTALL_DIR} COMPONENT MLX_VENDOR
+    RUNTIME DESTINATION ${LYCHEE_INSTALL_DIR} COMPONENT MLX_VENDOR
+    LIBRARY DESTINATION ${LYCHEE_INSTALL_DIR} COMPONENT MLX_VENDOR
 )
 
 if(TARGET jaccl)
     install(TARGETS jaccl
-        RUNTIME DESTINATION ${OLLAMA_INSTALL_DIR} COMPONENT MLX
-        LIBRARY DESTINATION ${OLLAMA_INSTALL_DIR} COMPONENT MLX
-        FRAMEWORK DESTINATION ${OLLAMA_INSTALL_DIR} COMPONENT MLX
+        RUNTIME DESTINATION ${LYCHEE_INSTALL_DIR} COMPONENT MLX
+        LIBRARY DESTINATION ${LYCHEE_INSTALL_DIR} COMPONENT MLX
+        FRAMEWORK DESTINATION ${LYCHEE_INSTALL_DIR} COMPONENT MLX
     )
 endif()
 
@@ -114,37 +114,37 @@ endif()
 # Metal backend is only built for arm64, not x86_64.
 if(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
     install(FILES ${CMAKE_BINARY_DIR}/_deps/mlx-build/mlx/backend/metal/kernels/mlx.metallib
-        DESTINATION ${OLLAMA_INSTALL_DIR}
+        DESTINATION ${LYCHEE_INSTALL_DIR}
         COMPONENT MLX)
 endif()
 
 # Install headers for NVRTC JIT compilation at runtime.
 # MLX's own install rules use the default component so they get skipped by
-# --component MLX. Headers are installed alongside libmlx in OLLAMA_INSTALL_DIR.
+# --component MLX. Headers are installed alongside libmlx in LYCHEE_INSTALL_DIR.
 #
 # Layout:
-#   ${OLLAMA_INSTALL_DIR}/include/cccl/{cuda,nv}/  - CCCL headers
-#   ${OLLAMA_INSTALL_DIR}/include/*.h              - CUDA toolkit headers
+#   ${LYCHEE_INSTALL_DIR}/include/cccl/{cuda,nv}/  - CCCL headers
+#   ${LYCHEE_INSTALL_DIR}/include/*.h              - CUDA toolkit headers
 #
 # MLX's jit_module.cpp resolves CCCL via
 #   current_binary_dir()[.parent_path()] / "include" / "cccl"
 # On Linux, MLX's jit_module.cpp resolves CCCL via
 #   current_binary_dir().parent_path() / "include" / "cccl", so we create a
-#   symlink from lib/ollama/include -> ${OLLAMA_RUNNER_DIR}/include.
+#   symlink from lib/lychee/include -> ${LYCHEE_RUNNER_DIR}/include.
 # This will need refinement if we add multiple CUDA versions for MLX in the future.
 # CUDA runtime headers are found via CUDA_PATH env var (set by mlxrunner).
 if(EXISTS ${CMAKE_BINARY_DIR}/_deps/cccl-src/include/cuda)
     install(DIRECTORY ${CMAKE_BINARY_DIR}/_deps/cccl-src/include/cuda
-        DESTINATION ${OLLAMA_INSTALL_DIR}/include/cccl
+        DESTINATION ${LYCHEE_INSTALL_DIR}/include/cccl
         COMPONENT MLX)
     install(DIRECTORY ${CMAKE_BINARY_DIR}/_deps/cccl-src/include/nv
-        DESTINATION ${OLLAMA_INSTALL_DIR}/include/cccl
+        DESTINATION ${LYCHEE_INSTALL_DIR}/include/cccl
         COMPONENT MLX)
 endif()
 
 # Install minimal CUDA toolkit headers needed by MLX JIT kernels.
 # These are the transitive closure of includes from mlx/backend/cuda/device/*.cuh.
-# The Go mlxrunner sets CUDA_PATH to OLLAMA_INSTALL_DIR so MLX finds them at
+# The Go mlxrunner sets CUDA_PATH to LYCHEE_INSTALL_DIR so MLX finds them at
 # $CUDA_PATH/include/*.h via NVRTC --include-path.
 if(CUDAToolkit_FOUND)
     # CUDAToolkit_INCLUDE_DIRS may be a semicolon-separated list
@@ -160,7 +160,7 @@ if(CUDAToolkit_FOUND)
     if(NOT _cuda_inc)
         message(WARNING "Could not find cuda_runtime_api.h in CUDAToolkit_INCLUDE_DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
     else()
-        set(_dst "${OLLAMA_INSTALL_DIR}/include")
+        set(_dst "${LYCHEE_INSTALL_DIR}/include")
         set(_MLX_JIT_CUDA_HEADERS
             builtin_types.h
             cooperative_groups.h
@@ -196,8 +196,8 @@ if(CUDAToolkit_FOUND)
             COMPONENT MLX)
         if(NOT WIN32 AND NOT APPLE)
             install(CODE "
-                set(_link \"${CMAKE_INSTALL_PREFIX}/${OLLAMA_LIB_DIR}/include\")
-                set(_target \"${OLLAMA_RUNNER_DIR}/include\")
+                set(_link \"${CMAKE_INSTALL_PREFIX}/${LYCHEE_LIB_DIR}/include\")
+                set(_target \"${LYCHEE_RUNNER_DIR}/include\")
                 if(NOT EXISTS \${_link})
                     execute_process(COMMAND \${CMAKE_COMMAND} -E create_symlink \${_target} \${_link})
                 endif()
@@ -211,8 +211,8 @@ endif()
 # dlfcn-win32 is a known CMake target with its own install rules (which install
 # to the wrong destination). We must install it explicitly here.
 if(WIN32)
-    install(FILES ${OLLAMA_BUILD_DIR}/dl.dll
-        DESTINATION ${OLLAMA_INSTALL_DIR}
+    install(FILES ${LYCHEE_BUILD_DIR}/dl.dll
+        DESTINATION ${LYCHEE_INSTALL_DIR}
         COMPONENT MLX)
 endif()
 
@@ -229,7 +229,7 @@ if(CUDAToolkit_FOUND)
         "${CUDAToolkit_LIBRARY_DIR}/libcudnn.so*")
     if(MLX_CUDA_LIBS)
         install(FILES ${MLX_CUDA_LIBS}
-            DESTINATION ${OLLAMA_INSTALL_DIR}
+            DESTINATION ${LYCHEE_INSTALL_DIR}
             COMPONENT MLX_VENDOR)
     endif()
 endif()

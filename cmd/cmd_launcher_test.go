@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ollama/ollama/cmd/config"
-	"github.com/ollama/ollama/cmd/launch"
-	"github.com/ollama/ollama/cmd/tui"
+	"github.com/lychee/lychee/cmd/config"
+	"github.com/lychee/lychee/cmd/launch"
+	"github.com/lychee/lychee/cmd/tui"
 )
 
 func setCmdTestHome(t *testing.T, dir string) {

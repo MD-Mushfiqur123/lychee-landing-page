@@ -1,0 +1,38 @@
+{
+  "name": "lychee",
+  "version": "0.6.0",
+  "description": "JavaScript client library for Lychee - Universal Local Inference Engine",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./src/index.js"
+    },
+    "./browser": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "require": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "author": "Lychee Maintainers",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lychee/lychee.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lychee/lychee/issues"
+  },
+  "homepage": "https://github.com/lychee/lychee#readme"
+}

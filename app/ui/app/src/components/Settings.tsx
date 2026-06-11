@@ -225,7 +225,7 @@ export default function Settings() {
   const cloudToggleDisabled =
     cloudStatusLoading || updateCloudMutation.isPending || cloudOverriddenByEnv;
 
-  const handleConnectOllamaAccount = async () => {
+  const handleConnectLycheeAccount = async () => {
     setConnectionError(null);
 
     // If user is already authenticated, no need to connect
@@ -250,11 +250,11 @@ export default function Settings() {
         }
       }
     } catch (error) {
-      console.error("Error connecting to Ollama account:", error);
+      console.error("Error connecting to Lychee account:", error);
       setConnectionError(
         error instanceof Error
           ? error.message
-          : "Failed to connect to Ollama account",
+          : "Failed to connect to Lychee account",
       );
       setIsAwaitingConnection(false);
     }
@@ -309,7 +309,7 @@ export default function Settings() {
       </header>
       <div className="w-full p-6 overflow-y-auto flex-1 overscroll-contain">
         <div className="space-y-4 max-w-2xl mx-auto">
-          {/* Connect Ollama Account */}
+          {/* Connect Lychee Account */}
           <div className="overflow-hidden rounded-xl bg-white dark:bg-neutral-800">
             <div className="p-4">
               <Field>
@@ -341,7 +341,7 @@ export default function Settings() {
                             className="px-3 py-2 text-sm font-medium bg-black/90 backdrop-blur-sm text-white rounded-lg border border-white/10 shadow-2xl transition-all duration-300 ease-out relative overflow-hidden group"
                             onClick={() =>
                               window.open(
-                                "https://ollama.com/upgrade",
+                                "https://lychee.com/upgrade",
                                 "_blank",
                               )
                             }
@@ -358,7 +358,7 @@ export default function Settings() {
                           color="white"
                           className="px-3 py-2 text-sm"
                           onClick={() =>
-                            window.open("https://ollama.com/settings", "_blank")
+                            window.open("https://lychee.com/settings", "_blank")
                           }
                         >
                           Manage
@@ -388,13 +388,13 @@ export default function Settings() {
                 ) : (
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>Ollama account</Label>
+                      <Label>Lychee account</Label>
                       <Description>Not connected</Description>
                     </div>
                     <Button
                       type="button"
                       color="white"
-                      onClick={handleConnectOllamaAccount}
+                      onClick={handleConnectLycheeAccount}
                       disabled={isRefreshing || isAwaitingConnection}
                     >
                       {isRefreshing || isAwaitingConnection ? (
@@ -426,7 +426,7 @@ export default function Settings() {
                       <Label>Cloud</Label>
                       <Description>
                         {cloudOverriddenByEnv
-                          ? "The OLLAMA_NO_CLOUD environment variable is currently forcing cloud off."
+                          ? "The LYCHEE_NO_CLOUD environment variable is currently forcing cloud off."
                           : "Enable cloud models and web search."}
                       </Description>
                     </div>
@@ -469,15 +469,15 @@ export default function Settings() {
                 </div>
               </Field>
 
-              {/* Expose Ollama */}
+              {/* Expose Lychee */}
               <Field>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start space-x-3 flex-1">
                     <WifiIcon className="mt-1 h-5 w-5 flex-shrink-0 text-black dark:text-neutral-100" />
                     <div>
-                      <Label>Expose Ollama to the network</Label>
+                      <Label>Expose Lychee to the network</Label>
                       <Description>
-                        Allow other devices or services to access Ollama.
+                        Allow other devices or services to access Lychee.
                       </Description>
                     </div>
                   </div>
@@ -567,7 +567,7 @@ export default function Settings() {
           </div>
 
           {/* Agent Mode */}
-          {window.OLLAMA_TOOLS && (
+          {window.LYCHEE_TOOLS && (
             <div className="overflow-hidden rounded-xl bg-white dark:bg-neutral-800">
               <div className="space-y-4 p-4">
                 <Field>

@@ -3,9 +3,9 @@ package gemma4
 import (
 	"math"
 
-	"github.com/ollama/ollama/fs"
-	"github.com/ollama/ollama/ml"
-	"github.com/ollama/ollama/ml/nn"
+	"github.com/lychee/lychee/fs"
+	"github.com/lychee/lychee/ml"
+	"github.com/lychee/lychee/ml/nn"
 )
 
 // AudioModel holds the audio encoder and configuration.

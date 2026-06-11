@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"cmp"
 	"errors"
 	"fmt"
@@ -13,14 +14,15 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/ledongthuc/pdf"
 	"github.com/spf13/cobra"
 
-	"github.com/ollama/ollama/api"
-	"github.com/ollama/ollama/envconfig"
-	"github.com/ollama/ollama/internal/modelref"
-	"github.com/ollama/ollama/readline"
-	"github.com/ollama/ollama/types/errtypes"
-	"github.com/ollama/ollama/types/model"
+	"github.com/lychee/lychee/api"
+	"github.com/lychee/lychee/envconfig"
+	"github.com/lychee/lychee/internal/modelref"
+	"github.com/lychee/lychee/readline"
+	"github.com/lychee/lychee/types/errtypes"
+	"github.com/lychee/lychee/types/model"
 )
 
 type MultilineState int
@@ -83,7 +85,7 @@ func generateInteractive(cmd *cobra.Command, opts runOptions) error {
 		fmt.Fprintln(os.Stderr, "  Ctrl + l            Clear the screen")
 		fmt.Fprintln(os.Stderr, "  Ctrl + g            Open default editor to compose a prompt")
 		fmt.Fprintln(os.Stderr, "  Ctrl + c            Stop the model from responding")
-		fmt.Fprintln(os.Stderr, "  Ctrl + d            Exit ollama (/bye)")
+		fmt.Fprintln(os.Stderr, "  Ctrl + d            Exit lychee (/bye)")
 		fmt.Fprintln(os.Stderr, "")
 	}
 
@@ -216,7 +218,7 @@ func generateInteractive(cmd *cobra.Command, opts runOptions) error {
 
 			client, err := api.ClientFromEnvironment()
 			if err != nil {
-				fmt.Println("error: couldn't connect to ollama server")
+				fmt.Println("error: couldn't connect to lychee server")
 				return err
 			}
 
@@ -260,7 +262,7 @@ func generateInteractive(cmd *cobra.Command, opts runOptions) error {
 
 			client, err := api.ClientFromEnvironment()
 			if err != nil {
-				fmt.Println("error: couldn't connect to ollama server")
+				fmt.Println("error: couldn't connect to lychee server")
 				return err
 			}
 
@@ -409,7 +411,7 @@ func generateInteractive(cmd *cobra.Command, opts runOptions) error {
 			if len(args) > 1 {
 				client, err := api.ClientFromEnvironment()
 				if err != nil {
-					fmt.Println("error: couldn't connect to ollama server")
+					fmt.Println("error: couldn't connect to lychee server")
 					return err
 				}
 				req := &api.ShowRequest{
@@ -512,10 +514,16 @@ func generateInteractive(cmd *cobra.Command, opts runOptions) error {
 		}
 
 		if sb.Len() > 0 && multiline == MultilineNone {
-			newMessage := api.Message{Role: "user", Content: sb.String()}
+			promptStr := sb.String()
+			processedPrompt, err := processPromptPDFAndURLs(promptStr)
+			if err == nil {
+				promptStr = processedPrompt
+			}
+
+			newMessage := api.Message{Role: "user", Content: promptStr}
 
 			if opts.MultiModal {
-				msg, images, err := extractFileData(sb.String())
+				msg, images, err := extractFileData(promptStr)
 				if err != nil {
 					return err
 				}
@@ -655,10 +663,10 @@ func editInExternalEditor(content string) (string, error) {
 	// Check that the editor binary exists
 	name := strings.Fields(editor)[0]
 	if _, err := exec.LookPath(name); err != nil {
-		return "", fmt.Errorf("editor %q not found, set OLLAMA_EDITOR to the path of your preferred editor", name)
+		return "", fmt.Errorf("editor %q not found, set LYCHEE_EDITOR to the path of your preferred editor", name)
 	}
 
-	tmpFile, err := os.CreateTemp("", "ollama-prompt-*.txt")
+	tmpFile, err := os.CreateTemp("", "lychee-prompt-*.txt")
 	if err != nil {
 		return "", fmt.Errorf("creating temp file: %w", err)
 	}
@@ -732,4 +740,111 @@ func getImageData(filePath string) ([]byte, error) {
 	}
 
 	return buf, nil
+}
+
+func extractPDFTextFromBytes(data []byte) (string, error) {
+	reader := bytes.NewReader(data)
+	pdfReader, err := pdf.NewReader(reader, int64(len(data)))
+	if err != nil {
+		return "", fmt.Errorf("failed to create PDF reader: %w", err)
+	}
+
+	var textBuilder strings.Builder
+	numPages := pdfReader.NumPage()
+
+	for i := 1; i <= numPages; i++ {
+		page := pdfReader.Page(i)
+		if page.V.IsNull() {
+			continue
+		}
+
+		text, err := page.GetPlainText(nil)
+		if err != nil {
+			continue
+		}
+
+		if strings.TrimSpace(text) != "" {
+			if textBuilder.Len() > 0 {
+				textBuilder.WriteString("\n\n--- Page ")
+				textBuilder.WriteString(fmt.Sprintf("%d", i))
+				textBuilder.WriteString(" ---\n")
+			}
+			textBuilder.WriteString(text)
+		}
+	}
+
+	return textBuilder.String(), nil
+}
+
+func cleanHTMLText(html string) string {
+	reScript := regexp.MustCompile(`(?is)<script.*?>.*?</script>`)
+	html = reScript.ReplaceAllString(html, "")
+	reStyle := regexp.MustCompile(`(?is)<style.*?>.*?</style>`)
+	html = reStyle.ReplaceAllString(html, "")
+
+	reTags := regexp.MustCompile(`<[^>]*>`)
+	text := reTags.ReplaceAllString(html, " ")
+
+	reSpaces := regexp.MustCompile(`\s+`)
+	text = reSpaces.ReplaceAllString(text, " ")
+
+	return strings.TrimSpace(text)
+}
+
+func processPromptPDFAndURLs(prompt string) (string, error) {
+	reURL := regexp.MustCompile(`https?://[^\s"'<>()]+`)
+	urls := reURL.FindAllString(prompt, -1)
+
+	rePDF := regexp.MustCompile(`(?i)(?:[a-zA-Z]:)?[^\s"'\n]+\.pdf`)
+	pdfPaths := rePDF.FindAllString(prompt, -1)
+
+	var inlinedTexts []string
+
+	for _, rawPath := range pdfPaths {
+		cleanPath := strings.Trim(rawPath, `"'`)
+		if _, err := os.Stat(cleanPath); err == nil {
+			fmt.Printf("  Extracting text from PDF: %s\n", cleanPath)
+			data, err := os.ReadFile(cleanPath)
+			if err != nil {
+				fmt.Printf("  Error reading PDF %s: %v\n", cleanPath, err)
+				continue
+			}
+			text, err := extractPDFTextFromBytes(data)
+			if err != nil {
+				fmt.Printf("  Error extracting text from PDF %s: %v\n", cleanPath, err)
+				continue
+			}
+			if text != "" {
+				inlinedTexts = append(inlinedTexts, fmt.Sprintf("\n[Contents of PDF %s]:\n%s\n", cleanPath, text))
+				prompt = strings.ReplaceAll(prompt, rawPath, fmt.Sprintf("[PDF: %s]", cleanPath))
+			}
+		}
+	}
+
+	for _, u := range urls {
+		fmt.Printf("  Fetching URL: %s\n", u)
+		resp, err := http.Get(u)
+		if err != nil {
+			fmt.Printf("  Error fetching URL %s: %v\n", u, err)
+			continue
+		}
+		bodyBytes, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			fmt.Printf("  Error reading response from URL %s: %v\n", u, err)
+			continue
+		}
+
+		text := cleanHTMLText(string(bodyBytes))
+		if text != "" {
+			inlinedTexts = append(inlinedTexts, fmt.Sprintf("\n[Contents of URL %s]:\n%s\n", u, text))
+			prompt = strings.ReplaceAll(prompt, u, fmt.Sprintf("[URL: %s]", u))
+		}
+	}
+
+	if len(inlinedTexts) > 0 {
+		prompt = prompt + "\n" + strings.Join(inlinedTexts, "\n")
+	}
+
+	return prompt, nil
 }
