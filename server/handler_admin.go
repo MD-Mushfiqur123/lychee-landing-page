@@ -15,7 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/lychee/lychee/api"
-	"github.com/lychee/lychee/envconfig"
 	"github.com/lychee/lychee/format"
 	"github.com/lychee/lychee/fs/ggml"
 	internalcloud "github.com/lychee/lychee/internal/cloud"

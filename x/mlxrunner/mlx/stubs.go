@@ -53,6 +53,9 @@ func (t *Array) GatherMM(other, lhs, rhs *Array, sorted bool) *Array { return t 
 func (t *Array) Matmul(other *Array) *Array { return t }
 func (t *Array) Sigmoid() *Array { return t }
 func (t *Array) Tanh() *Array { return t }
+func (t *Array) Set(other *Array) {}
+func (t *Array) LogsumexpAxis(axis int, keepDims bool) *Array { return t }
+func (t *Array) MaxAxis(axis int, keepDims bool) *Array { return t }
 
 // Additional methods for convenience/safety
 func (t *Array) Dim(axis int) int { return 0 }
@@ -195,3 +198,6 @@ func Compile3(name string, fn func(*Array, *Array, *Array) *Array, opts ...Compi
 
 func Logaddexp(a, b *Array) *Array { return a }
 func Conv1d(x, weight *Array, bias *Array, stride, padding, dilation, groups int32) *Array { return nil }
+func Add(a, b *Array) *Array { return nil }
+func FastGatedDelta(q, k, v, g, beta, state, mask *Array) (y, nextState *Array) { return nil, nil }
+func Reshape(a *Array, shape ...int32) *Array { return nil }

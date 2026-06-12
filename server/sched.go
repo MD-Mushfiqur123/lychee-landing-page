@@ -18,7 +18,6 @@ import (
 	"github.com/lychee/lychee/logutil"
 	"github.com/lychee/lychee/ml"
 	"github.com/lychee/lychee/types/model"
-	"github.com/lychee/lychee/x/mlxrunner"
 )
 
 type LlmRequest struct {
