@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func TestSchemaMigrations(t *testing.T) {
@@ -467,7 +467,7 @@ func loadV2Schema(t *testing.T, dbPath string) *database {
 	}
 
 	// Open database connection
-	conn, err := sql.Open("sqlite3", dbPath+"?_foreign_keys=on&_journal_mode=WAL&_busy_timeout=5000&_txlock=immediate")
+	conn, err := sql.Open("sqlite", dbPath+"?_foreign_keys=on&_journal_mode=WAL&_busy_timeout=5000&_txlock=immediate")
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
 	}

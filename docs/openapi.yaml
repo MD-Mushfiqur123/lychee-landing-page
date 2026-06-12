@@ -238,6 +238,12 @@ paths:
       responses:
         '200':
           description: List of conversation summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConversationSummary'
     post:
       tags: [conversations]
       summary: Create a new conversation
@@ -255,10 +261,14 @@ paths:
                 messages:
                   type: array
                   items:
-                    type: object
+                    $ref: '#/components/schemas/ChatMessage'
       responses:
         '201':
           description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
 
   /api/conversations/{id}:
     get:
@@ -274,6 +284,10 @@ paths:
       responses:
         '200':
           description: Full conversation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
     delete:
       tags: [conversations]
       summary: Delete a conversation
@@ -296,6 +310,12 @@ paths:
       responses:
         '200':
           description: List of routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelRoute'
     post:
       tags: [routes]
       summary: Create or update a virtual model route
@@ -305,28 +325,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [name, endpoints]
-              properties:
-                name:
-                  type: string
-                endpoints:
-                  type: array
-                  items:
-                    type: object
-                    required: [host]
-                    properties:
-                      host:
-                        type: string
-                      model:
-                        type: string
-                strategy:
-                  type: string
-                  enum: [round_robin, random, least_loaded]
-                  default: round_robin
+              $ref: '#/components/schemas/ModelRoute'
       responses:
         '200':
           description: Route created or updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelRoute'
 
   /api/routes/{name}:
     delete:
@@ -342,6 +348,29 @@ paths:
       responses:
         '200':
           description: Route deleted
+
+  /api/routes/{name}/status:
+    get:
+      tags: [routes]
+      summary: Query the health and status of a virtual model route
+      operationId: getRouteStatus
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Route status details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
   schemas:
@@ -430,9 +459,155 @@ components:
         error:
           type: string
 
+    ChatMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [system, user, assistant, tool]
+          example: "user"
+        content:
+          type: string
+          example: "What is quantum computing?"
+        thinking:
+          type: string
+          example: "Thinking process..."
+        images:
+          type: array
+          items:
+            type: string
+            format: byte
+        tool_calls:
+          type: array
+          items:
+            type: object
+        tool_name:
+          type: string
+        tool_call_id:
+          type: string
+
+    ConversationSummary:
+      type: object
+      required: [id, model, title, messages, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          example: "conv-123"
+        model:
+          type: string
+          example: "gemma3"
+        title:
+          type: string
+          example: "What is quantum computing?"
+        messages:
+          type: integer
+          example: 2
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Conversation:
+      type: object
+      required: [id, model, messages, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          example: "conv-123"
+        model:
+          type: string
+          example: "gemma3"
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ModelEndpoint:
+      type: object
+      required: [host]
+      properties:
+        host:
+          type: string
+          example: "http://localhost:11434"
+        model:
+          type: string
+          example: "gemma3"
+        weight:
+          type: integer
+          example: 1
+
+    ModelRoute:
+      type: object
+      required: [name, endpoints, strategy]
+      properties:
+        name:
+          type: string
+          example: "fast"
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelEndpoint'
+        strategy:
+          type: string
+          enum: [round_robin, random, least_loaded, weighted_round_robin]
+          example: "round_robin"
+
+    ModelEndpointStatus:
+      type: object
+      required: [host, healthy, active_requests]
+      properties:
+        host:
+          type: string
+          example: "http://localhost:11434"
+        model:
+          type: string
+          example: "gemma3"
+        healthy:
+          type: boolean
+          example: true
+        active_requests:
+          type: integer
+          example: 0
+        last_check:
+          type: string
+          format: date-time
+        last_error:
+          type: string
+          example: "connection refused"
+
+    RouteStatusResponse:
+      type: object
+      required: [name, strategy, endpoints]
+      properties:
+        name:
+          type: string
+          example: "fast"
+        strategy:
+          type: string
+          example: "round_robin"
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelEndpointStatus'
+
   responses:
     BadRequest:
       description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:

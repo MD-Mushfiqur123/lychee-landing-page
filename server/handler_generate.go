@@ -50,8 +50,13 @@ func (s *Server) GenerateHandler(c *gin.Context) {
 		return
 	}
 
+	if s.modelAliases != nil {
+		req.Model = s.modelAliases.Resolve(req.Model)
+	}
+
 	var releaseRoute func() = func() {}
 	if s.modelRouter != nil {
+		originalModel := req.Model
 		endpoint, release, err := s.modelRouter.Resolve(req.Model)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -64,6 +69,7 @@ func (s *Server) GenerateHandler(c *gin.Context) {
 				defer releaseRoute()
 				remoteURL, err := url.Parse(endpoint.Host)
 				if err != nil {
+					s.modelRouter.RecordFailure(originalModel, endpoint.Host)
 					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 					return
 				}
@@ -88,6 +94,7 @@ func (s *Server) GenerateHandler(c *gin.Context) {
 				client := api.NewClient(remoteURL, http.DefaultClient)
 				err = client.Generate(c, &req, fn)
 				if err != nil {
+					s.modelRouter.RecordFailure(originalModel, endpoint.Host)
 					var apiError api.StatusError
 					if errors.As(err, &apiError) {
 						c.JSON(apiError.StatusCode, apiError)
@@ -96,6 +103,7 @@ func (s *Server) GenerateHandler(c *gin.Context) {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 					return
 				}
+				s.modelRouter.RecordSuccess(originalModel, endpoint.Host)
 				return
 			}
 		}

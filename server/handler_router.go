@@ -79,3 +79,18 @@ func (s *Server) DeleteRouteHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
 }
+
+// RouteStatusHandler queries the status of a virtual model route.
+func (s *Server) RouteStatusHandler(c *gin.Context) {
+	if s.modelRouter == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "model router not initialized"})
+		return
+	}
+	name := c.Param("name")
+	status, err := s.modelRouter.GetRouteStatus(name)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, status)
+}

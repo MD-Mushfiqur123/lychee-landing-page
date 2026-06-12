@@ -66,7 +66,7 @@ Lychee acts as a local proxy that translates industry-standard APIs into optimiz
 ## 📦 Installation
 
 > [!NOTE]
-> Lychee is currently in active release candidate phase.
+> Lychee is currently in active early alpha phase.
 
 ### Build from Source
 ```bash
@@ -76,7 +76,9 @@ go build -o lychee .
 sudo mv lychee /usr/local/bin/
 ```
 
-### Advanced Installation (Requires GitHub Releases)
+<details>
+<summary>Advanced Installation (Requires GitHub Releases)</summary>
+
 The installation scripts below retrieve pre-built binaries. Note: These require a published release.
 * **macOS & Linux:**
   ```bash
@@ -86,6 +88,27 @@ The installation scripts below retrieve pre-built binaries. Note: These require 
   ```powershell
   irm https://raw.githubusercontent.com/MD-Mushfiqur123/lychee/main/scripts/install.ps1 | iex
   ```
+</details>
+
+### Client SDKs Installation
+
+Official client SDKs are available to integrate Lychee into your applications:
+
+* **Python SDK:**
+  ```bash
+  pip install lychee-python
+  ```
+* **JavaScript SDK:**
+  ```bash
+  npm install lychee-js
+  ```
+* **Rust SDK (coming soon):**
+  Add the dependency in your `Cargo.toml`:
+  ```toml
+  [dependencies]
+  lychee-rs = { git = "https://github.com/MD-Mushfiqur123/lychee.git", branch = "main" }
+  ```
+
 
 ### Docker (Coming Soon)
 > Docker images will be published to GHCR once the first stable release is tagged.
@@ -215,6 +238,96 @@ Optimizing and integrating local models has never been simpler:
        "model": "gemma3",
        "messages": [{"role": "user", "content": "Hello!"}],
        "max_tokens": 1024
+     }'
+   ```
+
+   *Structured Output with Auto-Retry (`/api/structured`):*
+   ```bash
+   curl http://localhost:11434/api/structured \
+     -H "Content-Type: application/json" \
+     -d '{
+       "model": "gemma3",
+       "prompt": "Extract the country name and population: France has a population of 67 million.",
+       "schema": {
+         "type": "object",
+         "properties": {
+           "country": {"type": "string"},
+           "population": {"type": "string"}
+         },
+         "required": ["country", "population"]
+       },
+       "max_retries": 3
+     }'
+   ```
+
+   *Conversation Memory Store (`/api/conversations`):*
+   ```bash
+   # Create a new persistent conversation session
+   curl http://localhost:11434/api/conversations \
+     -H "Content-Type: application/json" \
+     -d '{
+       "model": "gemma3",
+       "messages": [
+         {"role": "user", "content": "Hello! I am planning a trip to Paris."}
+       ]
+     }'
+   
+   # Retrieve conversation details and message history using the returned session ID
+   curl http://localhost:11434/api/conversations/<conversation_id>
+
+   # Resume conversation by passing the conversation_id parameter to the chat endpoint
+   curl http://localhost:11434/api/chat \
+     -H "Content-Type: application/json" \
+     -d '{
+       "model": "gemma3",
+       "conversation_id": "<conversation_id>",
+       "messages": [
+         {"role": "user", "content": "What is the first thing I should visit?"}
+       ]
+     }'
+   ```
+
+   *Virtual Model Router (`/api/routes`):*
+   ```bash
+   # Register a virtual model route called 'fast-route' distributed across two backends
+   curl http://localhost:11434/api/routes \
+     -H "Content-Type: application/json" \
+     -d '{
+       "name": "fast-route",
+       "endpoints": [
+         {"host": "http://localhost:11434", "model": "gemma3", "weight": 2},
+         {"host": "http://localhost:11435", "model": "phi3", "weight": 1}
+       ],
+       "strategy": "weighted_round_robin"
+     }'
+
+   # Call the virtual route like a standard model
+   curl http://localhost:11434/api/chat \
+     -H "Content-Type: application/json" \
+     -d '{
+       "model": "fast-route",
+       "messages": [{"role": "user", "content": "Hello!"}]
+     }'
+   ```
+
+   *Model Composer Chaining (`/api/compose`):*
+   ```bash
+   # Execute a multi-model pipeline where outputs pass sequentially
+   curl http://localhost:11434/api/compose \
+     -H "Content-Type: application/json" \
+     -d '{
+       "input": "Life is like a box of chocolates.",
+       "steps": [
+         {
+           "model": "gemma3",
+           "prompt": "Translate this sentence to French: {{input}}"
+         },
+         {
+           "model": "phi3",
+           "prompt": "Explain the meaning of this French translation: {{step[0].output}}"
+         }
+       ],
+       "stream": false
      }'
    ```
 

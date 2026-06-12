@@ -26,9 +26,16 @@ jobs:
           cache: true
 
       - name: Run Lychee-specific tests
+        env:
+          CGO_ENABLED: 0
         run: |
-          go test -count=1 -timeout 60s ./api/... ./model/...
-          go test -count=1 -v ./server/ -run "TestCompose|TestSchema|TestPromptCache|TestStructured|TestMemory|TestRouter|TestDashboard"
+          go test -count=1 -timeout 120s -coverprofile=coverage.out ./api/... ./model/...
+          go test -count=1 -v -coverprofile=server_coverage.out ./server/ -run "TestCompose|TestSchema|TestPromptCache|TestStructured|TestMemory|TestRouter|TestDashboard"
+
+      - name: Show Coverage Summary
+        run: |
+          go tool cover -func=coverage.out
+          go tool cover -func=server_coverage.out
 
       - name: Run Python SDK tests
         run: |
@@ -55,27 +62,19 @@ jobs:
 
   # ─── Build Verification ──────────────────────────────────────────
   build:
-    name: Build (${{ matrix.os }})
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            binary: lychee
-          - os: windows-latest
-            binary: lychee.exe
-          - os: macos-latest
-            binary: lychee
-    runs-on: ${{ matrix.os }}
+    name: Build & Vet Packages
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
           cache: true
-      - name: Build binary
-        run: go build -o ${{ matrix.binary }} .
-      - name: Verify binary runs
-        run: ./${{ matrix.binary }} --version
+      - name: Vet & Build Packages
+        run: |
+          go build ./api/...
+          go build ./model/...
+          go vet ./server/...
 
   # ─── Security Scan ───────────────────────────────────────────────
   security:

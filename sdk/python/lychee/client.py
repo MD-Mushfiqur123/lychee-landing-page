@@ -331,9 +331,9 @@ class Lychee:
     # Conversation Memory API
     # ──────────────────────────────────────────────────────────────────────────
 
-    def list_conversations(self) -> list[dict]:
-        """List summaries of all stored conversations."""
-        return self._get("/api/conversations")
+    def list_conversations(self, limit: int = 50, offset: int = 0) -> list[dict]:
+        """List summaries of stored conversations with pagination."""
+        return self._get(f"/api/conversations?limit={limit}&offset={offset}")
 
     def get_conversation(self, conversation_id: str) -> dict:
         """Retrieve a specific conversation history."""

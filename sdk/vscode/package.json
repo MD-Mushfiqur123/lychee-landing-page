@@ -30,10 +30,25 @@
       {
         "command": "lychee.runModel",
         "title": "Lychee: Run Model"
+      },
+      {
+        "command": "lychee.listModels",
+        "title": "Lychee: List Available Models"
+      },
+      {
+        "command": "lychee.structured",
+        "title": "Lychee: Generate Structured Output"
+      },
+      {
+        "command": "lychee.compose",
+        "title": "Lychee: Compose Pipeline"
       }
     ]
   },
   "activationEvents": [
-    "onCommand:lychee.runModel"
+    "onCommand:lychee.runModel",
+    "onCommand:lychee.listModels",
+    "onCommand:lychee.structured",
+    "onCommand:lychee.compose"
   ]
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -50,13 +51,16 @@ func TestMemoryStore(t *testing.T) {
 	})
 
 	t.Run("list conversations", func(t *testing.T) {
-		list, err := store.List()
+		list, total, err := store.List(50, 0)
 		if err != nil {
 			t.Fatalf("failed to list conversations: %v", err)
 		}
 
 		if len(list) != 1 {
 			t.Fatalf("expected 1 conversation summary, got %d", len(list))
+		}
+		if total != 1 {
+			t.Errorf("expected total 1, got %d", total)
 		}
 
 		summary := list[0]
@@ -100,7 +104,7 @@ func TestMemoryStore(t *testing.T) {
 			go func(num int) {
 				defer wg.Done()
 				_ = store.AppendMessage(convID, api.Message{Role: "user", Content: "Concurrent message"})
-				_, _ = store.List()
+				_, _, _ = store.List(50, 0)
 			}(i)
 		}
 
@@ -127,7 +131,7 @@ func TestMemoryStore(t *testing.T) {
 			t.Error("expected error when loading deleted conversation, got nil")
 		}
 
-		list, err := store.List()
+		list, _, err := store.List(50, 0)
 		if err != nil {
 			t.Fatalf("failed to list: %v", err)
 		}
@@ -140,6 +144,117 @@ func TestMemoryStore(t *testing.T) {
 		_, err := store.Load("does-not-exist")
 		if err == nil {
 			t.Error("expected error loading non-existent conversation, got nil")
+		}
+	})
+
+	t.Run("pagination", func(t *testing.T) {
+		store2 := NewMemoryStore(t.TempDir())
+		for i := 0; i < 5; i++ {
+			_ = store2.Save(&Conversation{
+				ID:    fmt.Sprintf("conv-%d", i),
+				Model: "test",
+				Messages: []api.Message{
+					{Role: "user", Content: fmt.Sprintf("msg %d", i)},
+				},
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now().Add(time.Duration(i) * time.Minute),
+			})
+		}
+
+		list, total, err := store2.List(2, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if total != 5 {
+			t.Errorf("expected total 5, got %d", total)
+		}
+		if len(list) != 2 {
+			t.Errorf("expected 2 results, got %d", len(list))
+		}
+
+		list2, total2, _ := store2.List(2, 3)
+		if total2 != 5 {
+			t.Errorf("expected total 5, got %d", total2)
+		}
+		if len(list2) != 2 {
+			t.Errorf("expected 2 results at offset 3, got %d", len(list2))
+		}
+
+		list3, _, _ := store2.List(10, 10)
+		if len(list3) != 0 {
+			t.Errorf("expected 0 results at offset 10, got %d", len(list3))
+		}
+	})
+
+	t.Run("title auto-update", func(t *testing.T) {
+		store3 := NewMemoryStore(t.TempDir())
+		conv3 := &Conversation{
+			ID:    "title-conv",
+			Model: "test",
+			Messages: []api.Message{
+				{Role: "user", Content: "First message"},
+				{Role: "assistant", Content: "Hello!"},
+			},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		_ = store3.Save(conv3)
+
+		list, _, _ := store3.List(10, 0)
+		if list[0].Title != "First message" {
+			t.Errorf("expected Title to be 'First message', got %q", list[0].Title)
+		}
+
+		conv3.Messages = append(conv3.Messages,
+			api.Message{Role: "user", Content: "Third message"},
+		)
+		_ = store3.Save(conv3)
+		list, _, _ = store3.List(10, 0)
+		if list[0].Title != "First message" {
+			t.Errorf("expected Title to still be 'First message', got %q", list[0].Title)
+		}
+
+		conv3.Messages = append(conv3.Messages,
+			api.Message{Role: "assistant", Content: "Response"},
+			api.Message{Role: "user", Content: "Fifth message"},
+		)
+		_ = store3.Save(conv3)
+		list, _, _ = store3.List(10, 0)
+		if list[0].Title != "Fifth message" {
+			t.Errorf("expected Title to auto-update to latest user message, got %q", list[0].Title)
+		}
+	})
+
+	t.Run("search conversations", func(t *testing.T) {
+		store4 := NewMemoryStore(t.TempDir())
+		_ = store4.Save(&Conversation{
+			ID:    "quantum-conv",
+			Model: "test",
+			Messages: []api.Message{
+				{Role: "user", Content: "Tell me about quantum physics"},
+			},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		})
+		_ = store4.Save(&Conversation{
+			ID:    "cooking-conv",
+			Model: "test",
+			Messages: []api.Message{
+				{Role: "user", Content: "How to cook pasta"},
+			},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		})
+
+		results, total, err := store4.Search("quantum", 50, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if total != 1 {
+			t.Errorf("expected 1 match, got %d", total)
+		}
+		if results[0].ID != "quantum-conv" {
+			t.Errorf("expected quantum-conv, got %s", results[0].ID)
 		}
 	})
 }

@@ -6,6 +6,10 @@
 
 - [Generate a completion](#generate-a-completion)
 - [Generate a chat completion](#generate-a-chat-completion)
+- [Model Composer](#model-composer)
+- [Structured Output with Auto-Retry](#structured-output-with-auto-retry)
+- [Conversation Memory Store](#conversation-memory-store)
+- [Model Router](#model-router)
 - [Create a Model](#create-a-model)
 - [List Local Models](#list-local-models)
 - [Show Model Information](#show-model-information)
@@ -17,6 +21,7 @@
 - [List Running Models](#list-running-models)
 - [Version](#version)
 - [Experimental: Image Generation](#image-generation-experimental)
+
 
 ## Conventions
 
@@ -1930,3 +1935,407 @@ Progress updates during generation:
   "load_duration": 2000000000
 }
 ```
+
+## Model Composer
+
+```
+POST /api/compose
+```
+
+Chain multiple local models together into multi-step pipelines. The output of one step is passed as a template variable to subsequent steps.
+
+### Parameters
+
+- `input`: (required) the initial input string for the pipeline
+- `steps`: (required) an array of step objects, containing:
+  - `model`: name of the model to execute for this step
+  - `prompt`: the prompt template for this step. Can use placeholders like `{{input}}` (for initial input), `{{step[N].output}}` (output from step N), or `{{step[N].parallel[M].output}}` (output from parallel branch M of step N).
+  - `options`: (optional) model options dictionary
+  - `timeout_sec`: (optional) per-attempt execution timeout
+  - `fallback_model`: (optional) model to retry with if the main model fails
+  - `parallel`: (optional) a list of steps to execute concurrently
+  - `condition`: (optional) conditional logic to execute the step only if conditions are met
+  - `skip_on_error`: (optional) whether to skip the step if it fails instead of halting the pipeline
+- `stream`: (optional) if `true`, streams execution progress updates via SSE (Server-Sent Events)
+
+### Examples
+
+#### Request
+```shell
+curl http://localhost:11434/api/compose -d '{
+  "input": "Life is like a box of chocolates.",
+  "steps": [
+    {
+      "model": "gemma3",
+      "prompt": "Translate this sentence to French: {{input}}"
+    },
+    {
+      "model": "phi3",
+      "prompt": "Explain the meaning of this French translation: {{step[0].output}}"
+    }
+  ],
+  "stream": false
+}'
+```
+
+#### Response
+```json
+{
+  "output": "The French sentence 'La vie est comme une boîte de chocolats' means that life is full of unexpected surprises...",
+  "results": [
+    {
+      "model": "gemma3",
+      "output": "La vie est comme une boîte de chocolats."
+    },
+    {
+      "model": "phi3",
+      "output": "The French sentence 'La vie est comme une boîte de chocolats' means that life is full of unexpected surprises..."
+    }
+  ]
+}
+```
+
+## Structured Output with Auto-Retry
+
+```
+POST /api/structured
+```
+
+Generate schema-conforming JSON structure with automatic validation and correction retries. If the model output is invalid, it retries with error-correction prompts.
+
+### Parameters
+
+- `model`: (required) the name of the model
+- `prompt`: (required) the prompt to guide output generation
+- `schema`: (required) a JSON Schema object defining the target structure
+- `max_retries`: (optional) maximum number of correction retry attempts (default: `3`)
+- `options`: (optional) model execution parameters
+- `stream`: (optional) if `true`, streams retry status updates and attempts via SSE
+
+### Examples
+
+#### Request
+```shell
+curl http://localhost:11434/api/structured -d '{
+  "model": "gemma3",
+  "prompt": "Extract the country name and population: France has a population of 67 million.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "country": {"type": "string"},
+      "population": {"type": "string"}
+    },
+    "required": ["country", "population"]
+  },
+  "max_retries": 3
+}'
+```
+
+#### Response
+```json
+{
+  "model": "gemma3",
+  "output": "{\n  \"country\": \"France\",\n  \"population\": \"67 million\"\n}",
+  "valid": true,
+  "attempts": 1,
+  "errors": []
+}
+```
+
+## Conversation Memory Store
+
+Persist, load, resume, and manage conversation sessions locally.
+
+---
+
+### List Saved Conversations
+
+```
+GET /api/conversations
+```
+
+List summaries of all saved conversations. Supports search querying and pagination.
+
+#### Parameters
+
+- `q`: (optional) search string to filter conversations containing specific terms
+- `limit`: (optional) number of conversation summaries to return (default: `50`, capped at `500`)
+- `offset`: (optional) starting offset for pagination (default: `0`)
+
+#### Examples
+
+##### Request
+```shell
+curl http://localhost:11434/api/conversations?limit=1&offset=0
+```
+
+##### Response
+```json
+[
+  {
+    "id": "c1f7b8b2-5a50-482a-a924-f72566db352c",
+    "model": "gemma3",
+    "title": "What is quantum computing?",
+    "messages": 2,
+    "created_at": "2026-06-12T06:31:05+06:00",
+    "updated_at": "2026-06-12T06:31:10+06:00"
+  }
+]
+```
+
+---
+
+### Create a Conversation
+
+```
+POST /api/conversations
+```
+
+Create a new persistent conversation session with message history.
+
+#### Parameters
+
+- `model`: (required) name of the model associated with the conversation
+- `messages`: (required) array of chat message objects (system, user, assistant, or tool)
+
+#### Examples
+
+##### Request
+```shell
+curl http://localhost:11434/api/conversations -d '{
+  "model": "gemma3",
+  "messages": [
+    {"role": "user", "content": "Hello! I am planning a trip to Paris."}
+  ]
+}'
+```
+
+##### Response
+```json
+{
+  "id": "c1f7b8b2-5a50-482a-a924-f72566db352c",
+  "model": "gemma3",
+  "messages": [
+    {"role": "user", "content": "Hello! I am planning a trip to Paris."}
+  ],
+  "created_at": "2026-06-12T06:31:05+06:00",
+  "updated_at": "2026-06-12T06:31:05+06:00"
+}
+```
+
+---
+
+### Retrieve Conversation Details
+
+```
+GET /api/conversations/{id}
+```
+
+Retrieve details and full message history of a specific conversation session.
+
+#### Parameters
+
+- `id`: (required, path parameter) the conversation ID
+
+#### Examples
+
+##### Request
+```shell
+curl http://localhost:11434/api/conversations/c1f7b8b2-5a50-482a-a924-f72566db352c
+```
+
+##### Response
+```json
+{
+  "id": "c1f7b8b2-5a50-482a-a924-f72566db352c",
+  "model": "gemma3",
+  "messages": [
+    {"role": "user", "content": "Hello! I am planning a trip to Paris."},
+    {"role": "assistant", "content": "Bonjour! Paris is wonderful. I can help you plan..."}
+  ],
+  "created_at": "2026-06-12T06:31:05+06:00",
+  "updated_at": "2026-06-12T06:31:10+06:00"
+}
+```
+
+---
+
+### Delete a Conversation
+
+```
+DELETE /api/conversations/{id}
+```
+
+Delete a conversation and its message history from the store.
+
+#### Parameters
+
+- `id`: (required, path parameter) the conversation ID
+
+#### Examples
+
+##### Request
+```shell
+curl -X DELETE http://localhost:11434/api/conversations/c1f7b8b2-5a50-482a-a924-f72566db352c
+```
+
+##### Response
+```json
+{
+  "status": "deleted"
+}
+```
+
+## Model Router
+
+Define virtual model names that load-balance requests across multiple local or remote instances.
+
+---
+
+### List Virtual Routes
+
+```
+GET /api/routes
+```
+
+List all registered virtual model routes.
+
+#### Examples
+
+##### Request
+```shell
+curl http://localhost:11434/api/routes
+```
+
+##### Response
+```json
+[
+  {
+    "name": "fast-route",
+    "endpoints": [
+      {"host": "http://localhost:11434", "model": "gemma3", "weight": 2},
+      {"host": "http://localhost:11435", "model": "phi3", "weight": 1}
+    ],
+    "strategy": "weighted_round_robin"
+  }
+]
+```
+
+---
+
+### Register or Update a Route
+
+```
+POST /api/routes
+```
+
+Create or update a virtual route.
+
+#### Parameters
+
+- `name`: (required) virtual model name to match in incoming `/api/chat` or `/api/generate` requests
+- `endpoints`: (required) list of backend endpoint objects containing:
+  - `host`: base URL of the remote/local instance (e.g. `http://localhost:11435`)
+  - `model`: (optional) model name to use on the backend endpoint
+  - `weight`: (optional) weight value for the `weighted_round_robin` strategy
+- `strategy`: (optional) load balancing policy. Values: `round_robin`, `random`, `least_loaded`, `weighted_round_robin` (default: `round_robin`)
+
+#### Examples
+
+##### Request
+```shell
+curl http://localhost:11434/api/routes -d '{
+  "name": "fast-route",
+  "endpoints": [
+    {"host": "http://localhost:11434", "model": "gemma3", "weight": 2},
+    {"host": "http://localhost:11435", "model": "phi3", "weight": 1}
+  ],
+  "strategy": "weighted_round_robin"
+}'
+```
+
+##### Response
+```json
+{
+  "name": "fast-route",
+  "endpoints": [
+    {"host": "http://localhost:11434", "model": "gemma3", "weight": 2},
+    {"host": "http://localhost:11435", "model": "phi3", "weight": 1}
+  ],
+  "strategy": "weighted_round_robin"
+}
+```
+
+---
+
+### Query Route Status
+
+```
+GET /api/routes/{name}/status
+```
+
+Retrieve current health status, active request counters, and background health checks metadata for a virtual route's endpoints.
+
+#### Parameters
+
+- `name`: (required, path parameter) the virtual route name
+
+#### Examples
+
+##### Request
+```shell
+curl http://localhost:11434/api/routes/fast-route/status
+```
+
+##### Response
+```json
+{
+  "name": "fast-route",
+  "strategy": "weighted_round_robin",
+  "endpoints": [
+    {
+      "host": "http://localhost:11434",
+      "model": "gemma3",
+      "healthy": true,
+      "active_requests": 0,
+      "last_check": "2026-06-12T06:33:00+06:00"
+    },
+    {
+      "host": "http://localhost:11435",
+      "model": "phi3",
+      "healthy": true,
+      "active_requests": 0,
+      "last_check": "2026-06-12T06:33:00+06:00"
+    }
+  ]
+}
+```
+
+---
+
+### Delete a Route
+
+```
+DELETE /api/routes/{name}
+```
+
+Remove a virtual route definition.
+
+#### Parameters
+
+- `name`: (required, path parameter) the virtual route name
+
+#### Examples
+
+##### Request
+```shell
+curl -X DELETE http://localhost:11434/api/routes/fast-route
+```
+
+##### Response
+```json
+{
+  "status": "deleted"
+}
+```
+

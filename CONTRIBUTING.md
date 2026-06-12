@@ -106,9 +106,13 @@ When contributing new features or improvements to Lychee, keep in mind our core 
 2. **Native Agent Mode**: Stateful agent orchestration within the sandbox environment (`x/agent`).
 3. **Prompt Caching**: Intelligent KV cache reuse for low TTFT.
 4. **Model Composer**: Sequential execution chaining with template variables for multi-step prompts.
-5. **Embedded Web Dashboard**: Embedded React-based SPA console served at `/dashboard/` for interactive chat and configuration.
-6. **Model Comparison & Benchmarking**: CLI tools for benchmarking (`compare`, `scan`, `generate-client`).
-7. **Rich Terminal Dashboard**: Live terminal-based performance monitoring (`stats --tui`).
+5. **Conversation Memory**: Persistent session tracking using JSON and SQLite with search, pagination, and auto-titling APIs.
+6. **Model Router**: Load balancing (round-robin, random, least-loaded, weighted) across multiple instances with circuit breakers and health checks.
+7. **Structured Output**: JSON schema-conforming validation and error-correction retry logic with streaming SSE updates and temperature escalation.
+8. **Multi-Language SDKs**: Official integration client libraries (Python, JavaScript, Rust), IDE integrations (VSCode), and advanced CLI pipelines.
+9. **Embedded Web Dashboard**: Embedded React-based SPA console served at `/dashboard/` for interactive chat and configuration.
+10. **Model Comparison & Benchmarking**: CLI tools for benchmarking (`compare`, `scan`, `generate-client`).
+11. **Rich Terminal Dashboard**: Live terminal-based performance monitoring (`stats --tui`).
 
 Features aligning with these pillars are highly encouraged.
 

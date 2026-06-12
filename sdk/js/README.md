@@ -5,13 +5,13 @@ The official JavaScript/TypeScript client library for Lychee — the universal l
 ## Installation
 
 ```bash
-npm install @lychee/lychee
+npm install lychee-js
 ```
 
 ## Quick Start
 
 ```javascript
-import lychee from '@lychee/lychee'
+import lychee from 'lychee-js'
 
 // Simple chat completion
 const response = await lychee.chat({
@@ -24,7 +24,7 @@ console.log(response.message.content)
 ## Custom Client Configuration
 
 ```javascript
-import { Lychee } from '@lychee/lychee'
+import { Lychee } from 'lychee-js'
 
 const client = new Lychee({ host: 'http://localhost:11434' })
 

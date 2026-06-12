@@ -674,6 +674,7 @@ func NewCLI() *cobra.Command {
 		NewQuantizeCmd(),
 		NewInspectCmd(),
 		NewCatalogCmd(),
+		NewComposeCmd(),
 		NewExportCmd(),
 		NewImportCmd(),
 		NewGenerateClientCmd(),

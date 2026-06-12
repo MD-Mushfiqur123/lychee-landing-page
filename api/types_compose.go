@@ -48,3 +48,13 @@ type ComposeResponse struct {
 	Output  string       `json:"output"`
 	Results []StepResult `json:"results"`
 }
+
+// ComposeEvent represents a progress event streamed during composition.
+type ComposeEvent struct {
+	Event  string           `json:"event"`
+	Index  int              `json:"index,omitempty"`
+	Model  string           `json:"model,omitempty"`
+	Text   string           `json:"text,omitempty"`
+	Output string           `json:"output,omitempty"`
+	Result *ComposeResponse `json:"result,omitempty"`
+}

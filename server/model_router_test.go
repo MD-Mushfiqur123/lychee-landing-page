@@ -3,7 +3,9 @@ package server
 import (
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/lychee/lychee/api"
 )
@@ -168,6 +170,154 @@ func TestModelRouter(t *testing.T) {
 		ep, _, _ := router.Resolve("fast")
 		if ep != nil {
 			t.Error("expected resolved endpoint to be nil after deletion")
+		}
+	})
+
+	t.Run("weighted round robin strategy resolution", func(t *testing.T) {
+		weightedRoute := api.ModelRoute{
+			Name: "weighted-route",
+			Endpoints: []api.ModelEndpoint{
+				{Host: "hostA", Model: "m", Weight: 3},
+				{Host: "hostB", Model: "m", Weight: 1},
+			},
+			Strategy: "weighted_round_robin",
+		}
+		_ = router.AddRoute(weightedRoute)
+
+		counts := make(map[string]int)
+		for i := 0; i < 4; i++ {
+			ep, rel, err := router.Resolve("weighted-route")
+			if err != nil {
+				t.Fatalf("resolve failed: %v", err)
+			}
+			counts[ep.Host]++
+			rel()
+		}
+
+		if counts["hostA"] != 3 {
+			t.Errorf("expected hostA to be chosen 3 times, got %d", counts["hostA"])
+		}
+		if counts["hostB"] != 1 {
+			t.Errorf("expected hostB to be chosen 1 time, got %d", counts["hostB"])
+		}
+	})
+
+	t.Run("skip unhealthy endpoints", func(t *testing.T) {
+		unhealthyRoute := api.ModelRoute{
+			Name: "unhealthy-route",
+			Endpoints: []api.ModelEndpoint{
+				{Host: "host1", Model: "m"},
+				{Host: "host2", Model: "m"},
+			},
+			Strategy: "round_robin",
+		}
+		_ = router.AddRoute(unhealthyRoute)
+
+		router.mu.RLock()
+		state := router.routes["unhealthy-route"]
+		router.mu.RUnlock()
+		atomic.StoreInt32(&state.endpoints[0].healthy, 0)
+
+		for i := 0; i < 5; i++ {
+			ep, rel, err := router.Resolve("unhealthy-route")
+			if err != nil {
+				t.Fatalf("resolve failed: %v", err)
+			}
+			if ep.Host != "host2" {
+				t.Errorf("expected only host2, got %q", ep.Host)
+			}
+			rel()
+		}
+	})
+
+	t.Run("all endpoints unhealthy returns nil", func(t *testing.T) {
+		allUnhealthyRoute := api.ModelRoute{
+			Name: "all-unhealthy-route",
+			Endpoints: []api.ModelEndpoint{
+				{Host: "host1", Model: "m"},
+			},
+		}
+		_ = router.AddRoute(allUnhealthyRoute)
+
+		router.mu.RLock()
+		state := router.routes["all-unhealthy-route"]
+		router.mu.RUnlock()
+		atomic.StoreInt32(&state.endpoints[0].healthy, 0)
+
+		ep, _, err := router.Resolve("all-unhealthy-route")
+		if err != nil {
+			t.Fatalf("resolve failed: %v", err)
+		}
+		if ep != nil {
+			t.Errorf("expected nil endpoint for all unhealthy route, got %v", ep)
+		}
+	})
+
+	t.Run("circuit breaker behavior", func(t *testing.T) {
+		cbRoute := api.ModelRoute{
+			Name: "cb-route",
+			Endpoints: []api.ModelEndpoint{
+				{Host: "host-cb-1", Model: "m"},
+				{Host: "host-cb-2", Model: "m"},
+			},
+			Strategy: "round_robin",
+		}
+		_ = router.AddRoute(cbRoute)
+
+		router.RecordFailure("cb-route", "host-cb-1")
+		router.RecordFailure("cb-route", "host-cb-1")
+		router.RecordFailure("cb-route", "host-cb-1")
+
+		for i := 0; i < 5; i++ {
+			ep, rel, err := router.Resolve("cb-route")
+			if err != nil {
+				t.Fatalf("resolve failed: %v", err)
+			}
+			if ep.Host != "host-cb-2" {
+				t.Errorf("expected only host-cb-2 to be chosen, got %q", ep.Host)
+			}
+			rel()
+		}
+
+		router.RecordSuccess("cb-route", "host-cb-1")
+		ep, rel, _ := router.Resolve("cb-route")
+		if ep == nil {
+			t.Errorf("expected non-nil endpoint after circuit reset")
+		}
+		rel()
+	})
+
+	t.Run("circuit breaker half open recovery", func(t *testing.T) {
+		cbRoute := api.ModelRoute{
+			Name: "cb-half-open",
+			Endpoints: []api.ModelEndpoint{
+				{Host: "host-cb-half-1", Model: "m"},
+			},
+		}
+		_ = router.AddRoute(cbRoute)
+
+		router.RecordFailure("cb-half-open", "host-cb-half-1")
+		router.RecordFailure("cb-half-open", "host-cb-half-1")
+		router.RecordFailure("cb-half-open", "host-cb-half-1")
+
+		ep, _, _ := router.Resolve("cb-half-open")
+		if ep != nil {
+			t.Errorf("expected nil endpoint when circuit is open")
+		}
+
+		router.mu.RLock()
+		state := router.routes["cb-half-open"]
+		router.mu.RUnlock()
+		state.endpoints[0].circuitOpenUntil = time.Now().Add(-1 * time.Second)
+
+		ep, rel, _ := router.Resolve("cb-half-open")
+		if ep == nil || ep.Host != "host-cb-half-1" {
+			t.Errorf("expected host-cb-half-1 on half-open retry, got %v", ep)
+		}
+		rel()
+
+		if atomic.LoadInt32(&state.endpoints[0].healthy) != 1 {
+			t.Errorf("expected endpoint to be marked healthy on half-open resolution")
 		}
 	})
 }

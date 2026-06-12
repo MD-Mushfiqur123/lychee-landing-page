@@ -99,7 +99,7 @@ export class Lychee {
     }
   ): Promise<any>;
 
-  listConversations(): Promise<any[]>;
+  listConversations(opts?: { limit?: number; offset?: number }): Promise<any[]>;
   getConversation(id: string): Promise<any>;
   deleteConversation(id: string): Promise<any>;
 

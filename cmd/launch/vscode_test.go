@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 	"github.com/lychee/lychee/cmd/internal/fileutil"
 )
 
@@ -272,7 +272,7 @@ func TestShowInModelPicker(t *testing.T) {
 		os.MkdirAll(dbDir, 0o755)
 		dbPath := filepath.Join(dbDir, "state.vscdb")
 
-		db, err := sql.Open("sqlite3", dbPath)
+		db, err := sql.Open("sqlite", dbPath)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -295,7 +295,7 @@ func TestShowInModelPicker(t *testing.T) {
 	// helper to read prefs back from DB
 	readPrefs := func(t *testing.T, dbPath string) map[string]bool {
 		t.Helper()
-		db, err := sql.Open("sqlite3", dbPath)
+		db, err := sql.Open("sqlite", dbPath)
 		if err != nil {
 			t.Fatal(err)
 		}

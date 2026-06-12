@@ -5,7 +5,7 @@ The official Python client for Lychee — the universal local inference engine.
 ## Installation
 
 ```bash
-pip install lychee-ai
+pip install lychee-python
 ```
 
 ## Quick Start

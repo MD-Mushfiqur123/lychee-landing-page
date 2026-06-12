@@ -269,9 +269,9 @@ class Lychee {
   // Conversation Memory API
   // ────────────────────────────────────────────────────────────────────────────
 
-  /** List summaries of all saved conversations. */
-  async listConversations() {
-    return this._get('/api/conversations');
+  /** List summaries of saved conversations with pagination. */
+  async listConversations({ limit = 50, offset = 0 } = {}) {
+    return this._get(`/api/conversations?limit=${limit}&offset=${offset}`);
   }
 
   /** Retrieve conversation history. */

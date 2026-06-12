@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/lychee/lychee/api"
 	"github.com/lychee/lychee/llm"
 	"github.com/lychee/lychee/types/model"
 )
@@ -17,6 +19,8 @@ type StructuredOpts struct {
 	Schema     json.RawMessage
 	MaxRetries int // default: 3
 	Options    map[string]any
+	TimeoutSec int // default: 60
+	OnEvent    func(api.StructuredEvent)
 }
 
 // StructuredResult contains the generation result and retry metadata.
@@ -55,47 +59,102 @@ func (s *Server) generateStructured(ctx context.Context, opts StructuredOpts) (*
 		return nil, err
 	}
 
+	emit := func(event api.StructuredEvent) {
+		if opts.OnEvent != nil {
+			opts.OnEvent(event)
+		}
+	}
+
 	currentPrompt := opts.Prompt
 	var errorsList []string
 	var lastOutput string
 
 	for attempt := 1; attempt <= opts.MaxRetries; attempt++ {
+		emit(api.StructuredEvent{Event: "attempt_start", Attempt: attempt})
+
 		var responseSB strings.Builder
 		leadingBOS := leadingBOSForModel(m)
 
-		err = r.Completion(ctx, llm.CompletionRequest{
+		attemptOpts := runOpts
+		if attempt > 1 {
+			if attemptOpts.Temperature == 0 {
+				attemptOpts.Temperature = 0.8
+			}
+			attemptOpts.Temperature += 0.1 * float32(attempt-1)
+			if attemptOpts.Temperature > 1.2 {
+				attemptOpts.Temperature = 1.2
+			}
+		}
+
+		timeoutSec := opts.TimeoutSec
+		if timeoutSec <= 0 {
+			timeoutSec = 60
+		}
+		attemptCtx, cancelAttempt := context.WithTimeout(ctx, time.Duration(timeoutSec)*time.Second)
+
+		err = r.Completion(attemptCtx, llm.CompletionRequest{
 			Prompt:     currentPrompt,
-			Options:    runOpts,
+			Options:    attemptOpts,
 			LeadingBOS: leadingBOS,
 		}, func(cr llm.CompletionResponse) {
 			responseSB.WriteString(cr.Content)
 		})
+		cancelAttempt()
+
 		if err != nil {
-			return nil, err
+			errStr := err.Error()
+			errorsList = append(errorsList, errStr)
+			emit(api.StructuredEvent{Event: "attempt_fail", Attempt: attempt, Error: errStr})
+
+			currentPrompt = fmt.Sprintf(
+				"%s\n\nYour previous attempt failed with error: %s.\nPlease try again.",
+				opts.Prompt, errStr,
+			)
+			continue
 		}
 
 		lastOutput = responseSB.String()
+		emit(api.StructuredEvent{Event: "attempt_output", Attempt: attempt, Output: lastOutput})
 
 		// If Schema is empty/nil/empty object/null, bypass validation and return success
 		if len(opts.Schema) == 0 || string(opts.Schema) == "null" || string(opts.Schema) == "{}" || string(opts.Schema) == "" {
-			return &StructuredResult{
+			res := &StructuredResult{
 				Output:   lastOutput,
 				Valid:    true,
 				Attempts: attempt,
-			}, nil
+			}
+			emit(api.StructuredEvent{
+				Event: "complete",
+				Response: &api.StructuredResponse{
+					Output:   res.Output,
+					Valid:    res.Valid,
+					Attempts: res.Attempts,
+				},
+			})
+			return res, nil
 		}
 
 		// Validate schema
 		valErr := ValidateJSONSchema(lastOutput, opts.Schema)
 		if valErr == nil {
-			return &StructuredResult{
+			res := &StructuredResult{
 				Output:   lastOutput,
 				Valid:    true,
 				Attempts: attempt,
-			}, nil
+			}
+			emit(api.StructuredEvent{
+				Event: "complete",
+				Response: &api.StructuredResponse{
+					Output:   res.Output,
+					Valid:    res.Valid,
+					Attempts: res.Attempts,
+				},
+			})
+			return res, nil
 		}
 
 		errorsList = append(errorsList, valErr.Error())
+		emit(api.StructuredEvent{Event: "attempt_fail", Attempt: attempt, Error: valErr.Error()})
 
 		// Construct correction prompt
 		currentPrompt = fmt.Sprintf(
@@ -104,10 +163,20 @@ func (s *Server) generateStructured(ctx context.Context, opts StructuredOpts) (*
 		)
 	}
 
-	return &StructuredResult{
+	res := &StructuredResult{
 		Output:   lastOutput,
 		Valid:    false,
 		Attempts: opts.MaxRetries,
 		Errors:   errorsList,
-	}, nil
+	}
+	emit(api.StructuredEvent{
+		Event: "complete",
+		Response: &api.StructuredResponse{
+			Output:   res.Output,
+			Valid:    res.Valid,
+			Attempts: res.Attempts,
+			Errors:   res.Errors,
+		},
+	})
+	return res, nil
 }

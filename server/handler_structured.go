@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,20 +32,50 @@ func (s *Server) StructuredHandler(c *gin.Context) {
 		Schema:     req.Schema,
 		MaxRetries: req.MaxRetries,
 		Options:    req.Options,
+		TimeoutSec: req.TimeoutSec,
+	}
+
+	if req.Stream {
+		c.Header("Content-Type", "text/event-stream")
+		c.Header("Cache-Control", "no-cache")
+		c.Header("Connection", "keep-alive")
+		c.Header("Transfer-Encoding", "chunked")
+
+		opts.OnEvent = func(event api.StructuredEvent) {
+			data, err := json.Marshal(event)
+			if err != nil {
+				return
+			}
+			_, _ = c.Writer.Write([]byte("event: " + event.Event + "\n"))
+			_, _ = c.Writer.Write(append(append([]byte("data: "), data...), '\n', '\n'))
+			c.Writer.Flush()
+		}
 	}
 
 	res, err := s.generateStructured(c.Request.Context(), opts)
 	if err != nil {
+		if req.Stream {
+			errEvent := api.StructuredEvent{
+				Event: "attempt_fail",
+				Error: err.Error(),
+			}
+			data, _ := json.Marshal(errEvent)
+			_, _ = c.Writer.Write([]byte("event: " + errEvent.Event + "\n"))
+			_, _ = c.Writer.Write(append(append([]byte("data: "), data...), '\n', '\n'))
+			c.Writer.Flush()
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	resp := api.StructuredResponse{
-		Output:   res.Output,
-		Valid:    res.Valid,
-		Attempts: res.Attempts,
-		Errors:   res.Errors,
+	if !req.Stream {
+		resp := api.StructuredResponse{
+			Output:   res.Output,
+			Valid:    res.Valid,
+			Attempts: res.Attempts,
+			Errors:   res.Errors,
+		}
+		c.JSON(http.StatusOK, resp)
 	}
-
-	c.JSON(http.StatusOK, resp)
 }

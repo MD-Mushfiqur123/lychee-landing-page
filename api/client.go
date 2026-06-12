@@ -490,3 +490,25 @@ func (c *Client) Whoami(ctx context.Context) (*UserResponse, error) {
 	}
 	return &resp, nil
 }
+
+type ComposeResponseFunc func(ComposeEvent) error
+
+func (c *Client) Compose(ctx context.Context, req *ComposeRequest, fn ComposeResponseFunc) error {
+	if req.Stream == false {
+		var resp ComposeResponse
+		if err := c.do(ctx, http.MethodPost, "/api/compose", req, &resp); err != nil {
+			return err
+		}
+		return fn(ComposeEvent{
+			Event:  "complete",
+			Result: &resp,
+		})
+	}
+	return c.stream(ctx, http.MethodPost, "/api/compose", req, func(bts []byte) error {
+		var resp ComposeEvent
+		if err := json.Unmarshal(bts, &resp); err != nil {
+			return err
+		}
+		return fn(resp)
+	})
+}

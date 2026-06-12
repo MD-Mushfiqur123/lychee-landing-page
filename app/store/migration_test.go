@@ -252,7 +252,7 @@ func TestMigrationFromEpoc(t *testing.T) {
 	s := Store{DBPath: filepath.Join(tmpDir, "db.sqlite")}
 	defer s.Close()
 	// Open database connection
-	conn, err := sql.Open("sqlite3", s.DBPath+"?_foreign_keys=on&_journal_mode=WAL")
+	conn, err := sql.Open("sqlite", s.DBPath+"?_foreign_keys=on&_journal_mode=WAL")
 	if err != nil {
 		t.Fatal(err)
 	}

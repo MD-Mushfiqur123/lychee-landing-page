@@ -1,6 +1,6 @@
 {
-  "name": "lychee",
-  "version": "0.6.0",
+  "name": "lychee-js",
+  "version": "0.5.0-alpha.1",
   "description": "JavaScript client library for Lychee - Universal Local Inference Engine",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -29,10 +29,21 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lychee/lychee.git"
+    "url": "git+https://github.com/MD-Mushfiqur123/lychee.git"
   },
   "bugs": {
-    "url": "https://github.com/lychee/lychee/issues"
+    "url": "https://github.com/MD-Mushfiqur123/lychee/issues"
   },
-  "homepage": "https://github.com/lychee/lychee#readme"
+  "homepage": "https://github.com/MD-Mushfiqur123/lychee#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "lychee",
+    "llm",
+    "local-ai",
+    "inference",
+    "ollama",
+    "composer"
+  ]
 }
