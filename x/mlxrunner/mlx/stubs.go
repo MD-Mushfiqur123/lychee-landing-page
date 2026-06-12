@@ -56,6 +56,9 @@ func (t *Array) Tanh() *Array { return t }
 func (t *Array) Set(other *Array) {}
 func (t *Array) LogsumexpAxis(axis int, keepDims bool) *Array { return t }
 func (t *Array) MaxAxis(axis int, keepDims bool) *Array { return t }
+func (t *Array) Clone() *Array { return t }
+func (t *Array) NumBytes() int { return 0 }
+func (t *Array) SliceUpdate(other *Array, slices ...slice) *Array { return t }
 
 // Additional methods for convenience/safety
 func (t *Array) Dim(axis int) int { return 0 }

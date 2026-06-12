@@ -11,9 +11,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ─── Auto-update vulnerable dependencies ─────────────────────────
+  autoupdate:
+    name: Auto-update vulnerable dependencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Update packages
+        run: |
+          go get -u golang.org/x/image@latest golang.org/x/crypto@latest golang.org/x/net@latest golang.org/x/text@latest golang.org/x/sys@latest golang.org/x/tools@latest
+          go mod tidy
+      - name: Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add go.mod go.sum
+          git diff-index --quiet HEAD || (git commit -m "chore: auto-update vulnerable dependencies" && git push origin HEAD:main)
+
   # ─── Go Unit Tests ───────────────────────────────────────────────
   test:
     name: Go Tests (${{ matrix.os }})
+    needs: autoupdate
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -48,6 +71,7 @@ jobs:
   # ─── Linting ─────────────────────────────────────────────────────
   lint:
     name: Lint
+    needs: autoupdate
     runs-on: ubuntu-latest
     env:
       CGO_ENABLED: 0
@@ -65,6 +89,7 @@ jobs:
   # ─── Build Verification ──────────────────────────────────────────
   build:
     name: Build & Vet Packages
+    needs: autoupdate
     runs-on: ubuntu-latest
     env:
       CGO_ENABLED: 0
@@ -83,6 +108,7 @@ jobs:
   # ─── Security Scan ───────────────────────────────────────────────
   security:
     name: Security Scan
+    needs: autoupdate
     runs-on: ubuntu-latest
     env:
       CGO_ENABLED: 0
@@ -99,6 +125,7 @@ jobs:
   # ─── go mod tidy check ───────────────────────────────────────────
   mod-tidy:
     name: go mod tidy
+    needs: autoupdate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
