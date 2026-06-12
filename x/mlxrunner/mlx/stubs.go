@@ -134,6 +134,12 @@ func Minimum(a, b *Array) *Array { return nil }
 func MulScalar(a *Array, s float32) *Array { return nil }
 func PeakMemory() int { return 0 }
 func PrettyBytes(n int) fmt.Stringer { return nil }
+func Dequantize(w, scales, biases *Array, groupSize, bits int, mode string) *Array { return nil }
+func QuantizedMatmul(x, w, scales, biases *Array, transpose bool, groupSize, bits int, mode string) *Array { return nil }
+func Tri(n, m int32, k int) *Array { return nil }
+func Mul(a, b *Array) *Array { return nil }
+func LayerNormFn(x, weight, bias *Array, eps float32) *Array { return nil }
+func RMSNormFn(x, weight *Array, eps float32) *Array { return nil }
 func Quantize(w *Array, groupSize, bits int, mode string) (weights, scales, biases *Array) { return nil, nil, nil }
 func RandomKey(seed uint64) *Array { return nil }
 func SoftmaxAxis(a *Array, axis int, precise bool) *Array { return nil }
