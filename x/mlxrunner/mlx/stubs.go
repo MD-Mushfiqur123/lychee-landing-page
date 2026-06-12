@@ -1,5 +1,6 @@
 //go:build !cgo
 
+// Package mlx provides stubs for non-cgo builds.
 package mlx
 
 import (
@@ -149,3 +150,32 @@ const End = 2147483647 // math.MaxInt32
 func Slice(args ...int) slice {
 	return slice{args: args}
 }
+
+// Fused kernel compilation types and options
+type CompileFunc func(inputs ...*Array) []*Array
+type CompileOption func(*compileConfig)
+type compileConfig struct {
+	shapeless bool
+}
+
+func Shapeless() CompileOption {
+	return func(c *compileConfig) {}
+}
+
+func Compile(name string, fn CompileFunc, opts ...CompileOption) CompileFunc {
+	return fn
+}
+
+func Compile1(name string, fn func(*Array) *Array, opts ...CompileOption) func(*Array) *Array {
+	return fn
+}
+
+func Compile2(name string, fn func(*Array, *Array) *Array, opts ...CompileOption) func(*Array, *Array) *Array {
+	return fn
+}
+
+func Compile3(name string, fn func(*Array, *Array, *Array) *Array, opts ...CompileOption) func(*Array, *Array, *Array) *Array {
+	return fn
+}
+
+func Logaddexp(a, b *Array) *Array { return a }

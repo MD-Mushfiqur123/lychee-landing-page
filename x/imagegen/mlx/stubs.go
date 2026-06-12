@@ -10,6 +10,8 @@ type Array struct{}
 
 func (a *Array) Dtype() Dtype { return 0 }
 func (a *Array) Shape() []int32 { return nil }
+func (a *Array) Data() []float32 { return nil }
+func (a *Array) DataInt32() []int32 { return nil }
 func (a *Array) DataFloat32() []float32 { return nil }
 func (a *Array) Nbytes() int64 { return 0 }
 func (a *Array) Valid() bool { return false }
@@ -43,6 +45,7 @@ type SafetensorsFile struct{}
 func (s *SafetensorsFile) Free() {}
 func (s *SafetensorsFile) GetMetadata(key string) string { return "" }
 func (s *SafetensorsFile) Get(name string) *Array { return nil }
+func (s *SafetensorsFile) Set(name string, arr *Array) {}
 
 func LoadSafetensorsNative(path string) (*SafetensorsFile, error) {
 	return nil, errors.New("MLX requires CGO")
