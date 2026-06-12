@@ -75,8 +75,12 @@ func (s *Server) generateStructured(ctx context.Context, opts StructuredOpts) (*
 		var responseSB strings.Builder
 		leadingBOS := leadingBOSForModel(m)
 
-		attemptOpts := runOpts
-		if attempt > 1 {
+		var attemptOpts *api.Options
+		if runOpts != nil {
+			cop := *runOpts
+			attemptOpts = &cop
+		}
+		if attempt > 1 && attemptOpts != nil {
 			if attemptOpts.Temperature == 0 {
 				attemptOpts.Temperature = 0.8
 			}
