@@ -3,8 +3,8 @@
 .env
 .venv
 .swp
-dist
-build
+/dist
+/build
 .cache
 .gocache
 *.exe
@@ -17,7 +17,8 @@ llama/vendor
 /lychee
 integration/testdata/models/
 node_modules/
-dist/
+/dist/
+/app/ui/app/dist/
 .idea/
 .vscode/
 .DS_Store
@@ -25,3 +26,7 @@ dist/
 .git-rewrite/
 __pycache__/
 *.pyc
+
+# Allow committing the built webui dist assets so they are available in CI and embed.go
+!/server/webui/dist/**
+

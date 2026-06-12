@@ -1,0 +1,26 @@
+name: Tidy go.mod/go.sum
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.1'
+          cache: false
+      - name: Tidy
+        run: |
+          go mod tidy
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: go mod tidy"
+          file_pattern: "go.mod go.sum"
