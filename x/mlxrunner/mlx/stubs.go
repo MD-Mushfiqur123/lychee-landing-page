@@ -204,3 +204,8 @@ func Conv1d(x, weight *Array, bias *Array, stride, padding, dilation, groups int
 func Add(a, b *Array) *Array { return nil }
 func FastGatedDelta(q, k, v, g, beta, state, mask *Array) (y, nextState *Array) { return nil, nil }
 func Reshape(a *Array, shape ...int32) *Array { return nil }
+func RoPEWithFreqs(x *Array, dims int, traditional bool, base, scale float32, offsets *Array, freqs *Array) *Array { return nil }
+func RoPEWithBase(x *Array, dims int, traditional bool, base, scale float32, offsets *Array) *Array { return nil }
+func Matmul(a, b *Array) *Array { return nil }
+func Squeeze(a *Array, axis int) *Array { return nil }
+func Stack(arrays []*Array, axis int) *Array { return nil }
