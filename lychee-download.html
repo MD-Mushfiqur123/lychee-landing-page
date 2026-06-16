@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Lychee — Local LLM Runtime & Desktop GUI</title>
+    <meta name="description" content="Download Lychee CLI and Lychee Desktop for Windows. Run LLMs locally with a beautiful native GUI.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍒%3C/text%3E%3C/svg%3E">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0c;
+            --surface: #121216;
+            --surface-2: #1a1a20;
+            --border: #27272e;
+            --text: #e4e4e8;
+            --text-muted: #8b8b96;
+            --accent: #e8455a;
+            --accent-glow: rgba(232, 69, 90, 0.15);
+            --accent-2: #f26b7b;
+            --green: #34d399;
+            --green-glow: rgba(52, 211, 153, 0.15);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Animated accent blob */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -30%;
+            left: -20%;
+            width: 70%;
+            height: 70%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+            animation: float 15s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(10%, 5%) scale(1.05); }
+            66% { transform: translate(-5%, 8%) scale(0.95); }
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text);
+        }
+        .nav-brand .logo { font-size: 1.5rem; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-links .active { color: var(--accent-2); }
+
+        main {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 24px;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text) 30%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .hero .badge {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 6px 16px;
+            border-radius: 99px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .download-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+        .download-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        .download-card.desktop-card:hover {
+            border-color: var(--green);
+            box-shadow: 0 0 40px var(--green-glow);
+        }
+
+        .card-glow {
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .download-card .card-glow { background: var(--accent); }
+        .download-card.desktop-card .card-glow { background: var(--green); }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            position: relative;
+            z-index: 1;
+        }
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .meta-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+        .meta-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        .platform-badge.current {
+            background: rgba(52, 211, 153, 0.1);
+            border-color: rgba(52, 211, 153, 0.3);
+            color: var(--green);
+        }
+        .platform-badge .os-icon { font-size: 1rem; }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px 28px;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+        .cli-dl {
+            background: linear-gradient(135deg, var(--accent), #c0392b);
+            color: white;
+        }
+        .cli-dl:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 32px rgba(232, 69, 90, 0.35);
+        }
+        .desktop-dl {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+        }
+        .desktop-dl:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 32px rgba(52, 211, 153, 0.35);
+        }
+        .btn-arrow { transition: transform 0.3s; }
+        .download-btn:hover .btn-arrow { transform: translateX(4px); }
+
+        .release-note {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+        .release-note strong { color: var(--text); }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        footer a { color: var(--accent-2); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        .quick-links {
+            margin-top: 56px;
+            text-align: center;
+        }
+        .quick-links h3 {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        .quick-links .links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .quick-links .links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .quick-links .links a:hover {
+            border-color: var(--accent);
+            color: var(--text);
+            background: var(--surface-2);
+        }
+
+        @media (max-width: 680px) {
+            .download-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2rem; }
+            nav { padding: 12px 16px; }
+            .nav-links { gap: 12px; font-size: 0.8rem; }
+            main { padding: 32px 16px; }
+            .download-card { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="https://md-mushfiqur123.github.io/lychee-landing-page/" class="nav-brand">
+            <span class="logo">🍒</span>
+            <span>Lychee</span>
+        </a>
+        <div class="nav-links">
+            <a href="https://md-mushfiqur123.github.io/lychee-docs/">Docs</a>
+            <a href="https://github.com/MD-Mushfiqur123/lychee">GitHub</a>
+            <a href="https://github.com/MD-Mushfiqur123/lychee-desktop">Desktop</a>
+            <a href="#" class="active">Download</a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1>Download Lychee</h1>
+            <p>Run powerful LLMs locally on your machine. Choose the CLI runtime or the native desktop app with a beautiful GUI.</p>
+            <span class="badge">🍒 v0.2.0-alpha · Windows</span>
+        </section>
+
+        <div class="download-grid">
+            <!-- CLI Card -->
+            <div class="download-card">
+                <div class="card-glow"></div>
+                <div class="card-icon">🖥️</div>
+                <h2 class="card-title">Lychee CLI</h2>
+                <p class="card-subtitle">Core runtime — run LLMs from the terminal</p>
+
+                <div class="meta-row">
+                    <div class="meta-item">
+                        <span class="meta-label">Version</span>
+                        <span class="meta-value">v0.2.0-alpha</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Size</span>
+                        <span class="meta-value">~64 MB</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">License</span>
+                        <span class="meta-value">MIT</span>
+                    </div>
+                </div>
+
+                <div class="badges">
+                    <span class="platform-badge current">🪟 Windows x64</span>
+                    <span class="platform-badge">🍎 macOS</span>
+                    <span class="platform-badge">🐧 Linux</span>
+                </div>
+
+                <a href="https://github.com/MD-Mushfiqur123/lychee/releases/download/v0.2.0-alpha/lychee-windows-amd64.exe"
+                   class="download-btn cli-dl">
+                    <span>⬇️</span>
+                    <span>Download CLI</span>
+                    <span class="btn-arrow">→</span>
+                </a>
+
+                <div class="release-note">
+                    <strong>What you get:</strong> Multi-model pipelines, structured output, persistent memory, OpenAI/Anthropic API compatibility, TUI dashboard, and HuggingFace model pulls. <a href="https://github.com/MD-Mushfiqur123/lychee/releases/tag/v0.2.0-alpha">Full release notes →</a>
+                </div>
+            </div>
+
+            <!-- Desktop Card -->
+            <div class="download-card desktop-card">
+                <div class="card-glow"></div>
+                <div class="card-icon">💬</div>
+                <h2 class="card-title">Lychee Desktop</h2>
+                <p class="card-subtitle">Native GUI — chat, build pipelines, manage models</p>
+
+                <div class="meta-row">
+                    <div class="meta-item">
+                        <span class="meta-label">Version</span>
+                        <span class="meta-value">v0.2.0-alpha</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Size</span>
+                        <span class="meta-value">~11 MB</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">License</span>
+                        <span class="meta-value">MIT</span>
+                    </div>
+                </div>
+
+                <div class="badges">
+                    <span class="platform-badge current">🪟 Windows x64</span>
+                    <span class="platform-badge">🍎 macOS</span>
+                    <span class="platform-badge">🐧 Linux</span>
+                </div>
+
+                <a href="https://github.com/MD-Mushfiqur123/lychee/releases/download/v0.2.0-alpha/lychee-desktop.exe"
+                   class="download-btn desktop-dl">
+                    <span>⬇️</span>
+                    <span>Download Desktop</span>
+                    <span class="btn-arrow">→</span>
+                </a>
+
+                <div class="release-note">
+                    <strong>What you get:</strong> Native Wails desktop app with chat interface, Pipeline Studio (visual DAG builder), Model Manager, settings panel, and auto lifecycle management for Lychee serve. <a href="https://github.com/MD-Mushfiqur123/lychee-desktop/releases">Desktop releases →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <h3>More Resources</h3>
+            <div class="links">
+                <a href="https://md-mushfiqur123.github.io/lychee-docs/">📖 Documentation</a>
+                <a href="https://github.com/MD-Mushfiqur123/lychee">🍒 CLI Source</a>
+                <a href="https://github.com/MD-Mushfiqur123/lychee-desktop">🖥️ Desktop Source</a>
+                <a href="https://md-mushfiqur123.github.io/lychee-landing-page/">🌐 Homepage</a>
+                <a href="https://github.com/MD-Mushfiqur123/lychee/releases">📦 All Releases</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>🍒 Lychee is open-source under the <a href="https://github.com/MD-Mushfiqur123/lychee/blob/main/LICENSE">MIT License</a>.
+        Built with ❤️ for the local AI community.</p>
+    </footer>
+</body>
+</html>
