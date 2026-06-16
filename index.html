@@ -116,12 +116,12 @@
 
   /* ---- reveal animation ---- */
   .reveal {
-    opacity: 0;
+    /* opacity: 0; */
     transform: translateY(28px);
-    transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
     transition-delay: calc(var(--i, 0) * 90ms);
   }
-  .reveal.in { opacity: 1; transform: translateY(0); }
+  .reveal.in { /* opacity: 1; */ transform: translateY(0); }
   /* transform-only reveal: keeps ancestor opacity at 1 so backdrop blur of
      glass children works during the entrance instead of popping in after */
   .reveal.lift { opacity: 1; }
@@ -189,7 +189,7 @@
   .hero-media img {
     opacity: 0;
     transform: scale(1.045);
-    transition: opacity 1.9s var(--ease), transform 2.8s var(--ease);
+    transition: none;
     will-change: opacity, transform;
   }
   .hero-media img.loaded { opacity: 1; transform: scale(1); }
@@ -206,7 +206,7 @@
     width: 100%;
     height: 100%;
     opacity: 0;
-    transition: opacity 1.2s var(--ease) 2s;
+    transition: opacity 0.2s var(--ease);
   }
   #global-webgl-bg canvas.hero-gl.on { opacity: 1; }
 
@@ -1304,12 +1304,31 @@
     .cta-inner { padding: 84px 20px; }
   }
 </style>
+
+<link rel="preload" href="https://github.com/md-mushfiqur-rahim123-official/pic/blob/main/hero.jpg?raw=true" as="image">
+<link rel="preload" href="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/refs/heads/main/numbers.jpg" as="image">
+<link rel="preload" href="https://github.com/md-mushfiqur-rahim123-official/pic/blob/main/cta.jpg?raw=true" as="image">
+
+<style>
+/* INSTANT IMAGE OVERRIDE */
+.hero-media img, .cell-img img, .split-art img, .num-bg img, .cta-bg img, .q-img img {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+}
+.reveal.split-art, .reveal.cell-img, .reveal.cell {
+    opacity: 1 !important;
+    transform: none !important;
+}
+</style>
+
 </head>
 <body>
 
 <div id="global-webgl-bg" style="position: fixed; inset: 0; z-index: -2; background: #0b0c0a; pointer-events: none;">
-  <img src="assets/hero.jpg" alt="Background" fetchpriority="high" style="display:none;">
-  <div id="bg-blur-overlay" style="position: absolute; inset: 0; z-index: 10; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); background: rgba(11,12,10,0.65); opacity: 0; transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+  <img src="https://github.com/md-mushfiqur-rahim123-official/pic/blob/main/hero.jpg?raw=true" alt="Background" fetchpriority="high" style="display:none;" crossorigin="anonymous">
+  <div id="bg-blur-overlay" style="position: absolute; inset: 0; z-index: 10; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); background: rgba(11,12,10,0.65); opacity: 0; transition: opacity 0.1s cubic-bezier(0.16, 1, 0.3, 1);"></div>
 </div>
 
 <div class="grain" aria-hidden="true"></div>
@@ -1470,7 +1489,7 @@
       </article>
 
       <article class="cell reveal" style="--i:1">
-        <div class="cell-img"><img src="https://picsum.photos/id/10/1600/900" alt="Rolling forested hills under soft light" loading="lazy"></div>
+        <div class="cell-img"><img src="https://picsum.photos/id/10/1600/900" alt="Rolling forested hills under soft light" loading="eager" fetchpriority="high"></div>
         <div class="cell-over">
           <div class="cell-pad cell-top-row">
             <h3>Model Composer that<br>reads the landscape</h3>
@@ -1539,7 +1558,7 @@
     <!-- row 2 -->
     <div class="bento bento-row2">
       <article class="cell reveal" style="--i:0">
-        <div class="cell-img"><img src="https://picsum.photos/id/16/1600/900" alt="Coastal cliffs meeting a calm sea" loading="lazy"></div>
+        <div class="cell-img"><img src="https://picsum.photos/id/16/1600/900" alt="Coastal cliffs meeting a calm sea" loading="eager" fetchpriority="high"></div>
         <div class="cell-over">
           <div class="cell-pad cell-top-row">
             <h3>Policies, tuned<br>to your posture</h3>
@@ -1695,7 +1714,7 @@
         </ul>
       </div>
       <div class="split-art reveal" style="--i:2">
-        <img src="https://picsum.photos/id/17/1200/1400" alt="A quiet trail through an evergreen forest" loading="lazy">
+        <img src="https://picsum.photos/id/17/1200/1400" alt="A quiet trail through an evergreen forest" loading="eager" fetchpriority="high">
         <div class="orbit" aria-hidden="true">
           <span class="orbit-ring r1"></span>
           <span class="orbit-ring r2"></span>
@@ -1760,7 +1779,7 @@
         </ul>
       </div>
       <div class="split-art reveal" style="--i:2">
-        <img src="https://picsum.photos/id/28/1200/1400" alt="Sunlit path through an autumn forest" loading="lazy">
+        <img src="https://picsum.photos/id/28/1200/1400" alt="Sunlit path through an autumn forest" loading="eager" fetchpriority="high">
         <div class="art-tree">
           <span class="tree-pill">5+ Local Model Families Supported</span>
           <span class="tree-link"></span>
@@ -1831,10 +1850,10 @@
 
     <div class="voice-grid">
       <article class="quote-card feature reveal">
-        <div class="q-img"><img src="https://picsum.photos/id/13/1400/1000" alt="Waves washing over a quiet shore" loading="lazy"></div>
+        <div class="q-img"><img src="https://picsum.photos/id/13/1400/1000" alt="Waves washing over a quiet shore" loading="eager" fetchpriority="high"></div>
         <p class="q-text">"We went from struggling with brittle LangChain pipelines to shipping in production. Lychee's structured output retries saved our app."</p>
         <div class="q-who">
-          <img src="https://i.pravatar.cc/96?img=47" alt="Portrait of Mireille Okafor" loading="lazy">
+          <img src="https://i.pravatar.cc/96?img=47" alt="Portrait of Mireille Okafor" loading="eager" fetchpriority="high">
           <div>
             <div class="q-name">Mireille Okafor</div>
             <div class="q-role">Lead Engineer, AI Startup</div>
@@ -1847,7 +1866,7 @@
           <span class="q-mark">"</span>
           <p class="q-text">Drop-in Anthropic API compatibility meant I could point my existing Claude code to Lychee and run Gemma locally in seconds.</p>
           <div class="q-who">
-            <img src="https://i.pravatar.cc/96?img=12" alt="Portrait of Tomas Lindqvist" loading="lazy">
+            <img src="https://i.pravatar.cc/96?img=12" alt="Portrait of Tomas Lindqvist" loading="eager" fetchpriority="high">
             <div>
               <div class="q-name">Tomas Lindqvist</div>
               <div class="q-role">Open Source Developer</div>
@@ -1859,7 +1878,7 @@
           <span class="q-mark">"</span>
           <p class="q-text">The interactive terminal dashboard makes it so easy to monitor context usage and token throughput. Best local LLM tool out there.</p>
           <div class="q-who">
-            <img src="https://i.pravatar.cc/96?img=68" alt="Portrait of Alex Chen" loading="lazy">
+            <img src="https://i.pravatar.cc/96?img=68" alt="Portrait of Alex Chen" loading="eager" fetchpriority="high">
             <div>
               <div class="q-name">Alex Chen</div>
               <div class="q-role">AI Researcher</div>
@@ -1937,6 +1956,18 @@
     <span class="cta-note reveal" style="--i:3">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor"/><path d="M4.2 6.7l1.7 1.7 3.2-3.6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Open-source and compiled in Go · offline-first architecture
+    </span>
+    <span class="cta-note reveal desktop-badge" style="--i:3; margin-top: 16px;">
+      <a href="https://github.com/MD-Mushfiqur123/lychee-desktop" target="_blank" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: rgba(165,28,48,0.12); border: 1px solid rgba(165,28,48,0.28); border-radius: 100px; padding: 8px 18px; transition: background 0.3s, border-color 0.3s;" onmouseover="this.style.background='rgba(165,28,48,0.22)'; this.style.borderColor='rgba(165,28,48,0.45)';" onmouseout="this.style.background='rgba(165,28,48,0.12)'; this.style.borderColor='rgba(165,28,48,0.28)';">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/><rect x="5" y="10" width="2" height="3" rx=".5" fill="currentColor" opacity=".7"/><rect x="9" y="8" width="2" height="5" rx=".5" fill="currentColor" opacity=".7"/><path d="M5.5 5h5M5.5 7h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span style="font-size: 13px; font-weight: 600;">Lychee Desktop</span>
+        <span style="font-size: 11px; color: rgba(165,28,48,0.85); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">Download Now</span>
+      </a>
+    </span>
+    <span class="cta-note reveal" style="--i:4; margin-top: 12px; font-weight: 500;">
+      Built by Mushfiqur · 
+      <a href="https://www.facebook.com/profile.php?id=100090048324727" target="_blank" style="color: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(242,244,236,0.3); transition: text-decoration-color 0.2s;">Facebook</a> · 
+      <a href="https://github.com/MD-Mushfiqur123" target="_blank" style="color: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(242,244,236,0.3); transition: text-decoration-color 0.2s;">GitHub</a>
     </span>
   </div>
 </section>
