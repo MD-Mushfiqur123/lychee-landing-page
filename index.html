@@ -1368,6 +1368,226 @@
     .foot-grid { grid-template-columns: 1fr; }
     .cta-inner { padding: 84px 20px; }
   }
+
+  /* =========================================================
+     NAV ACTIONS — Sign In / User Greeting
+  ========================================================= */
+  .nav-actions {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-greeting {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    padding: 8px 14px;
+    background: rgba(165,28,48,0.12);
+    border: 1px solid rgba(165,28,48,0.25);
+    border-radius: 100px;
+  }
+  .user-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(244,246,238,0.2);
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  /* =========================================================
+     OAUTH MODAL
+  ========================================================= */
+  .oauth-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(11,12,10,0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s var(--ease);
+  }
+  .oauth-modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .oauth-modal {
+    position: relative;
+    width: min(420px, calc(100vw - 48px));
+    background: linear-gradient(180deg, rgba(20,22,20,0.95), rgba(14,16,14,0.98));
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 32px 64px -16px rgba(0,0,0,0.6);
+    border-radius: var(--radius-lg);
+    padding: 36px 32px 32px;
+    transform: translateY(12px) scale(0.97);
+    transition: transform 0.35s var(--ease);
+  }
+  .oauth-modal-overlay.open .oauth-modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .oauth-modal-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: rgba(244,246,238,0.06);
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: background 0.2s var(--ease), color 0.2s var(--ease);
+  }
+  .oauth-modal-close:hover {
+    background: rgba(244,246,238,0.14);
+    color: var(--text);
+  }
+
+  .oauth-modal h3 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .oauth-modal .oauth-sub {
+    font-size: 14px;
+    color: var(--text-3);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .oauth-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 13px 18px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font);
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), filter 0.2s var(--ease), border-color 0.2s var(--ease);
+    text-decoration: none;
+    color: #fff;
+  }
+  .oauth-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.12);
+  }
+  .oauth-btn:active {
+    transform: scale(0.97);
+  }
+
+  .oauth-btn svg.oauth-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Google */
+  .oauth-btn.google {
+    background: #fff;
+    color: #1f1f1f;
+    border-color: rgba(255,255,255,0.18);
+    box-shadow: 0 2px 12px rgba(255,255,255,0.06);
+  }
+  .oauth-btn.google:hover {
+    box-shadow: 0 4px 20px rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.35);
+  }
+
+  /* Microsoft */
+  .oauth-btn.microsoft {
+    background: #2f2f2f;
+    color: #fff;
+    border-color: rgba(255,255,255,0.12);
+    box-shadow: 0 2px 12px rgba(0,120,212,0.1);
+  }
+  .oauth-btn.microsoft:hover {
+    box-shadow: 0 4px 20px rgba(0,120,212,0.25);
+    border-color: rgba(0,120,212,0.4);
+  }
+
+  /* GitHub */
+  .oauth-btn.github {
+    background: #24292e;
+    color: #fff;
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .oauth-btn.github:hover {
+    box-shadow: 0 4px 20px rgba(110,84,148,0.25);
+    border-color: rgba(110,84,148,0.35);
+  }
+
+  /* Divider */
+  .oauth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0 18px;
+    color: var(--text-3);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .oauth-divider::before,
+  .oauth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Demo note */
+  .oauth-demo-note {
+    margin-top: 18px;
+    padding: 12px 16px;
+    background: rgba(165,28,48,0.08);
+    border: 1px solid rgba(165,28,48,0.18);
+    border-radius: 12px;
+    font-size: 12.5px;
+    color: var(--text-3);
+    line-height: 1.5;
+    text-align: center;
+  }
+  .oauth-demo-note code {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11.5px;
+    color: var(--moss);
+    background: rgba(165,28,48,0.1);
+    padding: 2px 6px;
+    border-radius: 5px;
+  }
+
+  @media (max-width: 520px) {
+    .nav-actions { gap: 6px; }
+    .nav-actions .btn { padding: 8px 14px; font-size: 13px; }
+    .user-greeting { font-size: 12px; padding: 6px 10px; }
+  }
 </style>
 
 <link rel="preload" href="https://github.com/md-mushfiqur-rahim123-official/pic/blob/main/hero.jpg?raw=true" as="image">
@@ -1416,7 +1636,12 @@
       <a href="#compliance">API Compatibility</a>
       <a href="#voices">Community</a>
     </div>
-    <a href="#cta" class="btn btn-white btn-sm">Get started</a>
+    <div class="nav-actions">
+      <button id="signInBtn" class="btn btn-glass btn-sm">Sign In</button>
+      <span id="userGreeting" class="user-greeting" style="display:none;"></span>
+      <button id="signOutBtn" class="btn btn-glass btn-sm" style="display:none;">Sign Out</button>
+      <a href="#cta" class="btn btn-white btn-sm">Get started</a>
+    </div>
   </div>
 </nav>
 
@@ -2327,6 +2552,53 @@
   </div>
 </footer>
 
+<!-- ============================================ 
+     OAUTH SIGN IN MODAL
+============================================ -->
+<div class="oauth-modal-overlay" id="oauthModalOverlay" aria-hidden="true">
+  <div class="oauth-modal" role="dialog" aria-modal="true" aria-labelledby="oauthModalTitle">
+    <button class="oauth-modal-close" id="oauthModalClose" aria-label="Close">&times;</button>
+    <h3 id="oauthModalTitle">Sign In to Lychee</h3>
+    <p class="oauth-sub">Connect your account to sync settings across devices.</p>
+    <div class="oauth-buttons">
+      <!-- Google -->
+      <button class="oauth-btn google" data-provider="google">
+        <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Sign in with Google
+      </button>
+
+      <!-- Microsoft -->
+      <button class="oauth-btn microsoft" data-provider="microsoft">
+        <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="1" y="1" width="10" height="10" fill="#F25022"/>
+          <rect x="13" y="1" width="10" height="10" fill="#7FBA00"/>
+          <rect x="1" y="13" width="10" height="10" fill="#00A4EF"/>
+          <rect x="13" y="13" width="10" height="10" fill="#FFB900"/>
+        </svg>
+        Sign in with Microsoft
+      </button>
+
+      <!-- GitHub -->
+      <button class="oauth-btn github" data-provider="github">
+        <svg class="oauth-icon" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        Sign in with GitHub
+      </button>
+    </div>
+    <div class="oauth-divider">Demo Mode</div>
+    <p class="oauth-demo-note">
+      Using placeholder OAuth client IDs. Replace <code>OAUTH_CLIENT_ID</code> with your real client ID before deploying.
+      In demo mode, clicking a provider will simulate a login.
+    </p>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
@@ -2756,6 +3028,221 @@
     localStorage.setItem(key, count);
     var el = document.getElementById('viewCount');
     if (el) el.textContent = count;
+  })();
+
+  /* =========================================================
+     OAUTH 2.0 SIGN IN HANDLER
+  ========================================================= */
+  (function() {
+    var currentPage = window.location.origin + window.location.pathname;
+
+    /* ---- OAuth Provider Configs (use placeholder IDs — replace before prod) ---- */
+    var OAUTH_PROVIDERS = {
+      google: {
+        name: 'Google',
+        authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+        clientId: 'OAUTH_CLIENT_ID_GOOGLE.apps.googleusercontent.com',
+        scope: 'openid profile email',
+        responseType: 'token',
+        extraParams: '&nonce=' + Math.random().toString(36).substring(2)
+      },
+      microsoft: {
+        name: 'Microsoft',
+        authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+        clientId: 'OAUTH_CLIENT_ID_MICROSOFT',
+        scope: 'openid profile User.Read',
+        responseType: 'token',
+        extraParams: '&response_mode=fragment'
+      },
+      github: {
+        name: 'GitHub',
+        authUrl: 'https://github.com/login/oauth/authorize',
+        clientId: 'OAUTH_CLIENT_ID_GITHUB',
+        scope: 'read:user user:email',
+        responseType: 'token',
+        extraParams: ''
+      }
+    };
+
+    /* ---- Build full OAuth redirect URL ---- */
+    function buildOAuthUrl(provider) {
+      var p = OAUTH_PROVIDERS[provider];
+      if (!p) return '#';
+      return p.authUrl +
+        '?client_id=' + encodeURIComponent(p.clientId) +
+        '&redirect_uri=' + encodeURIComponent(currentPage) +
+        '&response_type=' + p.responseType +
+        '&scope=' + encodeURIComponent(p.scope) +
+        p.extraParams;
+    }
+
+    /* ---- Check if user data is stored in sessionStorage ---- */
+    function restoreSession() {
+      var data = sessionStorage.getItem('lychee_oauth_user');
+      if (data) {
+        try {
+          var user = JSON.parse(data);
+          showLoggedIn(user);
+          return true;
+        } catch (e) {}
+      }
+      return false;
+    }
+
+    /* ---- Parse OAuth callback from URL hash (implicit flow) ---- */
+    function handleOAuthCallback() {
+      var hash = window.location.hash;
+      if (!hash) return false;
+
+      var params = {};
+      hash.substring(1).split('&').forEach(function(pair) {
+        var parts = pair.split('=');
+        if (parts.length === 2) {
+          params[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+        }
+      });
+
+      if (params.access_token) {
+        // Real OAuth callback: extract user info from token response
+        // For demo: use a simulated user based on state/provider param
+        var provider = params.provider || 'google';
+        var providerName = OAUTH_PROVIDERS[provider] ? OAUTH_PROVIDERS[provider].name : provider;
+
+        var user = {
+          name: providerName + ' User',
+          email: 'user@' + provider + '.com',
+          provider: provider,
+          avatar: '',
+          token: params.access_token.substring(0, 16) + '...'
+        };
+
+        sessionStorage.setItem('lychee_oauth_user', JSON.stringify(user));
+        showLoggedIn(user);
+
+        // Clean URL
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, currentPage);
+        }
+        return true;
+      }
+      return false;
+    }
+
+    /* ---- Simulate OAuth login (demo mode) ---- */
+    function simulateLogin(provider) {
+      var p = OAUTH_PROVIDERS[provider];
+      if (!p) return;
+
+      var demoUsers = {
+        google:  { name: 'Alex Rivera',    email: 'alex.rivera@gmail.com',      avatar: 'https://i.pravatar.cc/96?img=3' },
+        microsoft:{ name: 'Jordan Lee',    email: 'jordan.lee@outlook.com',     avatar: 'https://i.pravatar.cc/96?img=5' },
+        github:  { name: 'Taylor Chen',    email: 'taylor@github.com',          avatar: 'https://i.pravatar.cc/96?img=8' }
+      };
+
+      var dummy = demoUsers[provider];
+      var user = {
+        name: dummy.name,
+        email: dummy.email,
+        provider: p.name,
+        avatar: dummy.avatar
+      };
+
+      sessionStorage.setItem('lychee_oauth_user', JSON.stringify(user));
+      showLoggedIn(user);
+      closeModal();
+    }
+
+    /* ---- Update nav UI for logged-in state ---- */
+    function showLoggedIn(user) {
+      var signInBtn = document.getElementById('signInBtn');
+      var signOutBtn = document.getElementById('signOutBtn');
+      var greetingEl = document.getElementById('userGreeting');
+
+      if (signInBtn) signInBtn.style.display = 'none';
+      if (greetingEl) {
+        var avatarHtml = user.avatar
+          ? '<img src="' + user.avatar + '" alt="" class="user-avatar" loading="lazy">'
+          : '';
+        greetingEl.innerHTML = avatarHtml + 'Welcome, ' + user.name.split(' ')[0] + '!';
+        greetingEl.style.display = 'inline-flex';
+        greetingEl.style.alignItems = 'center';
+      }
+      if (signOutBtn) signOutBtn.style.display = 'inline-flex';
+    }
+
+    /* ---- Sign out ---- */
+    function signOut() {
+      sessionStorage.removeItem('lychee_oauth_user');
+      var signInBtn = document.getElementById('signInBtn');
+      var signOutBtn = document.getElementById('signOutBtn');
+      var greetingEl = document.getElementById('userGreeting');
+      if (signInBtn) signInBtn.style.display = 'inline-flex';
+      if (signOutBtn) signOutBtn.style.display = 'none';
+      if (greetingEl) greetingEl.style.display = 'none';
+    }
+
+    /* ---- Modal open/close ---- */
+    var overlay = document.getElementById('oauthModalOverlay');
+    var closeBtn = document.getElementById('oauthModalClose');
+
+    function openModal() {
+      if (overlay) {
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeModal() {
+      if (overlay) {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+    }
+
+    /* ---- Wire up events ---- */
+    document.getElementById('signInBtn').addEventListener('click', openModal);
+    document.getElementById('signOutBtn').addEventListener('click', signOut);
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (overlay) {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeModal();
+      });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && overlay && overlay.classList.contains('open')) {
+        closeModal();
+      }
+    });
+
+    // Wire OAuth buttons — use placeholder URLs + demo fallback
+    document.querySelectorAll('.oauth-btn[data-provider]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var provider = this.getAttribute('data-provider');
+        var url = buildOAuthUrl(provider);
+
+        // Check if client ID is still a placeholder
+        var clientId = OAUTH_PROVIDERS[provider].clientId;
+        var isPlaceholder = clientId.indexOf('OAUTH_CLIENT_ID') === 0;
+
+        if (isPlaceholder) {
+          // Demo mode: simulate login
+          simulateLogin(provider);
+        } else {
+          // Real OAuth flow: redirect
+          window.location.href = url;
+        }
+      });
+    });
+
+    /* ---- Init: check for callback or restore session ---- */
+    if (!handleOAuthCallback()) {
+      restoreSession();
+    }
   })();
 
 })();
