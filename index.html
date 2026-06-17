@@ -1304,6 +1304,31 @@
     height: 20px;
   }
 
+  /* badge strip */
+  .hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 22px;
+    max-width: 720px;
+  }
+  .hero-badges a {
+    display: inline-flex;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.25s var(--ease), filter 0.25s var(--ease);
+  }
+  .hero-badges a:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.15);
+  }
+  .hero-badges img {
+    display: block;
+    height: 20px;
+  }
+
   /* =========================================================
      RESPONSIVE
   ========================================================= */
@@ -1402,12 +1427,44 @@
   <div class="wrap hero-core">
     <span class="hero-kicker reveal"><span class="dot"></span>The Orchestration Layer for Local LLMs</span>
     <h1 class="reveal" style="--i:1">From basic inference<br>to <em>advanced orchestration</em></h1>
-    <p class="reveal" style="--i:2">Lychee extends Ollama with multi-model pipelines, structured output, persistent conversation memory, and multi-instance load balancing.</p>
-    <div class="hero-cta reveal lift" style="--i:3">
-      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" class="btn btn-white">View on GitHub</a>
-      <a href="#platform" class="btn btn-glass">Read the Docs</a>
+    <div class="hero-badges reveal" style="--i:2">
+      <a href="https://github.com/MD-Mushfiqur123/lychee/releases" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/github/v/release/MD-Mushfiqur123/lychee?style=flat-square&color=A51C30&labelColor=1a1c1a" alt="GitHub release" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/github/go-mod/go-version/MD-Mushfiqur123/lychee?style=flat-square&color=00ADD8&labelColor=1a1c1a" alt="Go version" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee/blob/main/LICENSE" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/github/license/MD-Mushfiqur123/lychee?style=flat-square&color=4c1&labelColor=1a1c1a" alt="License MIT" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee/pkgs/container/lychee" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/docker-GHCR-A51C30?style=flat-square&logo=docker&logoColor=white&labelColor=1a1c1a" alt="Docker pulls" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/github/stars/MD-Mushfiqur123/lychee?style=flat-square&color=e3b341&labelColor=1a1c1a" alt="GitHub stars" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee-desktop" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/desktop-available-7b68ee?style=flat-square&logo=windows&logoColor=white&labelColor=1a1c1a" alt="Desktop Available" loading="lazy">
+      </a>
+      <a href="#" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/python-SDK-3776AB?style=flat-square&logo=python&logoColor=white&labelColor=1a1c1a" alt="Python SDK" loading="lazy">
+      </a>
+      <a href="#" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/npm-SDK-CB3837?style=flat-square&logo=npm&logoColor=white&labelColor=1a1c1a" alt="npm SDK" loading="lazy">
+      </a>
+      <a href="#" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/go-SDK-00ADD8?style=flat-square&logo=go&logoColor=white&labelColor=1a1c1a" alt="Go SDK" loading="lazy">
+      </a>
+      <a href="#" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/rust-SDK-000000?style=flat-square&logo=rust&logoColor=white&labelColor=1a1c1a" alt="Rust SDK" loading="lazy">
+      </a>
     </div>
-    <div class="hero-star-badge reveal" style="--i:4">
+    <p class="reveal" style="--i:3">Lychee extends Ollama with multi-model pipelines, structured output, persistent conversation memory, and multi-instance load balancing.</p>
+    <div class="hero-cta reveal lift" style="--i:4">
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" class="btn btn-white">View on GitHub</a>
+      <a href="https://md-mushfiqur123.github.io/lychee-docs/" target="_blank" class="btn btn-glass">Read the Docs</a>
+    </div>
+    <div class="hero-star-badge reveal" style="--i:5">
       <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" style="display:inline-flex;">
         <img src="https://img.shields.io/github/stars/MD-Mushfiqur123/lychee?style=social&color=A51C30" alt="GitHub stars" loading="lazy">
       </a>
@@ -1416,7 +1473,7 @@
 
   <div class="wrap">
     <div class="hero-stats">
-      <div class="hstat reveal" style="--i:4">
+      <div class="hstat reveal" style="--i:6">
         <div>
           <div class="hstat-num" data-count="100" data-decimals="0" data-suffix="%">0</div>
           <div class="hstat-label">Local Execution</div>
@@ -1427,7 +1484,7 @@
           <circle cx="29" cy="29" r="14" stroke="rgba(242,244,236,0.25)"/>
         </svg>
       </div>
-      <div class="hstat reveal" style="--i:5">
+      <div class="hstat reveal" style="--i:7">
         <div>
           <div class="hstat-num" data-count="1" data-suffix=" ms">0</div>
           <div class="hstat-label">Network Latency</div>
@@ -1949,7 +2006,7 @@
         <h2 class="reveal" style="--i:1">We translate the APIs. <em>You</em> build the future.</h2>
         <p class="reveal" style="--i:2">Lychee runs entirely locally. The platform is open-source, compiled in Go, and built on an offline-first architecture prioritizing maximum throughput with your hardware.</p>
         <div class="reveal" style="--i:3; margin-top: 28px;">
-          <a href="#cta" class="btn btn-glass btn-sm">View API documentation</a>
+          <a href="https://md-mushfiqur123.github.io/lychee-docs/" target="_blank" class="btn btn-glass btn-sm">View API documentation</a>
         </div>
       </div>
       <div class="badges">
@@ -1987,15 +2044,63 @@
 </section>
 
 <!-- ============================================
+     SECTION 7.5 — v0.2.0 HIGHLIGHTS
+============================================ -->
+<section class="voices" id="whats-new">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-pill reveal" style="background: rgba(165,28,48,0.08); border-color: rgba(165,28,48,0.25);">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><circle cx="7.5" cy="7.5" r="5.5" stroke="#A51C30" stroke-width="1.3"/><path d="M4.5 7.5l2 2 4-4" stroke="#A51C30" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="color: rgba(165,28,48,0.9);">Just shipped</span>
+      </span>
+      <h2 class="reveal" style="--i:1">New in <em>v0.2.0-alpha</em></h2>
+      <p class="reveal" style="--i:2">The latest release brings major features across the entire Lychee ecosystem — from the core runtime to desktop and SDKs.</p>
+    </div>
+
+    <div class="badges" style="max-width: 900px; margin: 0 auto;">
+      <div class="badge-tile reveal" style="--i:0">
+        <span class="badge-ico">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="4" stroke="#A51C30" stroke-width="1.4"/><path d="M7 10h6M10 7v6" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <h4>Lychee Desktop App</h4>
+        <span>Native GUI for Windows, macOS &amp; Linux. One-click install, model browser, terminal dashboard built-in.</span>
+      </div>
+      <div class="badge-tile reveal" style="--i:1">
+        <span class="badge-ico">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#A51C30" stroke-width="1.4"/><path d="M6.5 10.3l2.3 2.3 4.7-5" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h4>4 Official SDKs</h4>
+        <span>Python, JavaScript/TypeScript, Go, and Rust SDKs with first-class structured output &amp; pipeline support.</span>
+      </div>
+      <div class="badge-tile reveal" style="--i:2">
+        <span class="badge-ico">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.2 16.8 5v4.3c0 4-2.8 7-6.8 8.5-4-1.5-6.8-4.5-6.8-8.5V5L10 2.2z" stroke="#A51C30" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 10l2.1 2.1 3.9-4.2" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h4>Comprehensive Documentation</h4>
+        <span>New dedicated docs site with API reference, quickstart guides, and architecture overview at lychee-docs.</span>
+      </div>
+      <div class="badge-tile reveal" style="--i:3">
+        <span class="badge-ico">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#A51C30" stroke-width="1.4"/><path d="M10 6v4M10 13h.01" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round"/><path d="M2 10h16M4.3 4.8c3.2 2.4 8.2 2.4 11.4 0M4.3 15.2c3.2-2.4 8.2-2.4 11.4 0" stroke="#A51C30" stroke-width="1.2"/></svg>
+        </span>
+        <h4>Pipeline Engine v2</h4>
+        <span>DAG-based conditional routing, parallel step execution, and automatic schema propagation between stages.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
      SECTION 8 — CTA + FOOTER
 ============================================ -->
 <section class="cta" id="cta">
   
   <div class="cta-inner">
     <h2 class="reveal">Let your development get <em>faster</em></h2>
-    <p class="reveal" style="--i:1">A 5-minute local installation — no cloud accounts, just your hardware and what Lychee can orchestrate on it.</p>
+    <p class="reveal" style="--i:1">A 5-minute local installation — no cloud accounts, just your hardware and what Lychee can orchestrate on it. <strong>v0.2.0-alpha</strong> now available.</p>
     <div class="cta-actions reveal lift" style="--i:2">
-      <a href="#" class="btn btn-white">Install Lychee</a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee/releases" target="_blank" class="btn btn-white">Install Lychee</a>
+      <a href="https://md-mushfiqur123.github.io/lychee-docs/" target="_blank" class="btn btn-glass">Read the Docs</a>
       <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" class="btn btn-glass">View on GitHub</a>
     </div>
     <span class="cta-note reveal" style="--i:3">
@@ -2025,7 +2130,7 @@
           <svg width="25" height="25" viewBox="0 0 26 26" fill="none" aria-hidden="true">
             <circle cx="13" cy="13" r="4" fill="#A51C30"/><path d="M13 1C6.37 1 1 6.37 1 13s5.37 12 12 12 12-5.37 12-12S19.63 1 13 1zm0 21.6c-5.3 0-9.6-4.3-9.6-9.6S7.7 3.4 13 3.4s9.6 4.3 9.6 9.6-4.3 9.6-9.6 9.6z" fill="#f2f4ec"/>
           </svg>Lychee</a>
-        <p>The Orchestration Layer for Local LLMs — Built on the shoulders of Ollama.</p>
+        <p>The Orchestration Layer for Local LLMs — Built on Ollama. v0.2.0-alpha · 4 SDKs · Open source.</p>
       </div>
       <div class="foot-col">
         <h5>Features</h5>
@@ -2038,7 +2143,7 @@
         <h5>Resources</h5>
         <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank">GitHub</a>
         <a href="#">Research</a>
-        <a href="#">Documentation</a>
+        <a href="https://md-mushfiqur123.github.io/lychee-docs/" target="_blank">Documentation</a>
         <a href="#">Press</a>
       </div>
       <div class="foot-col">
