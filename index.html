@@ -3,8 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lychee — Local LLM Orchestration</title>
-<meta name="description" content="Lychee is the orchestration layer for local LLMs. Multi-model pipelines, structured output, persistent conversation memory, and multi-instance load balancing.">
+<title>Lychee — Universal Local LLM Runtime</title>
+<meta name="description" content="Run any LLM locally. Full Ollama compatibility + HuggingFace, pipelines, structured output. Free &amp; open source.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lychee — Universal Local LLM Runtime">
+<meta property="og:description" content="Run any LLM locally. Full Ollama compatibility + HuggingFace, pipelines, structured output. Free &amp; open source.">
+<meta property="og:image" content="https://raw.githubusercontent.com/MD-Mushfiqur123/pic/main/hero.jpg">
+<meta property="og:image:alt" content="Lychee — Universal Local LLM Runtime hero image">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://md-mushfiqur123.github.io/lychee-landing-page/">
+<meta property="og:site_name" content="Lychee">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lychee — Universal Local LLM Runtime">
+<meta name="twitter:description" content="Run any LLM locally. Full Ollama compatibility + HuggingFace, pipelines, structured output. Free &amp; open source.">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/MD-Mushfiqur123/pic/main/hero.jpg">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://md-mushfiqur123.github.io/lychee-landing-page/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -1264,6 +1284,26 @@
     animation: breathe 2.8s ease-in-out infinite;
   }
 
+  /* ---- view counter + gh star ---- */
+  .view-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-3);
+    margin-top: 12px;
+  }
+  .hero-star-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .hero-star-badge img {
+    display: block;
+    height: 20px;
+  }
+
   /* =========================================================
      RESPONSIVE
   ========================================================= */
@@ -1366,6 +1406,11 @@
     <div class="hero-cta reveal lift" style="--i:3">
       <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" class="btn btn-white">View on GitHub</a>
       <a href="#platform" class="btn btn-glass">Read the Docs</a>
+    </div>
+    <div class="hero-star-badge reveal" style="--i:4">
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" style="display:inline-flex;">
+        <img src="https://img.shields.io/github/stars/MD-Mushfiqur123/lychee?style=social&color=A51C30" alt="GitHub stars" loading="lazy">
+      </a>
     </div>
   </div>
 
@@ -2008,6 +2053,14 @@
       <span>© 2026 Lychee Contributors</span>
       <span class="status"><span class="dot"></span>All systems steady</span>
     </div>
+    <div class="view-counter" id="viewCounter" style="text-align:center; justify-content:center; margin-top:16px;">
+      <span>👁️ Views: <strong id="viewCount">...</strong></span>
+    </div>
+    <div style="text-align:center; margin-top:6px;">
+      <a href="https://hits.seeyoufarm.com" target="_blank" rel="noopener">
+        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fmd-mushfiqur123.github.io%2Flychee&count_bg=%23121412&title_bg=%23555&icon=&icon_color=%23A51C30&title=views&edge_flat=false" alt="Hits" loading="lazy">
+      </a>
+    </div>
   </div>
 </footer>
 
@@ -2432,6 +2485,16 @@
     }
     setTimeout(tick, 2600);
   }
+  /* ---- localStorage view counter ---- */
+  (function() {
+    var key = 'lychee_page_views';
+    var count = parseInt(localStorage.getItem(key) || '0', 10);
+    count += 1;
+    localStorage.setItem(key, count);
+    var el = document.getElementById('viewCount');
+    if (el) el.textContent = count;
+  })();
+
 })();
 </script>
 
