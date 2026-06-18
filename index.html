@@ -1,0 +1,3254 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lychee â€” Universal Local LLM Runtime</title>
+<meta name="description" content="Run any LLM locally. Full Ollama compatibility + HuggingFace, pipelines, structured output. Free &amp; open source.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lychee â€” Universal Local LLM Runtime">
+<meta property="og:description" content="Run any LLM locally. Full Ollama compatibility + HuggingFace, pipelines, structured output. Free &amp; open source.">
+<meta property="og:image" content="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/hero.jpg">
+<meta property="og:image:alt" content="Lychee â€” Universal Local LLM Runtime hero image">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://md-mushfiqur123.github.io/lychee-landing-page/">
+<meta property="og:site_name" content="Lychee">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lychee â€” Universal Local LLM Runtime">
+<meta name="twitter:description" content="Run any LLM locally. Full Ollama compatibility + HuggingFace, pipelines, structured output. Free &amp; open source.">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/hero.jpg">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://md-mushfiqur123.github.io/lychee-landing-page/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0c0a;
+    --bg-soft: #101210;
+    --card: #121412;
+    --card-hover: #161916;
+    --border: rgba(244, 246, 238, 0.07);
+    --border-strong: rgba(244, 246, 238, 0.14);
+    --text: #f2f4ec;
+    --text-2: #b9beae;
+    --text-3: #828877;
+    --moss: #A51C30;
+    --moss-deep: #7c1524;
+    --radius: 18px;
+    --radius-lg: 28px;
+    --font: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: rgba(165, 28, 48, 0.3); color: var(--text); }
+
+  /* ---- grain overlay ---- */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
+
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---- glass cursor ---- */
+  body.glass-cursor-on, body.glass-cursor-on * { cursor: none !important; }
+  .glass-cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 38px; height: 38px;
+    margin: -19px 0 0 -19px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 200;
+    opacity: 0;
+    background: radial-gradient(circle at 32% 26%, rgba(255,255,255,0.18), rgba(255,255,255,0.02) 52%, rgba(255,255,255,0.10) 100%);
+    border: 1px solid rgba(255,255,255,0.45);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.55),
+      inset 0 -3px 5px rgba(255,255,255,0.16),
+      inset 3px 0 4px rgba(255,255,255,0.10),
+      inset -1px -1px 2px rgba(11,12,10,0.12),
+      0 6px 18px rgba(0,0,0,0.22);
+    backdrop-filter: blur(3px) saturate(165%) brightness(1.07);
+    -webkit-backdrop-filter: blur(3px) saturate(165%) brightness(1.07);
+    transition: opacity 0.3s var(--ease);
+    will-change: transform;
+  }
+  .glass-cursor::before {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    border-radius: 50%;
+    border: 1.5px solid transparent;
+    border-top-color: rgba(255,255,255,0.5);
+    border-left-color: rgba(255,255,255,0.18);
+    transform: rotate(-12deg);
+  }
+  .glass-cursor::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 3px; height: 3px;
+    margin: -1.5px 0 0 -1.5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+  }
+  .glass-cursor.visible { opacity: 1; }
+
+  .cursor-trail {
+    position: fixed;
+    top: 0; left: 0;
+    width: 6px; height: 6px;
+    margin: -3px 0 0 -3px;
+    background: #A51C30;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 199;
+    filter: blur(2px);
+    will-change: transform, opacity;
+    opacity: 0;
+  }
+
+
+  /* ---- reveal animation ---- */
+  .reveal {
+    /* opacity: 0; */
+    transform: translateY(28px);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+    transition-delay: calc(var(--i, 0) * 90ms);
+  }
+  .reveal.in { /* opacity: 1; */ transform: translateY(0); }
+  /* transform-only reveal: keeps ancestor opacity at 1 so backdrop blur of
+     glass children works during the entrance instead of popping in after */
+  .reveal.lift { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .hero-media img { opacity: 1 !important; transform: none !important; transition: none !important; }
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+
+  /* ---- buttons ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.25s var(--ease), background 0.25s var(--ease), border-color 0.25s var(--ease);
+    will-change: transform;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-white { background: var(--text); color: #131510; }
+  .btn-white:hover { background: #ffffff; transform: translateY(-1px); }
+  .btn-glass {
+    background: rgba(244, 246, 238, 0.08);
+    color: var(--text);
+    border-color: rgba(244, 246, 238, 0.14);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .btn-glass:hover { background: rgba(244, 246, 238, 0.14); transform: translateY(-1px); }
+  .btn-sm { padding: 9px 18px; font-size: 14px; }
+
+  /* =========================================================
+     SECTION 1 â€” HERO
+  ========================================================= */
+  .hero {
+    position: relative;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero-media {
+    position: absolute;
+    inset: -12% 0;
+    z-index: -2;
+    will-change: transform;
+  }
+  .hero-media img,
+  .hero-media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 60%;
+  }
+  .hero-media img {
+    opacity: 0;
+    transform: scale(1.045);
+    transition: none;
+    will-change: opacity, transform;
+  }
+  .hero-media img.loaded { opacity: 1; transform: scale(1); }
+  .hero-veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(11,12,10,0.62) 0%, rgba(11,12,10,0.18) 34%, rgba(11,12,10,0.30) 62%, rgba(11,12,10,0.96) 100%);
+  }
+  #global-webgl-bg canvas.hero-gl {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.2s var(--ease);
+  }
+  #global-webgl-bg canvas.hero-gl.on { opacity: 1; }
+
+  /* nav */
+  .nav-shell {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 60;
+    border-bottom: 1px solid transparent;
+    transition: background 1.2s var(--ease), border-color 1.2s var(--ease), backdrop-filter 1.2s var(--ease);
+  }
+  .nav-shell.scrolled {
+    background: rgba(11,12,10,0.72);
+    border-bottom-color: var(--border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  .nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    transition: padding 0.9s var(--ease);
+  }
+  .nav-shell.scrolled .nav { padding-top: 12px; padding-bottom: 12px; }
+  .nav .brand { grid-column: 1; justify-self: start; }
+  .nav .nav-links { grid-column: 2; justify-self: center; }
+  .nav > .btn { grid-column: 3; justify-self: end; }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    color: var(--text);
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 24px;
+    letter-spacing: 0.01em;
+  }
+  .brand svg { display: block; }
+  .nav-links {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: rgba(11,12,10,0.14);
+    border: 1px solid rgba(244,246,238,0.07);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 100px;
+    padding: 5px;
+  }
+  .nav-links a {
+    color: var(--text-2);
+    text-decoration: none;
+    font-size: 14.5px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 100px;
+    transition: color 0.2s var(--ease), background 0.2s var(--ease);
+  }
+  .nav-links a:hover { color: var(--text); background: rgba(244,246,238,0.08); }
+
+  /* hero content */
+  .hero-core {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 130px 0 48px;
+  }
+  .hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(242,244,236,0.85);
+    background: rgba(11,12,10,0.30);
+    border: 1px solid rgba(244,246,238,0.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+  }
+  .hero-kicker .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--moss);
+    animation: breathe 2.8s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(165,28,48,0.45); }
+    50% { opacity: 0.7; transform: scale(0.82); box-shadow: 0 0 0 6px rgba(165,28,48,0); }
+  }
+  .hero h1 {
+    font-size: clamp(2.7rem, 6.4vw, 4.9rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+    max-width: 18ch;
+    text-wrap: balance;
+    text-shadow: 0 2px 40px rgba(11,12,10,0.5);
+  }
+  .hero h1 em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .hero p {
+    margin-top: 22px;
+    font-size: clamp(1rem, 1.4vw, 1.125rem);
+    color: rgba(242,244,236,0.82);
+    max-width: 46ch;
+    text-wrap: balance;
+    text-shadow: 0 1px 24px rgba(11,12,10,0.6);
+  }
+  .hero-cta { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; justify-content: center; }
+
+  /* hero stats */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 36px 0 44px;
+  }
+  .hstat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0 36px;
+    border-left: 1px solid rgba(244,246,238,0.16);
+  }
+  .hstat:first-child { border-left: none; padding-left: 0; }
+  .hstat:last-child { padding-right: 0; }
+  .hstat-num {
+    font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .hstat-label { font-size: 14px; color: rgba(242,244,236,0.7); margin-top: 2px; }
+  .hstat-orb { flex-shrink: 0; opacity: 0.8; }
+  .hstat-orb .spin { transform-origin: center; animation: slowspin 26s linear infinite; }
+  @keyframes slowspin { to { transform: rotate(360deg); } }
+
+  /* =========================================================
+     SECTION 2 â€” TRUST STRIP
+  ========================================================= */
+  .trust {
+    padding: 72px 0 60px;
+    border-bottom: 1px solid var(--border);
+  }
+  .trust-label {
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 40px;
+  }
+  .marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .marquee-track {
+    display: flex;
+    gap: 84px;
+    width: max-content;
+    animation: marquee 17s linear infinite;
+    will-change: transform;
+  }
+  /* .marquee:hover .marquee-track { animation-play-state: paused; } */
+  @keyframes marquee { to { transform: translateX(-10%); } }
+  .logo-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: rgba(242,244,236,0.42);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition: color 0.3s var(--ease);
+  }
+  .logo-item:hover { color: rgba(242,244,236,0.85); }
+  .logo-item.serifed { font-family: var(--serif); font-weight: 400; font-size: 22px; }
+  .logo-item.mono-ish { letter-spacing: 0.12em; font-size: 16px; text-transform: uppercase; }
+
+  /* =========================================================
+     SECTION HEADERS (shared)
+  ========================================================= */
+  .sec-head { text-align: center; max-width: 760px; margin: 0 auto 64px; }
+  .sec-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 100px;
+    padding: 7px 16px;
+    margin-bottom: 24px;
+  }
+  .sec-pill svg { opacity: 0.8; }
+  .sec-head h2, .split-copy h2, .cta-inner h2 {
+    font-size: clamp(2rem, 4.4vw, 3.3rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .sec-head h2 em, .split-copy h2 em, .cta-inner h2 em, .num-head h2 em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+  }
+  .sec-head p { margin-top: 18px; color: var(--text-2); font-size: 17px; max-width: 56ch; margin-left: auto; margin-right: auto; }
+
+  /* =========================================================
+     SECTION 3 â€” BENTO
+  ========================================================= */
+  .bento-sec { padding: 110px 0; }
+  .bento {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 16px;
+  }
+  .bento-row2 { grid-template-columns: 2fr 1fr; margin-top: 16px; }
+  .cell {
+    position: relative;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--card);
+    overflow: hidden;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+  }
+  .cell:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+
+  /* Mouse Glow effect for Bento Cells */
+  .cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(600px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(165,28,48,0.12), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .cell:hover::before { opacity: 1; }
+  .cell > * { position: relative; z-index: 2; }
+
+  .cell-pad { padding: 32px; }
+  .cell h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; }
+  .cell .cell-sub { margin-top: 10px; font-size: 14.5px; color: var(--text-2); line-height: 1.55; max-width: 38ch; }
+  .cell-img {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .cell-img img { width: 100%; height: 100%; object-fit: cover; }
+  .cell-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11,12,10,0.78) 0%, rgba(11,12,10,0.25) 45%, rgba(11,12,10,0.55) 100%);
+  }
+  .cell-over { position: relative; z-index: 1; display: flex; flex-direction: column; flex: 1; }
+  .cell-top-row { display: flex; justify-content: space-between; gap: 32px; align-items: flex-start; }
+  .cell-top-row .cell-sub { text-align: right; margin-top: 4px; }
+
+  /* cell 1 â€” key vault */
+  .vault-panel {
+    margin-top: 24px;
+    background: rgba(244,246,238,0.03);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .vault-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 11px 16px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .vault-head .hsm {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: none;
+    color: var(--moss);
+    border: 1px solid rgba(165,28,48,0.3);
+    background: rgba(165,28,48,0.08);
+    padding: 3px 9px; border-radius: 100px;
+    white-space: nowrap;
+  }
+  .key-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .key-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--moss); flex-shrink: 0; }
+  .key-dot.busy { background: #d4c189; animation: breathe 1.7s ease-in-out infinite; }
+  .key-name { font-weight: 600; color: var(--text-2); }
+  .key-fp {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px; letter-spacing: 0.04em;
+    color: var(--text-3);
+    background: rgba(244,246,238,0.05);
+    border-radius: 6px;
+    padding: 2px 7px;
+  }
+  .key-when { margin-left: auto; font-size: 12px; color: var(--text-3); }
+  .key-when.rotating { color: #d4c189; display: inline-flex; align-items: center; gap: 6px; }
+  .key-when.rotating svg { animation: slowspin 2.4s linear infinite; transform-origin: center; }
+  .cipher-strip {
+    margin-top: 12px;
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(244,246,238,0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 16px;
+  }
+  .cipher-label {
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+  .cipher-text {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12.5px; letter-spacing: 0.06em;
+    color: var(--moss);
+    overflow: hidden; white-space: nowrap;
+    flex: 1;
+  }
+  .cipher-strip > svg { flex-shrink: 0; opacity: 0.7; }
+  .spec-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 18px; }
+  .spec {
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em;
+    color: var(--text-3);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px 11px;
+  }
+
+  /* cell 2 â€” chart */
+  .chart-zone { margin-top: auto; position: relative; z-index: 1; padding: 0 32px 24px; }
+  .chart-frame {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(244,246,238,0.10), rgba(244,246,238,0.03) 38%, rgba(11,12,10,0.30));
+    border: 1px solid rgba(244,246,238,0.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 28px 56px -24px rgba(0,0,0,0.55);
+    backdrop-filter: blur(26px) saturate(150%);
+    -webkit-backdrop-filter: blur(26px) saturate(150%);
+    border-radius: 18px;
+    padding: 18px 20px 14px;
+  }
+  .chart-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(115deg, rgba(255,255,255,0.09), transparent 42%);
+    pointer-events: none;
+  }
+  .chart-frame svg { display: block; width: 100%; height: auto; }
+  .chart-axis { display: flex; justify-content: space-between; font-size: 11.5px; color: rgba(242,244,236,0.55); padding-top: 10px; }
+  .draw-line {
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 1200;
+    transition: stroke-dashoffset 2.4s var(--ease) 0.3s;
+  }
+  .cell.in .draw-line { stroke-dashoffset: 0; }
+  .chart-area { opacity: 0; transition: opacity 1.6s ease 1.2s; }
+  .cell.in .chart-area { opacity: 1; }
+  .chart-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .chart-title {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(242,244,236,0.6);
+  }
+  .chart-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .legend {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; color: rgba(242,244,236,0.6);
+  }
+  .legend i { display: block; width: 16px; height: 2px; border-radius: 2px; background: #f2f4ec; }
+  .legend i.dashed { background: repeating-linear-gradient(90deg, rgba(242,244,236,0.55) 0 4px, transparent 4px 8px); }
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 11.5px; font-weight: 600;
+    color: rgba(242,244,236,0.85);
+    border: 1px solid rgba(244,246,238,0.14);
+    background: rgba(244,246,238,0.06);
+    border-radius: 100px;
+    padding: 3px 11px;
+  }
+  .live-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--moss);
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  .pulse-ring {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ringgrow 2.6s ease-out infinite;
+  }
+  @keyframes ringgrow {
+    0% { transform: scale(0.35); opacity: 0.9; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  /* cell 3 â€” chips + generated rules */
+  .chip-zone {
+    margin-top: auto;
+    position: relative; z-index: 1;
+    padding: 24px 32px 28px;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 16px;
+    align-items: end;
+  }
+  .chip-col { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+  .dial-panel {
+    width: 100%;
+    max-width: 340px;
+    background: linear-gradient(180deg, rgba(244,246,238,0.10), rgba(244,246,238,0.03) 40%, rgba(11,12,10,0.32));
+    border: 1px solid rgba(244,246,238,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 24px 48px -20px rgba(0,0,0,0.5);
+    backdrop-filter: blur(26px) saturate(150%);
+    -webkit-backdrop-filter: blur(26px) saturate(150%);
+    border-radius: 18px;
+    padding: 16px 18px 14px;
+  }
+  .dial-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.13em; text-transform: uppercase;
+    color: rgba(242,244,236,0.6);
+  }
+  .dial-val { color: var(--moss); letter-spacing: 0.04em; }
+  .dial { display: block; width: 72%; margin: 12px auto 0; }
+  .dial-fill { stroke-dasharray: 0 290; transition: stroke-dasharray 1.6s var(--ease) 0.4s; }
+  .cell.in .dial-fill { stroke-dasharray: 157 290; }
+  .needle {
+    transform-box: view-box;
+    transform-origin: 110px 112px;
+    transform: rotate(-76deg);
+  }
+  .cell.in .needle { animation: dialswing 1.5s var(--ease) 0.4s forwards; }
+  @keyframes dialswing {
+    0% { transform: rotate(-76deg); }
+    70% { transform: rotate(18deg); }
+    100% { transform: rotate(14deg); }
+  }
+  .needle-wrap {
+    transform-box: view-box;
+    transform-origin: 110px 112px;
+    animation: dialwobble 7s ease-in-out 2.4s infinite;
+  }
+  @keyframes dialwobble {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-3deg); }
+  }
+  .dial-stops {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--text-3);
+    margin-top: 4px;
+  }
+  .dial-stops .on { color: var(--text); font-weight: 600; }
+  .dial-scope {
+    display: flex; justify-content: space-between; gap: 10px;
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid rgba(244,246,238,0.10);
+  }
+  .scope-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: rgba(242,244,236,0.75);
+    white-space: nowrap;
+  }
+  .chip-status {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; color: rgba(242,244,236,0.78);
+  }
+  .chip-status svg { animation: slowspin 8s linear infinite; transform-origin: center; }
+  .typed::after { content: ''; display: inline-block; width: 1px; height: 13px; background: rgba(242,244,236,0.8); margin-left: 2px; vertical-align: -2px; animation: blink 1.05s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .rules-panel {
+    background: linear-gradient(180deg, rgba(244,246,238,0.08), rgba(244,246,238,0.02) 40%, rgba(11,12,10,0.34));
+    border: 1px solid rgba(244,246,238,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 24px 48px -20px rgba(0,0,0,0.5);
+    backdrop-filter: blur(26px) saturate(150%);
+    -webkit-backdrop-filter: blur(26px) saturate(150%);
+    border-radius: 16px;
+    padding: 14px 16px 5px;
+  }
+  .rules-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.13em; text-transform: uppercase;
+    color: rgba(242,244,236,0.6);
+    padding-bottom: 10px;
+  }
+  .rules-count { color: var(--moss); letter-spacing: 0.04em; }
+  .rule {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 0;
+    border-top: 1px solid rgba(244,246,238,0.08);
+    font-size: 12.5px;
+    color: rgba(242,244,236,0.78);
+    white-space: nowrap;
+    opacity: 0.45;
+    animation: rulecycle 8s ease-in-out infinite;
+  }
+  .rule svg { flex-shrink: 0; }
+  .rule:nth-child(2) { animation-delay: 0s; }
+  .rule:nth-child(3) { animation-delay: 2s; }
+  .rule:nth-child(4) { animation-delay: 4s; }
+  .rule:nth-child(5) { animation-delay: 6s; }
+  @keyframes rulecycle {
+    0%, 100% { opacity: 0.45; }
+    4%, 22% { opacity: 1; }
+    30% { opacity: 0.45; }
+  }
+
+  /* cell 4 â€” containment timeline */
+  .auto-cta { margin-top: 22px; }
+  .timeline { position: relative; margin-top: auto; padding-top: 22px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px; top: 46px; bottom: 30px;
+    width: 1px;
+    background: rgba(244,246,238,0.12);
+  }
+  .t-step {
+    position: relative;
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 10px 0;
+    opacity: 0.42;
+    animation: stepglow 9s ease-in-out infinite;
+  }
+  .t-step:nth-child(1) { animation-delay: 0s; }
+  .t-step:nth-child(2) { animation-delay: 2.25s; }
+  .t-step:nth-child(3) { animation-delay: 4.5s; }
+  .t-step:nth-child(4) { animation-delay: 6.75s; }
+  @keyframes stepglow {
+    0%, 100% { opacity: 0.42; }
+    5%, 27% { opacity: 1; }
+    35% { opacity: 0.42; }
+  }
+  .t-ico {
+    position: relative; z-index: 1;
+    width: 23px; height: 23px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .t-time {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 10.5px; letter-spacing: 0.06em;
+    color: var(--text-3);
+  }
+  .t-label { font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; margin-top: 1px; }
+  .t-sub { font-size: 12.5px; color: var(--text-3); margin-top: 1px; }
+
+  /* =========================================================
+     SECTION 4 â€” SPLIT FEATURES (zig-zag)
+  ========================================================= */
+  .split-sec { padding: 30px 0 110px; }
+  .split-row {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 72px;
+    align-items: center;
+    padding: 70px 0;
+  }
+  .split-row + .split-row { border-top: 1px solid var(--border); }
+  .split-row.flip .split-copy { order: 2; }
+  .split-row.flip .split-art { order: 1; }
+  .split-copy .mini-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--moss);
+    margin-bottom: 20px;
+  }
+  .split-copy p { margin-top: 18px; color: var(--text-2); font-size: 16.5px; max-width: 52ch; }
+  .split-list { margin-top: 28px; display: flex; flex-direction: column; }
+  .split-list li {
+    list-style: none;
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    font-size: 15.5px;
+    color: var(--text-2);
+  }
+  .split-list li strong { color: var(--text); font-weight: 600; }
+  .split-list li svg { flex-shrink: 0; margin-top: 4px; }
+  .split-art {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    aspect-ratio: 4 / 4.6;
+    max-height: 560px;
+    width: 100%;
+  }
+  .split-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .split-art::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(200deg, rgba(11,12,10,0.05) 30%, rgba(11,12,10,0.55) 100%);
+  }
+  .float-card {
+    position: absolute;
+    z-index: 2;
+    left: 24px; right: 24px; bottom: 24px;
+    background: linear-gradient(180deg, rgba(244,246,238,0.08), rgba(11,12,10,0.48));
+    border: 1px solid rgba(244,246,238,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 24px 48px -16px rgba(0,0,0,0.5);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .float-card .fc-body { flex: 1; min-width: 0; }
+  .float-card .fc-title { display: block; }
+  .float-card .fc-sub { display: block; }
+  .float-card .sig {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    background: rgba(165,28,48,0.16);
+    border: 1px solid rgba(165,28,48,0.3);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .float-card .fc-title { font-size: 14.5px; font-weight: 600; }
+  .float-card .fc-sub { font-size: 12.5px; color: var(--text-3); margin-top: 1px; }
+  .float-card .fc-pill {
+    margin-left: auto;
+    font-size: 12px; font-weight: 600;
+    color: #11130d;
+    background: var(--moss);
+    border-radius: 100px;
+    padding: 4px 11px;
+    white-space: nowrap;
+  }
+  /* orbital coverage visual (overnight watch) */
+  .orbit {
+    position: absolute;
+    z-index: 2;
+    top: 42%; left: 50%;
+    width: 380px; height: 380px;
+    transform: translate(-50%, -50%);
+  }
+  .orbit-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(244,246,238,0.22);
+    background: radial-gradient(circle, rgba(244,246,238,0.02) 40%, rgba(244,246,238,0.06) 100%);
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .orbit-ring.r1 { width: 240px; height: 240px; }
+  .orbit-ring.r2 {
+    width: 360px; height: 360px;
+    border-color: rgba(244,246,238,0.12);
+    background: radial-gradient(circle, rgba(244,246,238,0.015) 55%, rgba(244,246,238,0.045) 100%);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+  }
+  .orbit-spinner {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 300px; height: 300px;
+    margin: -150px 0 0 -150px;
+    animation: slowspin 70s linear infinite;
+  }
+  .orbit-core {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 104px; height: 104px;
+    margin: -52px 0 0 -52px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, rgba(244,246,238,0.16), rgba(244,246,238,0.05));
+    border: 1px solid rgba(244,246,238,0.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 24px 48px -16px rgba(0,0,0,0.5);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    display: flex; align-items: center; justify-content: center;
+    animation: nodeglow 4s ease-in-out infinite;
+  }
+  .orbit-node {
+    position: absolute;
+    width: 42px; height: 42px;
+    margin: -21px 0 0 -21px;
+    border-radius: 50%;
+    background: rgba(11,12,10,0.45);
+    border: 1px solid rgba(244,246,238,0.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 12px 24px -8px rgba(0,0,0,0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    animation: tilefloat 6s ease-in-out infinite;
+  }
+
+  /* compliance node tree */
+  .art-tree {
+    position: absolute;
+    z-index: 2;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(400px, calc(100% - 48px));
+    background: linear-gradient(180deg, rgba(244,246,238,0.10), rgba(11,12,10,0.38));
+    border: 1px solid rgba(244,246,238,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 32px 64px -24px rgba(0,0,0,0.55);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    border-radius: 22px;
+    padding: 26px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .tree-pill {
+    font-size: 12.5px; font-weight: 600;
+    color: rgba(242,244,236,0.9);
+    background: rgba(244,246,238,0.08);
+    border: 1px solid rgba(244,246,238,0.16);
+    border-radius: 100px;
+    padding: 7px 16px;
+    white-space: nowrap;
+  }
+  .tree-link {
+    width: 1px; height: 24px;
+    background: linear-gradient(180deg, rgba(244,246,238,0.4), rgba(244,246,238,0.1));
+  }
+  .tree-node {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: rgba(244,246,238,0.08);
+    border: 1px solid rgba(244,246,238,0.2);
+    display: flex; align-items: center; justify-content: center;
+    animation: nodeglow 3.6s ease-in-out infinite;
+  }
+  @keyframes nodeglow {
+    0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 0 rgba(165,28,48,0.25); }
+    50% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 10px rgba(165,28,48,0); }
+  }
+  .tree-tiles {
+    display: flex; gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .tree-tile {
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em;
+    color: rgba(242,244,236,0.85);
+    background: rgba(244,246,238,0.06);
+    border: 1px solid rgba(244,246,238,0.14);
+    border-radius: 12px;
+    padding: 10px 13px;
+    white-space: nowrap;
+    animation: tilefloat 6s ease-in-out infinite;
+  }
+  .tree-tile:nth-child(2) { animation-delay: 1.2s; }
+  .tree-tile:nth-child(3) { animation-delay: 2.4s; }
+  .tree-tile:nth-child(4) { animation-delay: 3.6s; }
+  @keyframes tilefloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  .tree-caption {
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: rgba(242,244,236,0.6);
+  }
+
+  /* =========================================================
+     SECTION 5 â€” NUMBERS (full-bleed nature)
+  ========================================================= */
+  .numbers {
+    position: relative;
+    padding: 150px 0;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .numbers .num-bg { position: absolute; inset: 0; z-index: -2; }
+  .numbers .num-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .numbers::after {
+    content: '';
+    position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(180deg, var(--bg) 0%, rgba(11,12,10,0.45) 26%, rgba(11,12,10,0.45) 74%, var(--bg) 100%);
+  }
+  .num-head { text-align: center; max-width: 680px; margin: 0 auto 80px; }
+  .num-head h2 {
+    font-size: clamp(2rem, 4.4vw, 3.3rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    text-shadow: 0 2px 30px rgba(11,12,10,0.6);
+    text-wrap: balance;
+  }
+  .num-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .num-cell {
+    text-align: center;
+    padding: 8px 28px;
+    border-left: 1px solid rgba(244,246,238,0.18);
+  }
+  .num-cell:first-child { border-left: none; }
+  .num-val {
+    font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 24px rgba(11,12,10,0.55);
+  }
+  .num-cap { margin-top: 10px; font-size: 14.5px; color: rgba(242,244,236,0.78); text-shadow: 0 1px 14px rgba(11,12,10,0.6); }
+
+  /* =========================================================
+     SECTION 6 â€” TESTIMONIALS
+  ========================================================= */
+  .voices { padding: 110px 0; }
+  .voice-grid {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 16px;
+  }
+  .voice-col { display: flex; flex-direction: column; gap: 16px; }
+  .quote-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+  }
+  .quote-card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+  .quote-card.feature {
+    position: relative;
+    overflow: hidden;
+    justify-content: flex-end;
+    min-height: 480px;
+    isolation: isolate;
+  }
+  .quote-card.feature .q-img { position: absolute; inset: 0; z-index: -1; }
+  .quote-card.feature .q-img img { width: 100%; height: 100%; object-fit: cover; }
+  .quote-card.feature .q-img::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(11,12,10,0.25) 0%, rgba(11,12,10,0.86) 78%);
+  }
+  .q-mark { font-family: var(--serif); font-size: 64px; line-height: 0.6; color: var(--moss); height: 30px; }
+  .q-text {
+    font-size: 21px;
+    line-height: 1.45;
+    letter-spacing: -0.015em;
+    font-weight: 500;
+    text-wrap: balance;
+  }
+  .quote-card.feature .q-text { font-size: clamp(1.35rem, 2.3vw, 1.8rem); max-width: 28ch; }
+  .q-text em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+  .q-who { display: flex; align-items: center; gap: 14px; margin-top: 28px; }
+  .q-who img {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(244,246,238,0.2);
+  }
+  .q-name { font-size: 15px; font-weight: 600; }
+  .q-role { font-size: 13.5px; color: var(--text-3); }
+
+  /* =========================================================
+     SECTION 7 â€” COMPLIANCE
+  ========================================================= */
+  .comply { padding: 30px 0 120px; }
+  .comply-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 72px;
+    align-items: center;
+  }
+  .comply-copy h2 {
+    font-size: clamp(1.9rem, 3.8vw, 2.9rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .comply-copy h2 em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+  .comply-copy p { margin-top: 18px; color: var(--text-2); font-size: 16.5px; max-width: 44ch; }
+  .badges {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .badge-tile {
+    background: rgba(18,20,18,0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.4s var(--ease), transform 0.2s var(--ease), background 0.4s var(--ease);
+  }
+  /* Badge Tile Glow Effect */
+  .badge-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(400px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(165,28,48,0.15), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .badge-tile:hover::before { opacity: 1; }
+  .badge-tile > * { position: relative; z-index: 2; }
+  
+  /* Click Animation */
+  .badge-tile:active { transform: scale(0.96) !important; }
+  .cell:active { transform: scale(0.97) !important; }
+
+  .badge-tile:hover { border-color: var(--border-strong); background: var(--card-hover); transform: translateY(-3px); }
+  .badge-ico {
+    width: 42px; height: 42px;
+    border-radius: 13px;
+    background: rgba(165,28,48,0.12);
+    border: 1px solid rgba(165,28,48,0.26);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .badge-tile h4 { font-size: 16.5px; font-weight: 600; letter-spacing: -0.01em; }
+  .badge-tile span { font-size: 13.5px; color: var(--text-3); line-height: 1.5; }
+
+  /* =========================================================
+     SECTION 8 â€” CTA + FOOTER
+  ========================================================= */
+  .cta {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: var(--radius-lg);
+    margin: 0 24px;
+    max-width: 1320px;
+  }
+  @media (min-width: 1368px) { .cta { margin: 0 auto; } }
+  .cta-bg { position: absolute; inset: 0; z-index: -2; }
+  .cta-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+  .cta::after {
+    content: '';
+    position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(180deg, rgba(11,12,10,0.5) 0%, rgba(11,12,10,0.78) 100%);
+    border-radius: inherit;
+  }
+  .cta { border: 1px solid var(--border-strong); }
+  .cta-inner {
+    text-align: center;
+    padding: 120px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .cta-inner h2 { max-width: 17ch; text-shadow: 0 2px 36px rgba(11,12,10,0.55); }
+  .cta-inner p { margin-top: 18px; color: rgba(242,244,236,0.82); max-width: 44ch; text-wrap: balance; }
+  .cta-actions { display: flex; gap: 12px; margin-top: 38px; flex-wrap: wrap; justify-content: center; }
+  .cta-note { margin-top: 22px; font-size: 13px; color: rgba(242,244,236,0.6); display: inline-flex; gap: 8px; align-items: center; }
+
+  footer { padding: 90px 0 48px; }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 1.6fr repeat(3, 1fr);
+    gap: 48px;
+    padding-bottom: 64px;
+    border-bottom: 1px solid var(--border);
+  }
+  .foot-brand p { margin-top: 16px; color: var(--text-3); font-size: 14.5px; max-width: 30ch; }
+  .foot-col h5 {
+    font-size: 12.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .foot-col a {
+    display: block;
+    color: var(--text-2);
+    text-decoration: none;
+    font-size: 14.5px;
+    padding: 5px 0;
+    transition: color 0.2s var(--ease);
+  }
+  .foot-col a:hover { color: var(--text); }
+  .foot-base {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding-top: 32px;
+    font-size: 13.5px;
+    color: var(--text-3);
+    flex-wrap: wrap;
+  }
+  .foot-base .status { display: inline-flex; align-items: center; gap: 8px; }
+  .foot-base .status .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--moss);
+    animation: breathe 2.8s ease-in-out infinite;
+  }
+
+  /* ---- view counter + gh star ---- */
+  .view-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-3);
+    margin-top: 12px;
+  }
+  .hero-star-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .hero-star-badge img {
+    display: block;
+    height: 20px;
+  }
+
+  /* badge strip */
+  .hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 22px;
+    max-width: 720px;
+  }
+  .hero-badges a {
+    display: inline-flex;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.25s var(--ease), filter 0.25s var(--ease);
+  }
+  .hero-badges a:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.15);
+  }
+  .hero-badges img {
+    display: block;
+    height: 20px;
+  }
+
+  /* =========================================================
+     RESPONSIVE
+  ========================================================= */
+  @media (max-width: 1024px) {
+    .num-grid { grid-template-columns: repeat(2, 1fr); row-gap: 44px; }
+    .num-cell:nth-child(3) { border-left: none; }
+    .split-row { gap: 44px; }
+  }
+  @media (max-width: 860px) {
+    .nav-links { display: none; }
+    .bento, .bento-row2 { grid-template-columns: 1fr; }
+    .hero-stats { grid-template-columns: 1fr; gap: 22px; }
+    .hstat { border-left: none; padding: 0; justify-content: flex-start; gap: 24px; }
+    .hstat-orb { order: 2; margin-left: auto; }
+    .split-row, .split-row.flip { grid-template-columns: 1fr; padding: 52px 0; }
+    .split-row.flip .split-copy { order: 1; }
+    .split-row.flip .split-art { order: 2; }
+    .split-art { aspect-ratio: 4 / 3.4; }
+    .voice-grid { grid-template-columns: 1fr; }
+    .comply-grid { grid-template-columns: 1fr; gap: 44px; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .cell-top-row { flex-direction: column; }
+    .cell-top-row .cell-sub { text-align: left; }
+    .chip-zone { grid-template-columns: 1fr; }
+    .numbers { padding: 100px 0; }
+  }
+  @media (max-width: 520px) {
+    .badges { grid-template-columns: 1fr; }
+    .key-fp { display: none; }
+    .rule { white-space: normal; }
+    .split-art { aspect-ratio: 4 / 4.4; }
+    .orbit { transform: translate(-50%, -52%) scale(0.68); }
+    .art-tree { padding: 20px 16px; }
+    .tree-pill { white-space: normal; text-align: center; }
+    .num-grid { grid-template-columns: 1fr; }
+    .num-cell { border-left: none; }
+    .foot-grid { grid-template-columns: 1fr; }
+    .cta-inner { padding: 84px 20px; }
+  }
+
+  /* =========================================================
+     NAV ACTIONS â€” Sign In / User Greeting
+  ========================================================= */
+  .nav-actions {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-greeting {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    padding: 8px 14px;
+    background: rgba(165,28,48,0.12);
+    border: 1px solid rgba(165,28,48,0.25);
+    border-radius: 100px;
+  }
+  .user-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(244,246,238,0.2);
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  /* =========================================================
+     OAUTH MODAL
+  ========================================================= */
+  .oauth-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(11,12,10,0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s var(--ease);
+  }
+  .oauth-modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .oauth-modal {
+    position: relative;
+    width: min(420px, calc(100vw - 48px));
+    background: linear-gradient(180deg, rgba(20,22,20,0.95), rgba(14,16,14,0.98));
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 32px 64px -16px rgba(0,0,0,0.6);
+    border-radius: var(--radius-lg);
+    padding: 36px 32px 32px;
+    transform: translateY(12px) scale(0.97);
+    transition: transform 0.35s var(--ease);
+  }
+  .oauth-modal-overlay.open .oauth-modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .oauth-modal-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: rgba(244,246,238,0.06);
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: background 0.2s var(--ease), color 0.2s var(--ease);
+  }
+  .oauth-modal-close:hover {
+    background: rgba(244,246,238,0.14);
+    color: var(--text);
+  }
+
+  .oauth-modal h3 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .oauth-modal .oauth-sub {
+    font-size: 14px;
+    color: var(--text-3);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .oauth-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 13px 18px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font);
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), filter 0.2s var(--ease), border-color 0.2s var(--ease);
+    text-decoration: none;
+    color: #fff;
+  }
+  .oauth-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.12);
+  }
+  .oauth-btn:active {
+    transform: scale(0.97);
+  }
+
+  .oauth-btn svg.oauth-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Google */
+  .oauth-btn.google {
+    background: #fff;
+    color: #1f1f1f;
+    border-color: rgba(255,255,255,0.18);
+    box-shadow: 0 2px 12px rgba(255,255,255,0.06);
+  }
+  .oauth-btn.google:hover {
+    box-shadow: 0 4px 20px rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.35);
+  }
+
+  /* Microsoft */
+  .oauth-btn.microsoft {
+    background: #2f2f2f;
+    color: #fff;
+    border-color: rgba(255,255,255,0.12);
+    box-shadow: 0 2px 12px rgba(0,120,212,0.1);
+  }
+  .oauth-btn.microsoft:hover {
+    box-shadow: 0 4px 20px rgba(0,120,212,0.25);
+    border-color: rgba(0,120,212,0.4);
+  }
+
+  /* GitHub */
+  .oauth-btn.github {
+    background: #24292e;
+    color: #fff;
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .oauth-btn.github:hover {
+    box-shadow: 0 4px 20px rgba(110,84,148,0.25);
+    border-color: rgba(110,84,148,0.35);
+  }
+
+  /* Divider */
+  .oauth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0 18px;
+    color: var(--text-3);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .oauth-divider::before,
+  .oauth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Demo note */
+  .oauth-demo-note {
+    margin-top: 18px;
+    padding: 12px 16px;
+    background: rgba(165,28,48,0.08);
+    border: 1px solid rgba(165,28,48,0.18);
+    border-radius: 12px;
+    font-size: 12.5px;
+    color: var(--text-3);
+    line-height: 1.5;
+    text-align: center;
+  }
+  .oauth-demo-note code {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11.5px;
+    color: var(--moss);
+    background: rgba(165,28,48,0.1);
+    padding: 2px 6px;
+    border-radius: 5px;
+  }
+
+  @media (max-width: 520px) {
+    .nav-actions { gap: 6px; }
+    .nav-actions .btn { padding: 8px 14px; font-size: 13px; }
+    .user-greeting { font-size: 12px; padding: 6px 10px; }
+  }
+</style>
+
+<link rel="preload" href="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/hero.jpg" as="image">
+<link rel="preload" href="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/numbers.jpg" as="image">
+<link rel="preload" href="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/cta.jpg" as="image">
+
+<style>
+/* INSTANT IMAGE OVERRIDE */
+.hero-media img, .cell-img img, .split-art img, .num-bg img, .cta-bg img, .q-img img {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+}
+.reveal.split-art, .reveal.cell-img, .reveal.cell {
+    opacity: 1 !important;
+    transform: none !important;
+}
+</style>
+
+</head>
+<body>
+
+<div id="global-webgl-bg" style="position: fixed; inset: 0; z-index: -2; background: #0b0c0a; pointer-events: none;">
+  <img src="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/hero.jpg" alt="Background" fetchpriority="high" style="display:none;" crossorigin="anonymous">
+  <div id="bg-blur-overlay" style="position: absolute; inset: 0; z-index: 10; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); background: rgba(11,12,10,0.65); opacity: 0; transition: opacity 0.1s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+</div>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="glass-cursor" id="glassCursor" aria-hidden="true"></div>
+
+<!-- ============================================
+     SECTION 1 â€” HERO
+============================================ -->
+<nav class="nav-shell" id="navShell">
+  <div class="nav">
+    <a class="brand" href="#">
+      <svg width="27" height="27" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <circle cx="13" cy="13" r="4" fill="#A51C30"/><path d="M13 1C6.37 1 1 6.37 1 13s5.37 12 12 12 12-5.37 12-12S19.63 1 13 1zm0 21.6c-5.3 0-9.6-4.3-9.6-9.6S7.7 3.4 13 3.4s9.6 4.3 9.6 9.6-4.3 9.6-9.6 9.6z" fill="#f2f4ec"/>
+      </svg>
+      <span style="font-family: var(--serif); font-style: italic; font-size: 23px; padding-top: 1px;">Lychee</span>
+    </a>
+    <div class="nav-links">
+      <a href="#platform">Features</a>
+      <a href="#proof">Performance</a>
+      <a href="#compliance">API Compatibility</a>
+      <a href="#voices">Community</a>
+    </div>
+    <div class="nav-actions">
+      <button id="signInBtn" class="btn btn-glass btn-sm">Sign In</button>
+      <span id="userGreeting" class="user-greeting" style="display:none;"></span>
+      <button id="signOutBtn" class="btn btn-glass btn-sm" style="display:none;">Sign Out</button>
+      <a href="#cta" class="btn btn-white btn-sm">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-media" id="heroMedia">
+    <img src="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/hero.jpg" alt="Lychee hero background" fetchpriority="high" crossorigin="anonymous">
+  </div>
+  <div class="hero-veil" aria-hidden="true"></div>
+
+  <div class="wrap hero-core">
+    <span class="hero-kicker reveal"><span class="dot"></span>The Orchestration Layer for Local LLMs</span>
+    <h1 class="reveal" style="--i:1">From basic inference<br>to <em>advanced orchestration</em></h1>
+    <div class="hero-badges reveal" style="--i:2">
+      <a href="https://github.com/MD-Mushfiqur123/lychee/releases" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/github/v/release/MD-Mushfiqur123/lychee?style=flat-square&color=A51C30&labelColor=1a1c1a" alt="GitHub release" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/github/go-mod/go-version/MD-Mushfiqur123/lychee?style=flat-square&color=00ADD8&labelColor=1a1c1a" alt="Go version" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee/blob/main/LICENSE" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/github/license/MD-Mushfiqur123/lychee?style=flat-square&color=4c1&labelColor=1a1c1a" alt="License MIT" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee/pkgs/container/lychee" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/docker-GHCR-A51C30?style=flat-square&logo=docker&logoColor=white&labelColor=1a1c1a" alt="Docker pulls" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/github/stars/MD-Mushfiqur123/lychee?style=flat-square&color=e3b341&labelColor=1a1c1a" alt="GitHub stars" loading="lazy">
+      </a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee-desktop" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/desktop-available-7b68ee?style=flat-square&logo=windows&logoColor=white&labelColor=1a1c1a" alt="Desktop Available" loading="lazy">
+      </a>
+      <a href="#" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/python-SDK-3776AB?style=flat-square&logo=python&logoColor=white&labelColor=1a1c1a" alt="Python SDK" loading="lazy">
+      </a>
+      <a href="#" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/npm-SDK-CB3837?style=flat-square&logo=npm&logoColor=white&labelColor=1a1c1a" alt="npm SDK" loading="lazy">
+      </a>
+      <a href="#" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/go-SDK-00ADD8?style=flat-square&logo=go&logoColor=white&labelColor=1a1c1a" alt="Go SDK" loading="lazy">
+      </a>
+      <a href="#" target="_blank" rel="noopener">
+        <img src="https://img.shields.io/badge/rust-SDK-000000?style=flat-square&logo=rust&logoColor=white&labelColor=1a1c1a" alt="Rust SDK" loading="lazy">
+      </a>
+    </div>
+    <p class="reveal" style="--i:3">Lychee extends Ollama with multi-model pipelines, structured output, persistent conversation memory, and multi-instance load balancing.</p>
+    <div class="hero-cta reveal lift" style="--i:4">
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" class="btn btn-white">View on GitHub</a>
+      <a href="https://md-mushfiqur123.github.io/lychee-docs/" target="_blank" class="btn btn-glass">Read the Docs</a>
+    </div>
+    <div class="hero-star-badge reveal" style="--i:5">
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" style="display:inline-flex;">
+        <img src="https://img.shields.io/github/stars/MD-Mushfiqur123/lychee?style=social&color=A51C30" alt="GitHub stars" loading="lazy">
+      </a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero-stats">
+      <div class="hstat reveal" style="--i:6">
+        <div>
+          <div class="hstat-num" data-count="100" data-decimals="0" data-suffix="%">0</div>
+          <div class="hstat-label">Local Execution</div>
+        </div>
+        <svg class="hstat-orb" width="58" height="58" viewBox="0 0 58 58" fill="none" aria-hidden="true">
+          <circle cx="29" cy="29" r="27" stroke="rgba(242,244,236,0.3)"/>
+          <g class="spin"><path d="M29 7 a22 22 0 0 1 22 22" stroke="rgba(242,244,236,0.75)" stroke-linecap="round"/></g>
+          <circle cx="29" cy="29" r="14" stroke="rgba(242,244,236,0.25)"/>
+        </svg>
+      </div>
+      <div class="hstat reveal" style="--i:7">
+        <div>
+          <div class="hstat-num" data-count="1" data-suffix=" ms">0</div>
+          <div class="hstat-label">Network Latency</div>
+        </div>
+        <svg class="hstat-orb" width="58" height="58" viewBox="0 0 58 58" fill="none" aria-hidden="true">
+          <circle cx="29" cy="29" r="27" stroke="rgba(242,244,236,0.3)"/>
+          <g class="spin" style="animation-duration: 19s;"><path d="M51 29 a22 22 0 0 1 -22 22" stroke="rgba(242,244,236,0.75)" stroke-linecap="round"/></g>
+          <line x1="16" y1="29" x2="42" y2="29" stroke="rgba(242,244,236,0.25)"/>
+        </svg>
+      </div>
+      <div class="hstat reveal" style="--i:6">
+        <div>
+          <div class="hstat-num" data-count="5" data-prefix="+" data-suffix="">0</div>
+          <div class="hstat-label">Advanced Capabilities</div>
+        </div>
+        <svg class="hstat-orb" width="58" height="58" viewBox="0 0 58 58" fill="none" aria-hidden="true">
+          <circle cx="29" cy="29" r="27" stroke="rgba(242,244,236,0.3)"/>
+          <g class="spin" style="animation-duration: 32s; animation-direction: reverse;"><path d="M29 51 a22 22 0 0 1 -22 -22" stroke="rgba(242,244,236,0.75)" stroke-linecap="round"/></g>
+          <circle cx="29" cy="29" r="7" stroke="rgba(242,244,236,0.3)"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================
+     SECTION 2 â€” TRUST STRIP
+============================================ -->
+<section class="trust">
+  <div class="wrap">
+    <p class="trust-label reveal">Powered by best-in-class local engines</p>
+  </div>
+  <div class="marquee reveal" style="--i:1" aria-hidden="true">
+    <div class="marquee-track" id="marqueeTrack">
+      <span class="logo-item serifed">llama.cpp</span>
+      <span class="logo-item">MLX</span>
+      <span class="logo-item mono-ish">Ollama</span>
+      <span class="logo-item serifed">HuggingFace</span>
+      <span class="logo-item">OpenAI API</span>
+      <span class="logo-item mono-ish">Anthropic API</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 2.5 â€” WHAT IS LYCHEE?
+============================================ -->
+<section class="what-is-lychee" id="what-is-lychee">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-pill reveal">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor"/><circle cx="7.5" cy="7.5" r="2.2" fill="currentColor"/></svg>
+        The basics
+      </span>
+      <h2 class="reveal" style="--i:1">What <em>is</em> Lychee?</h2>
+    </div>
+
+    <div class="what-is-grid reveal" style="--i:2">
+      <div class="what-is-text">
+        <p>Lychee is a <strong>universal local LLM runtime</strong> â€” a lightweight, open-source server that lets you run large language models directly on your own machine. Think of it as the control center for your AI: it handles model loading, inference, and request routing, all without ever leaving your hardware.</p>
+
+        <p>At its core, Lychee is a <strong>drop-in replacement for Ollama</strong>. It speaks the same API and runs on the same port (11434), so any tool or library built for Ollama works with Lychee out of the box. But Lychee goes further â€” it adds native <strong>HuggingFace model support</strong>, <strong>multi-model pipelines</strong> that chain models together, <strong>structured output</strong> with automatic JSON schema enforcement, and <strong>intelligent multi-model routing</strong> that picks the right model for each task.</p>
+
+        <p>Because everything runs locally, you get <strong>complete privacy</strong> â€” your data never touches a cloud server. There are <strong>zero API costs</strong>, no rate limits, and no internet connection required. Your prompts, your code, your data: they stay on your machine, period.</p>
+
+        <p>Lychee is built for <strong>developers</strong> who want a local AI stack they can embed into their apps, <strong>researchers</strong> who need reliable, reproducible local inference, and <strong>privacy-conscious users</strong> who refuse to send sensitive data to third-party APIs. If you want the power of LLMs without the cloud, Lychee is for you.</p>
+      </div>
+
+      <div class="what-is-cards">
+        <div class="wi-card">
+          <span class="wi-ico">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><rect x="2" y="2" width="18" height="18" rx="5" stroke="#A51C30" stroke-width="1.5"/><path d="M7 11h8M11 7v8" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </span>
+          <h4>Ollama Compatible</h4>
+          <span>Same API Â· Same port 11434 Â· Drop-in replacement</span>
+        </div>
+        <div class="wi-card">
+          <span class="wi-ico">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M11 2.2 18.5 5v4.3c0 4-2.8 7-7.5 8.8-4.7-1.8-7.5-4.8-7.5-8.8V5L11 2.2z" stroke="#A51C30" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 11l2 2 4-4" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <h4>100% Local</h4>
+          <span>No cloud Â· No API keys Â· Complete data privacy</span>
+        </div>
+        <div class="wi-card">
+          <span class="wi-ico">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="9" stroke="#A51C30" stroke-width="1.5"/><path d="M11 6v5l3.5 3.5" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <h4>Zero API Costs</h4>
+          <span>No tokens to buy Â· No rate limits Â· Unlimited usage</span>
+        </div>
+        <div class="wi-card">
+          <span class="wi-ico">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M2 6l4-3 4 3 4-3 4 3 4-3v14l-4-3-4 3-4-3-4 3-4-3V6z" stroke="#A51C30" stroke-width="1.5" stroke-linejoin="round"/><path d="M6 3v14M10 17V6M14 17V6M18 3v14" stroke="#A51C30" stroke-width="1.2"/></svg>
+          </span>
+          <h4>HuggingFace + More</h4>
+          <span>HF models Â· Pipelines Â· Structured output Â· Routing</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.what-is-lychee {
+  padding: 100px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.what-is-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 64px;
+  align-items: start;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.what-is-text p {
+  font-size: 16.5px;
+  line-height: 1.72;
+  color: var(--text-2);
+  margin-bottom: 22px;
+}
+
+.what-is-text p:last-child {
+  margin-bottom: 0;
+}
+
+.what-is-text p strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.what-is-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+  cursor: default;
+}
+
+.wi-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.wi-ico {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: rgba(165,28,48,0.10);
+  border: 1px solid rgba(165,28,48,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.wi-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.wi-card span {
+  font-size: 13.5px;
+  color: var(--text-3);
+  line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+  .what-is-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .what-is-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .what-is-cards {
+    grid-template-columns: 1fr;
+  }
+  .what-is-text p {
+    font-size: 15.5px;
+  }
+}
+</style>
+
+<!-- ============================================
+     SECTION 3 â€” BENTO PLATFORM
+============================================ -->
+<section class="bento-sec" id="platform">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-pill reveal">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor"/><path d="M1 7.5h13M7.5 1c2 1.8 2 11.2 0 13M7.5 1c-2 1.8-2 11.2 0 13" stroke="currentColor"/></svg>
+        Advanced local LLM orchestration
+      </span>
+      <h2 class="reveal" style="--i:1">One unified API.<br><em>Endless</em> possibilities.</h2>
+      <p class="reveal" style="--i:2">Pipelines, memory, structured output, and routing all from a single lightweight drop-in binary.</p>
+    </div>
+
+    <!-- row 1 -->
+    <div class="bento">
+      <article class="cell cell-pad reveal" style="--i:0">
+        <h3>Model Composer</h3>
+        <p class="cell-sub">Chain multiple local models together sequentially into multi-step pipelines.</p>
+        <div class="vault-panel">
+          <div class="vault-head">
+            <span>Pipeline Execution</span>
+            <span class="hsm">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="2.2" y="5" width="7.6" height="5.4" rx="1.6" stroke="currentColor" stroke-width="1.2"/><path d="M4 5V3.8a2 2 0 0 1 4 0V5" stroke="currentColor" stroke-width="1.2"/></svg>
+              DAG-enabled
+            </span>
+          </div>
+          <div class="key-row">
+            <span class="key-dot"></span>
+            <span class="key-name">gemma:2b (translate)</span>
+            <span class="key-fp">128ms</span>
+            <span class="key-when">Step 1</span>
+          </div>
+          <div class="key-row">
+            <span class="key-dot"></span>
+            <span class="key-name">phi-3:mini (summarize)</span>
+            <span class="key-fp">45ms</span>
+            <span class="key-when">Step 2</span>
+          </div>
+          <div class="key-row">
+            <span class="key-dot busy"></span>
+            <span class="key-name">llama3:8b (format)</span>
+            <span class="key-fp">89ms</span>
+            <span class="key-when rotating">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M10.5 6a4.5 4.5 0 1 1-1.3-3.2M10.5 1.5v2.4H8.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              rotating
+            </span>
+          </div>
+        </div>
+        <div class="cipher-strip">
+          <span class="cipher-label">Encrypting</span>
+          <span class="cipher-text" id="cipherText">9f4eÂ·a7c2Â·51b0Â·e8d3</span>
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="2.5" y="6" width="9" height="6.5" rx="2" stroke="#a8bf8f" stroke-width="1.3"/><path d="M4.6 6V4.4a2.4 2.4 0 0 1 4.8 0V6" stroke="#a8bf8f" stroke-width="1.3"/></svg>
+        </div>
+        <div class="spec-row">
+          <span class="spec">AES-256-GCM</span>
+          <span class="spec">TLS 1.3</span>
+          <span class="spec">Zero-trust</span>
+        </div>
+      </article>
+
+      <article class="cell reveal" style="--i:1">
+        <div class="cell-img"><img src="https://picsum.photos/id/10/1600/900" alt="Rolling forested hills under soft light" loading="eager" fetchpriority="high"></div>
+        <div class="cell-over">
+          <div class="cell-pad cell-top-row">
+            <h3>Model Composer that<br>reads the landscape</h3>
+            <p class="cell-sub">Behavioral baselines across endpoints, cloud, and identity â€” anomalies surface before they become prompts.</p>
+          </div>
+          <div class="chart-zone">
+            <div class="chart-frame">
+              <div class="chart-head">
+                <span class="chart-title">Signal confidence Â· last 24h</span>
+                <div class="chart-meta">
+                  <span class="legend"><i></i>observed</span>
+                  <span class="legend"><i class="dashed"></i>baseline</span>
+                  <span class="live-badge"><span class="dot"></span>Live</span>
+                </div>
+              </div>
+              <svg viewBox="0 0 600 200" fill="none" aria-hidden="true">
+                <g stroke="rgba(242,244,236,0.10)" stroke-width="0.75">
+                  <line x1="36" y1="20" x2="600" y2="20"/>
+                  <line x1="36" y1="55" x2="600" y2="55"/>
+                  <line x1="36" y1="90" x2="600" y2="90"/>
+                  <line x1="36" y1="125" x2="600" y2="125"/>
+                  <line x1="36" y1="160" x2="600" y2="160"/>
+                </g>
+                <g fill="rgba(242,244,236,0.5)" font-size="10" font-family="Hanken Grotesk, sans-serif">
+                  <text x="0" y="24">100%</text>
+                  <text x="6" y="59">75%</text>
+                  <text x="6" y="94">50%</text>
+                  <text x="6" y="129">25%</text>
+                  <text x="14" y="164">0%</text>
+                </g>
+                <defs>
+                  <linearGradient id="areaFade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="rgba(242,244,236,0.12)"/>
+                    <stop offset="100%" stop-color="rgba(242,244,236,0)"/>
+                  </linearGradient>
+                </defs>
+                <path d="M36 141 L80 138 L124 142 L168 139 L212 141 L256 137 L300 139 L344 136 L388 139 L432 135 L476 138 L520 134 L564 137 L600 136" stroke="rgba(242,244,236,0.35)" stroke-width="1" stroke-dasharray="4 6"/>
+                <line x1="36" y1="78" x2="600" y2="78" stroke="rgba(165,28,48,0.5)" stroke-width="1" stroke-dasharray="2 5"/>
+                <text x="42" y="71" font-size="9.5" font-family="Hanken Grotesk, sans-serif" fill="rgba(165,28,48,0.9)" letter-spacing="0.1em">AUTO-CONTAIN THRESHOLD</text>
+                <path class="chart-area" d="M36 150 L70 144 L104 132 L138 128 L172 134 L206 130 L240 124 L268 121 L296 104 L324 88 L352 72 L374 64 L398 70 L420 76 L444 70 L468 62 L492 58 L516 50 L544 44 L572 38 L600 40 L600 160 L36 160 Z" fill="url(#areaFade)"/>
+                <g id="volBars"></g>
+                <path class="draw-line" d="M36 150 L70 144 L104 132 L138 128 L172 134 L206 130 L240 124 L268 121 L296 104 L324 88 L352 72 L374 64 L398 70 L420 76 L444 70 L468 62 L492 58 L516 50 L544 44 L572 38 L600 40" stroke="#f2f4ec" stroke-width="1"/>
+                <g fill="rgba(242,244,236,0.75)">
+                  <circle cx="138" cy="128" r="1.4"/>
+                  <circle cx="268" cy="121" r="1.4"/>
+                  <circle cx="468" cy="62" r="1.4"/>
+                </g>
+                <circle class="pulse-ring" cx="374" cy="64" r="10" stroke="rgba(165,28,48,0.8)" stroke-width="1"/>
+                <circle cx="374" cy="64" r="2.6" fill="#a8bf8f" stroke="#0b0c0a" stroke-width="1"/>
+                <line x1="374" y1="59" x2="374" y2="52" stroke="rgba(244,246,238,0.3)" stroke-width="0.75"/>
+                <g>
+                  <rect x="262" y="26" width="210" height="26" rx="8" fill="rgba(11,12,10,0.72)" stroke="rgba(244,246,238,0.16)" stroke-width="0.75"/>
+                  <text x="276" y="43" font-size="10.5" font-family="Hanken Grotesk, sans-serif" fill="rgba(242,244,236,0.85)">02:47 Â· login anomaly â€” contained</text>
+                </g>
+                <text x="598" y="58" text-anchor="end" font-size="11" font-weight="600" font-family="Hanken Grotesk, sans-serif" fill="#f2f4ec">85.7%</text>
+                <text x="598" y="70" text-anchor="end" font-size="8.5" font-family="Hanken Grotesk, sans-serif" fill="rgba(165,28,48,0.9)" letter-spacing="0.06em">+2.4 PTS VS BASELINE</text>
+                <g id="hourTicks"></g>
+              </svg>
+              <div class="chart-axis"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>now</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- row 2 -->
+    <div class="bento bento-row2">
+      <article class="cell reveal" style="--i:0">
+        <div class="cell-img"><img src="https://picsum.photos/id/16/1600/900" alt="Coastal cliffs meeting a calm sea" loading="eager" fetchpriority="high"></div>
+        <div class="cell-over">
+          <div class="cell-pad cell-top-row">
+            <h3>Policies, tuned<br>to your posture</h3>
+            <p class="cell-sub">Set scope and strictness once â€” Lychee shapes every detection rule and response runbook to match.</p>
+          </div>
+          <div class="chip-zone">
+            <div class="chip-col">
+              <div class="dial-panel">
+                <div class="dial-head"><span>Model strictness</span><span class="dial-val">Balanced</span></div>
+                <svg class="dial" viewBox="0 0 220 122" fill="none" aria-hidden="true">
+                  <path d="M24 112 A86 86 0 0 1 196 112" stroke="rgba(244,246,238,0.14)" stroke-width="6" stroke-linecap="round"/>
+                  <path class="dial-fill" d="M24 112 A86 86 0 0 1 196 112" stroke="rgba(165,28,48,0.9)" stroke-width="6" stroke-linecap="round"/>
+                  <g stroke="rgba(244,246,238,0.3)" stroke-width="1.5" stroke-linecap="round">
+                    <line x1="30" y1="112" x2="37" y2="112"/>
+                    <line x1="53.4" y1="55.4" x2="58.4" y2="60.4"/>
+                    <line x1="110" y1="32" x2="110" y2="39"/>
+                    <line x1="166.6" y1="55.4" x2="161.6" y2="60.4"/>
+                    <line x1="190" y1="112" x2="183" y2="112"/>
+                  </g>
+                  <g class="needle-wrap"><g class="needle">
+                    <line x1="110" y1="112" x2="110" y2="46" stroke="#f2f4ec" stroke-width="2" stroke-linecap="round"/>
+                  </g></g>
+                  <circle cx="110" cy="112" r="5.5" fill="#f4f6ee"/>
+                  <circle cx="110" cy="112" r="2" fill="#0b0c0a"/>
+                </svg>
+                <div class="dial-stops"><span>Watchful</span><span class="on">Balanced</span><span>Strict</span></div>
+                <div class="dial-scope">
+                  <span class="scope-item">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="#a8bf8f" stroke-width="1.1"/><path d="M3.8 6.2l1.5 1.5 2.9-3.2" stroke="#a8bf8f" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Endpoints
+                  </span>
+                  <span class="scope-item">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="#a8bf8f" stroke-width="1.1"/><path d="M3.8 6.2l1.5 1.5 2.9-3.2" stroke="#a8bf8f" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Cloud
+                  </span>
+                  <span class="scope-item">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="#a8bf8f" stroke-width="1.1"/><path d="M3.8 6.2l1.5 1.5 2.9-3.2" stroke="#a8bf8f" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Identity
+                  </span>
+                </div>
+              </div>
+              <span class="chip-status">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v2.4M7 10.6V13M13 7h-2.4M3.4 7H1M11.2 2.8 9.5 4.5M4.5 9.5l-1.7 1.7M11.2 11.2 9.5 9.5M4.5 4.5 2.8 2.8" stroke="#a8bf8f" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <span class="typed" id="typedLine">Calibrating policies for you</span>
+              </span>
+            </div>
+            <div class="rules-panel">
+              <div class="rules-head"><span>Generated rules</span><span class="rules-count">142 updated</span></div>
+              <div class="rule">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="#a8bf8f" stroke-width="1.2"/><path d="M4.4 7.2l1.8 1.8 3.4-3.8" stroke="#a8bf8f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Require MFA for admin sessions
+              </div>
+              <div class="rule">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="#a8bf8f" stroke-width="1.2"/><path d="M4.4 7.2l1.8 1.8 3.4-3.8" stroke="#a8bf8f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Block public bucket access
+              </div>
+              <div class="rule">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="#a8bf8f" stroke-width="1.2"/><path d="M4.4 7.2l1.8 1.8 3.4-3.8" stroke="#a8bf8f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Expire IAM keys idle 90+ days
+              </div>
+              <div class="rule">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="#a8bf8f" stroke-width="1.2"/><path d="M4.4 7.2l1.8 1.8 3.4-3.8" stroke="#a8bf8f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Quarantine unsigned binaries
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="cell cell-pad reveal" style="--i:1">
+        <h3>Autonomous containment</h3>
+        <p class="cell-sub">Invalid JSON output? Lychee isolates it, runs error-correction prompts, and returns a validated object before you finish your coffee.</p>
+        <div class="auto-cta">
+          <a href="#cta" class="btn btn-glass btn-sm">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M3 1.8v9.4l8-4.7-8-4.7z" fill="currentColor"/></svg>
+            Watch it respond
+          </a>
+        </div>
+        <div class="timeline">
+          <div class="t-step">
+            <span class="t-ico">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z" stroke="#a8bf8f" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="#a8bf8f" stroke-width="1.3"/></svg>
+            </span>
+            <div>
+              <div class="t-time">02:47:12</div>
+              <div class="t-label">Anomaly detected</div>
+              <div class="t-sub">Impossible travel Â· Frankfurt to Lagos</div>
+            </div>
+          </div>
+          <div class="t-step">
+            <span class="t-ico">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5 13.5 3.7v3.4c0 3.1-2.2 5.5-5.5 6.9C4.7 12.6 2.5 10.2 2.5 7.1V3.7L8 1.5z" stroke="#a8bf8f" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            </span>
+            <div>
+              <div class="t-time">02:47:31</div>
+              <div class="t-label">Session isolated</div>
+              <div class="t-sub">Network paused, state preserved</div>
+            </div>
+          </div>
+          <div class="t-step">
+            <span class="t-ico">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="5.5" cy="10.5" r="2.8" stroke="#a8bf8f" stroke-width="1.3"/><path d="M7.6 8.4 13.5 2.5M11 5l2.2 2.2" stroke="#a8bf8f" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </span>
+            <div>
+              <div class="t-time">02:48:02</div>
+              <div class="t-label">Tokens revoked</div>
+              <div class="t-sub">14 credentials rotated quietly</div>
+            </div>
+          </div>
+          <div class="t-step">
+            <span class="t-ico">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 1.5h5.2L12.5 5v9.5H4V1.5z" stroke="#a8bf8f" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 8h4.5M6 10.8h4.5" stroke="#a8bf8f" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </span>
+            <div>
+              <div class="t-time">02:51:44</div>
+              <div class="t-label">Report drafted</div>
+              <div class="t-sub">In your inbox â€” nobody woken</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 4 â€” SPLIT FEATURES
+============================================ -->
+<section class="split-sec" id="proof">
+  <div class="wrap">
+
+    <div class="split-row">
+      <div class="split-copy">
+        <span class="mini-label reveal">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="7" r="2" fill="currentColor"/></svg>
+          While you code
+        </span>
+        <h2 class="reveal" style="--i:1">In the background, Lychee <em>orchestrates</em></h2>
+        <p class="reveal" style="--i:2">Most LLM workflows get messy when juggling multiple prompts and contexts. Lychee orchestrates it all. It seamlessly correlates contexts across your pipeline, routes tasks to the best local model, and streams the output within milliseconds â€” leaving a complete, structured JSON response.</p>
+        <ul class="split-list">
+          <li class="reveal" style="--i:3">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="7.5" stroke="#a8bf8f" stroke-width="1.4"/><path d="M5.4 8.7l2.1 2.1 4.1-4.4" stroke="#a8bf8f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>Pipelined, not isolated.</strong> One unified workflow instead of messy sequential scripts.</span>
+          </li>
+          <li class="reveal" style="--i:4">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="7.5" stroke="#a8bf8f" stroke-width="1.4"/><path d="M5.4 8.7l2.1 2.1 4.1-4.4" stroke="#a8bf8f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>Persistent Conversation Memory.</strong> Pick up exactly where you left off across terminal sessions.</span>
+          </li>
+          <li class="reveal" style="--i:5">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="7.5" stroke="#a8bf8f" stroke-width="1.4"/><path d="M5.4 8.7l2.1 2.1 4.1-4.4" stroke="#a8bf8f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>Multi-instance load balancing.</strong> Seamlessly distribute generation requests across GPUs.</span>
+          </li>
+        </ul>
+      </div>
+      <div class="split-art reveal" style="--i:2">
+        <img src="https://picsum.photos/id/17/1200/1400" alt="A quiet trail through an evergreen forest" loading="eager" fetchpriority="high">
+        <div class="orbit" aria-hidden="true">
+          <span class="orbit-ring r1"></span>
+          <span class="orbit-ring r2"></span>
+          <svg class="orbit-spinner" viewBox="0 0 300 300" fill="none">
+            <circle cx="150" cy="150" r="149" stroke="rgba(165,28,48,0.55)" stroke-width="1.5" stroke-dasharray="64 872" stroke-linecap="round"/>
+          </svg>
+          <span class="orbit-node" style="top: 18.4%; left: 50%;">
+            <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="#f2f4ec" stroke-width="1.3" aria-hidden="true"><path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>
+          </span>
+          <span class="orbit-node" style="top: 65.8%; left: 22.6%; animation-delay: 1.2s;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#f2f4ec" stroke-width="1.3" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.2 7V5.2a2.8 2.8 0 0 1 5.6 0V7"/></svg>
+          </span>
+          <span class="orbit-node" style="top: 65.8%; left: 77.4%; animation-delay: 2.4s;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#f2f4ec" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="5.5" cy="10.5" r="2.8"/><path d="M7.6 8.4 13.5 2.5M11 5l2.2 2.2"/></svg>
+          </span>
+          <span class="orbit-node" style="top: 22.8%; left: 88.8%; animation-delay: 3.6s;">
+            <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="#f2f4ec" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5a3 3 0 0 1-.4-6A4 4 0 0 1 12 7.6a2.5 2.5 0 0 1-.5 4.9h-7z"/></svg>
+          </span>
+          <span class="orbit-node" style="top: 22.8%; left: 11.2%; animation-delay: 4.8s;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#f2f4ec" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 7c0-3-1.8-4.5-4.5-4.5S3.5 4 3.5 7c0 3.5-1.5 4.5-1.5 4.5h12s-.7-.5-1.1-2"/><path d="M6.8 14a1.4 1.4 0 0 0 2.4 0M2 2l12 12"/></svg>
+          </span>
+          <div class="orbit-core">
+            <svg width="36" height="36" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+              <circle cx="13" cy="13" r="2.7" fill="#a8bf8f"/><path d="M18.3 16.7A6.5 6.5 0 1 1 18.3 9.3" stroke="#f2f4ec" stroke-width="2.3" stroke-linecap="round"/><path d="M21.8 18.7A10.5 10.5 0 1 1 21.8 7.3" stroke="#f2f4ec" stroke-width="2.3" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="float-card">
+          <span class="sig">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 1.8 15.6 4.4v4.3c0 3.7-2.6 6.5-6.6 7.9-4-1.4-6.6-4.2-6.6-7.9V4.4L9 1.8z" stroke="#a8bf8f" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="fc-body">
+            <span class="fc-title">Pipeline Stage 2 â€” Summarize</span>
+            <span class="fc-sub">phi-3:mini context optimized Â· 45ms</span>
+          </span>
+          <span class="fc-pill">Completed</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="split-row flip">
+      <div class="split-copy">
+        <span class="mini-label reveal">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 12V7.5M7 12V2M12 12V5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Universal Compatibility
+        </span>
+        <h2 class="reveal" style="--i:1">Deploy locally in an <em>afternoon</em>, not a quarter</h2>
+        <p class="reveal" style="--i:2">Every request Lychee serves is strictly routed locally without reaching the cloud. When privacy is paramount, your local environment acts as the ultimate sandbox â€” isolated, offline-capable, and completely sovereign.</p>
+        <ul class="split-list">
+          <li class="reveal" style="--i:3">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="7.5" stroke="#a8bf8f" stroke-width="1.4"/><path d="M5.4 8.7l2.1 2.1 4.1-4.4" stroke="#a8bf8f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>Continuous schema validation</strong> across complex JSON objects.</span>
+          </li>
+          <li class="reveal" style="--i:4">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="7.5" stroke="#a8bf8f" stroke-width="1.4"/><path d="M5.4 8.7l2.1 2.1 4.1-4.4" stroke="#a8bf8f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>Format correction</strong> the moment a model hallucinates, not after it breaks your app.</span>
+          </li>
+          <li class="reveal" style="--i:5">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="7.5" stroke="#a8bf8f" stroke-width="1.4"/><path d="M5.4 8.7l2.1 2.1 4.1-4.4" stroke="#a8bf8f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong>Interactive terminal dashboard</strong> with real-time token throughput metrics.</span>
+          </li>
+        </ul>
+      </div>
+      <div class="split-art reveal" style="--i:2">
+        <img src="https://picsum.photos/id/28/1200/1400" alt="Sunlit path through an autumn forest" loading="eager" fetchpriority="high">
+        <div class="art-tree">
+          <span class="tree-pill">5+ Local Model Families Supported</span>
+          <span class="tree-link"></span>
+          <span class="tree-node">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 1.8 16.8 4.5v4.2c0 4-2.7 7-6.8 8.6-4.1-1.6-6.8-4.6-6.8-8.6V4.5L10 1.8z" stroke="#a8bf8f" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 9.6l2.1 2.1 3.9-4.2" stroke="#a8bf8f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="tree-link"></span>
+          <div class="tree-tiles">
+            <span class="tree-tile">llama3</span>
+            <span class="tree-tile">/v1/messages</span>
+            <span class="tree-tile">phi-3</span>
+            <span class="tree-tile">mistral</span>
+          </div>
+          <span class="tree-caption">OpenAI & Anthropic APIs mapped perfectly</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 5 â€” NUMBERS
+============================================ -->
+<section class="numbers">
+  <div class="num-bg"><img src="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/numbers.jpg" alt="Abstract nature texture" loading="lazy" crossorigin="anonymous"></div>
+  <div class="wrap">
+    <div class="num-head">
+      <span class="sec-pill reveal" style="border-color: rgba(244,246,238,0.3); background: rgba(11,12,10,0.3); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M2 13V8.5M7.5 13V2M13 13V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Measured performance
+      </span>
+      <h2 class="reveal" style="--i:1">The speed you can <em>rely on</em></h2>
+    </div>
+    <div class="num-grid">
+      <div class="num-cell reveal" style="--i:0">
+        <div class="num-val" data-count="100" data-decimals="0" data-suffix="%">0</div>
+        <div class="num-cap">Privacy guaranteed with local models</div>
+      </div>
+      <div class="num-cell reveal" style="--i:1">
+        <div class="num-val" data-count="0" data-prefix="$">0</div>
+        <div class="num-cap">API costs incurred for inference</div>
+      </div>
+      <div class="num-cell reveal" style="--i:2">
+        <div class="num-val" data-count="2" data-decimals="0" data-suffix="">0</div>
+        <div class="num-cap">Native backends (llama.cpp & MLX)</div>
+      </div>
+      <div class="num-cell reveal" style="--i:3">
+        <div class="num-val" data-count="1">0</div>
+        <div class="num-cap">Unified Orchestration Layer</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 6 â€” TESTIMONIALS
+============================================ -->
+<section class="voices" id="voices">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-pill reveal">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M3 10c-.8-.9-1.3-2-1.3-3.4C1.7 4 3.6 2.3 6 2.3v2C4.8 4.3 4 5.2 4 6.4h2V11H3v-1zm6.4 0c-.8-.9-1.3-2-1.3-3.4 0-2.6 1.9-4.3 4.3-4.3v2c-1.2 0-2 .9-2 2.1h2V11H9.4v-1z" fill="currentColor"/></svg>
+        From the developer community
+      </span>
+      <h2 class="reveal" style="--i:1">Builders that <em>move fast</em></h2>
+    </div>
+
+    <div class="voice-grid">
+      <article class="quote-card feature reveal">
+        <div class="q-img"><img src="https://picsum.photos/id/13/1400/1000" alt="Waves washing over a quiet shore" loading="eager" fetchpriority="high"></div>
+        <p class="q-text">"We went from struggling with brittle LangChain pipelines to shipping in production. Lychee's structured output retries saved our app."</p>
+        <div class="q-who">
+          <img src="https://i.pravatar.cc/96?img=47" alt="Portrait of Mireille Okafor" loading="eager" fetchpriority="high">
+          <div>
+            <div class="q-name">Mireille Okafor</div>
+            <div class="q-role">Lead Engineer, AI Startup</div>
+          </div>
+        </div>
+      </article>
+
+      <div class="voice-col">
+        <article class="quote-card reveal" style="--i:1">
+          <span class="q-mark">"</span>
+          <p class="q-text">Drop-in Anthropic API compatibility meant I could point my existing Claude code to Lychee and run Gemma locally in seconds.</p>
+          <div class="q-who">
+            <img src="https://i.pravatar.cc/96?img=12" alt="Portrait of Tomas Lindqvist" loading="eager" fetchpriority="high">
+            <div>
+              <div class="q-name">Tomas Lindqvist</div>
+              <div class="q-role">Open Source Developer</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="quote-card reveal" style="--i:2">
+          <span class="q-mark">"</span>
+          <p class="q-text">The interactive terminal dashboard makes it so easy to monitor context usage and token throughput. Best local LLM tool out there.</p>
+          <div class="q-who">
+            <img src="https://i.pravatar.cc/96?img=68" alt="Portrait of Alex Chen" loading="eager" fetchpriority="high">
+            <div>
+              <div class="q-name">Alex Chen</div>
+              <div class="q-role">AI Researcher</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 7 â€” COMPLIANCE
+============================================ -->
+<section class="comply" id="compliance">
+  <div class="wrap">
+    <div class="comply-grid">
+      <div class="comply-copy">
+        <span class="sec-pill reveal">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M7.5 1.5 13 3.7v3.6c0 3.1-2.2 5.4-5.5 6.5C4.2 12.7 2 10.4 2 7.3V3.7l5.5-2.2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Universal Standard
+        </span>
+        <h2 class="reveal" style="--i:1">We translate the APIs. <em>You</em> build the future.</h2>
+        <p class="reveal" style="--i:2">Lychee runs entirely locally. The platform is open-source, compiled in Go, and built on an offline-first architecture prioritizing maximum throughput with your hardware.</p>
+        <div class="reveal" style="--i:3; margin-top: 28px;">
+          <a href="https://md-mushfiqur123.github.io/lychee-docs/" target="_blank" class="btn btn-glass btn-sm">View API documentation</a>
+        </div>
+      </div>
+      <div class="badges">
+        <div class="badge-tile reveal" style="--i:0">
+          <span class="badge-ico">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#a8bf8f" stroke-width="1.5"/><path d="M6.5 10.3l2.3 2.3 4.7-5" stroke="#a8bf8f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <h4>/v1/chat/completions</h4>
+          <span>Audited annually by an independent firm. Report available under NDA.</span>
+        </div>
+        <div class="badge-tile reveal" style="--i:1">
+          <span class="badge-ico">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="4" stroke="#a8bf8f" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#a8bf8f" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </span>
+          <h4>/v1/messages</h4>
+          <span>Drop-in Anthropic SDK support. Deploy Claude workflows locally.</span>
+        </div>
+        <div class="badge-tile reveal" style="--i:2">
+          <span class="badge-ico">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#a8bf8f" stroke-width="1.5"/><path d="M10 2v16M2 10h16M4.3 4.8c3.2 2.4 8.2 2.4 11.4 0M4.3 15.2c3.2-2.4 8.2-2.4 11.4 0" stroke="#a8bf8f" stroke-width="1.2"/></svg>
+          </span>
+          <h4>Structured Outputs</h4>
+          <span>OpenAI Responses API support. Generate structured JSON seamlessly.</span>
+        </div>
+        <div class="badge-tile reveal" style="--i:3">
+          <span class="badge-ico">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.2 16.8 5v4.3c0 4-2.8 7-6.8 8.5-4-1.5-6.8-4.5-6.8-8.5V5L10 2.2z" stroke="#a8bf8f" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 6.5v4M10 13h.01" stroke="#a8bf8f" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+          <h4>Native Lychee API</h4>
+          <span>Streaming, tool calling, model composer, and conversation memory.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 7.5 â€” v0.2.0 HIGHLIGHTS
+============================================ -->
+<section class="voices" id="whats-new">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-pill reveal" style="background: rgba(165,28,48,0.08); border-color: rgba(165,28,48,0.25);">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><circle cx="7.5" cy="7.5" r="5.5" stroke="#A51C30" stroke-width="1.3"/><path d="M4.5 7.5l2 2 4-4" stroke="#A51C30" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="color: rgba(165,28,48,0.9);">Just shipped</span>
+      </span>
+      <h2 class="reveal" style="--i:1">New in <em>v0.2.0-alpha</em></h2>
+      <p class="reveal" style="--i:2">The latest release brings major features across the entire Lychee ecosystem â€” from the core runtime to desktop and SDKs.</p>
+    </div>
+
+    <div class="badges" style="max-width: 900px; margin: 0 auto;">
+      <div class="badge-tile reveal" style="--i:0">
+        <span class="badge-ico">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="4" stroke="#A51C30" stroke-width="1.4"/><path d="M7 10h6M10 7v6" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+        <h4>Lychee Desktop App</h4>
+        <span>Native GUI for Windows, macOS &amp; Linux. One-click install, model browser, terminal dashboard built-in.</span>
+      </div>
+      <div class="badge-tile reveal" style="--i:1">
+        <span class="badge-ico">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#A51C30" stroke-width="1.4"/><path d="M6.5 10.3l2.3 2.3 4.7-5" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h4>4 Official SDKs</h4>
+        <span>Python, JavaScript/TypeScript, Go, and Rust SDKs with first-class structured output &amp; pipeline support.</span>
+      </div>
+      <div class="badge-tile reveal" style="--i:2">
+        <span class="badge-ico">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.2 16.8 5v4.3c0 4-2.8 7-6.8 8.5-4-1.5-6.8-4.5-6.8-8.5V5L10 2.2z" stroke="#A51C30" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 10l2.1 2.1 3.9-4.2" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h4>Comprehensive Documentation</h4>
+        <span>New dedicated docs site with API reference, quickstart guides, and architecture overview at lychee-docs.</span>
+      </div>
+      <div class="badge-tile reveal" style="--i:3">
+        <span class="badge-ico">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="#A51C30" stroke-width="1.4"/><path d="M10 6v4M10 13h.01" stroke="#A51C30" stroke-width="1.5" stroke-linecap="round"/><path d="M2 10h16M4.3 4.8c3.2 2.4 8.2 2.4 11.4 0M4.3 15.2c3.2-2.4 8.2-2.4 11.4 0" stroke="#A51C30" stroke-width="1.2"/></svg>
+        </span>
+        <h4>Pipeline Engine v2</h4>
+        <span>DAG-based conditional routing, parallel step execution, and automatic schema propagation between stages.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 8 â€” CTA + FOOTER
+============================================ -->
+<section class="cta" id="cta">
+  <div class="cta-bg"><img src="https://raw.githubusercontent.com/md-mushfiqur-rahim123-official/pic/main/cta.jpg" alt="Abstract gradient texture" loading="lazy" crossorigin="anonymous"></div>
+  <div class="cta-inner">
+    <h2 class="reveal">Let your development get <em>faster</em></h2>
+    <p class="reveal" style="--i:1">A 5-minute local installation â€” no cloud accounts, just your hardware and what Lychee can orchestrate on it. <strong>v0.2.0-alpha</strong> now available.</p>
+    <div class="cta-actions reveal lift" style="--i:2">
+      <a href="https://github.com/MD-Mushfiqur123/lychee/releases" target="_blank" class="btn btn-white">Install Lychee</a>
+      <a href="https://md-mushfiqur123.github.io/lychee-docs/" target="_blank" class="btn btn-glass">Read the Docs</a>
+      <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank" class="btn btn-glass">View on GitHub</a>
+    </div>
+    <span class="cta-note reveal" style="--i:3">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor"/><path d="M4.2 6.7l1.7 1.7 3.2-3.6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Open-source and compiled in Go Â· offline-first architecture
+    </span>
+    <span class="cta-note reveal desktop-badge" style="--i:3; margin-top: 16px;">
+      <a href="https://github.com/MD-Mushfiqur123/lychee-desktop" target="_blank" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: rgba(165,28,48,0.12); border: 1px solid rgba(165,28,48,0.28); border-radius: 100px; padding: 8px 18px; transition: background 0.3s, border-color 0.3s;" onmouseover="this.style.background='rgba(165,28,48,0.22)'; this.style.borderColor='rgba(165,28,48,0.45)';" onmouseout="this.style.background='rgba(165,28,48,0.12)'; this.style.borderColor='rgba(165,28,48,0.28)';">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.2"/><rect x="5" y="10" width="2" height="3" rx=".5" fill="currentColor" opacity=".7"/><rect x="9" y="8" width="2" height="5" rx=".5" fill="currentColor" opacity=".7"/><path d="M5.5 5h5M5.5 7h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span style="font-size: 13px; font-weight: 600;">Lychee Desktop</span>
+        <span style="font-size: 11px; color: rgba(165,28,48,0.85); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">Download Now</span>
+      </a>
+    </span>
+    <span class="cta-note reveal" style="--i:4; margin-top: 12px; font-weight: 500;">
+      Built by Mushfiqur Â· 
+      <a href="https://www.facebook.com/profile.php?id=100090048324727" target="_blank" style="color: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(242,244,236,0.3); transition: text-decoration-color 0.2s;">Facebook</a> Â· 
+      <a href="https://github.com/MD-Mushfiqur123" target="_blank" style="color: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(242,244,236,0.3); transition: text-decoration-color 0.2s;">GitHub</a>
+    </span>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#">
+          <svg width="25" height="25" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+            <circle cx="13" cy="13" r="4" fill="#A51C30"/><path d="M13 1C6.37 1 1 6.37 1 13s5.37 12 12 12 12-5.37 12-12S19.63 1 13 1zm0 21.6c-5.3 0-9.6-4.3-9.6-9.6S7.7 3.4 13 3.4s9.6 4.3 9.6 9.6-4.3 9.6-9.6 9.6z" fill="#f2f4ec"/>
+          </svg>Lychee</a>
+        <p>The Orchestration Layer for Local LLMs â€” Built on Ollama. v0.2.0-alpha Â· 4 SDKs Â· Open source.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Features</h5>
+        <a href="#platform">Model Composer</a>
+        <a href="#platform">Structured Output</a>
+        <a href="#compliance">Memory Store</a>
+        <a href="#platform">Model Router</a>
+      </div>
+      <div class="foot-col">
+        <h5>Resources</h5>
+        <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank">GitHub</a>
+        <a href="#">Research</a>
+        <a href="https://md-mushfiqur123.github.io/lychee-docs/" target="_blank">Documentation</a>
+        <a href="#">Press</a>
+      </div>
+      <div class="foot-col">
+        <h5>Trust</h5>
+        <a href="#">Trust report</a>
+        <a href="#">Privacy policy</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>Â© 2026 Lychee Contributors</span>
+      <span class="status"><span class="dot"></span>All systems steady</span>
+    </div>
+    <div class="view-counter" id="viewCounter" style="text-align:center; justify-content:center; margin-top:16px;">
+      <span>ðŸ‘ï¸ Views: <strong id="viewCount">...</strong></span>
+    </div>
+    <div style="text-align:center; margin-top:6px;">
+      <a href="https://hits.seeyoufarm.com" target="_blank" rel="noopener">
+        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fmd-mushfiqur123.github.io%2Flychee&count_bg=%23121412&title_bg=%23555&icon=&icon_color=%23A51C30&title=views&edge_flat=false" alt="Hits" loading="lazy">
+      </a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================ 
+     OAUTH SIGN IN MODAL
+============================================ -->
+<div class="oauth-modal-overlay" id="oauthModalOverlay" aria-hidden="true">
+  <div class="oauth-modal" role="dialog" aria-modal="true" aria-labelledby="oauthModalTitle">
+    <button class="oauth-modal-close" id="oauthModalClose" aria-label="Close">&times;</button>
+    <h3 id="oauthModalTitle">Sign In to Lychee</h3>
+    <p class="oauth-sub">Connect your account to sync settings across devices.</p>
+    <div class="oauth-buttons">
+      <!-- Google -->
+      <button class="oauth-btn google" data-provider="google">
+        <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Sign in with Google
+      </button>
+
+      <!-- Microsoft -->
+      <button class="oauth-btn microsoft" data-provider="microsoft">
+        <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="1" y="1" width="10" height="10" fill="#F25022"/>
+          <rect x="13" y="1" width="10" height="10" fill="#7FBA00"/>
+          <rect x="1" y="13" width="10" height="10" fill="#00A4EF"/>
+          <rect x="13" y="13" width="10" height="10" fill="#FFB900"/>
+        </svg>
+        Sign in with Microsoft
+      </button>
+
+      <!-- GitHub -->
+      <button class="oauth-btn github" data-provider="github">
+        <svg class="oauth-icon" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        Sign in with GitHub
+      </button>
+    </div>
+    <div class="oauth-divider">Demo Mode</div>
+    <p class="oauth-demo-note">
+      Using placeholder OAuth client IDs. Replace <code>OAUTH_CLIENT_ID</code> with your real client ID before deploying.
+      In demo mode, clicking a provider will simulate a login.
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+<script>
+(function () {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- scroll reveals ---- */
+  var revealables = document.querySelectorAll('.reveal, .cell');
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
+    revealables.forEach(function (el) { io.observe(el); });
+  } else {
+    revealables.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* ---- cell mouse glow ---- */
+  document.querySelectorAll('.cell, .badge-tile').forEach(function(cell) {
+    cell.addEventListener('mousemove', function(e) {
+      var rect = cell.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      cell.style.setProperty('--mouse-x', x + 'px');
+      cell.style.setProperty('--mouse-y', y + 'px');
+    });
+  });
+
+
+  /* ---- animated counters ---- */
+  function animateCount(el) {
+    var target = parseFloat(el.dataset.count);
+    var decimals = parseInt(el.dataset.decimals || '0', 10);
+    var suffix = el.dataset.suffix || '';
+    var prefix = el.dataset.prefix || '';
+    var duration = 1900;
+    var start = null;
+    function frame(ts) {
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 4);
+      var val = target * eased;
+      el.textContent = prefix + val.toFixed(decimals) + suffix;
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  var counters = document.querySelectorAll('[data-count]');
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    var cio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          animateCount(e.target);
+          cio.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.6 });
+    counters.forEach(function (el) { cio.observe(el); });
+  } else {
+    counters.forEach(function (el) {
+      var d = parseInt(el.dataset.decimals || '0', 10);
+      el.textContent = (el.dataset.prefix || '') + parseFloat(el.dataset.count).toFixed(d) + (el.dataset.suffix || '');
+    });
+  }
+
+  /* ---- marquee: duplicate track for seamless loop ---- */
+  var track = document.getElementById('marqueeTrack');
+  if (track) track.innerHTML = track.innerHTML.repeat(10);
+
+  /* ---- nav: glass bar once scrolled ---- */
+  var shell = document.getElementById('navShell');
+  var bgOverlay = document.getElementById('bg-blur-overlay');
+  function navState() { 
+    shell.classList.toggle('scrolled', window.scrollY > 32); 
+    if (bgOverlay) bgOverlay.style.opacity = (window.scrollY > window.innerHeight * 0.25) ? '1' : '0';
+  }
+  window.addEventListener('scroll', navState, { passive: true });
+  navState();
+
+  /* ---- live cipher scramble ---- */
+  var cipher = document.getElementById('cipherText');
+  if (cipher && !reduceMotion) {
+    var glyphs = '0123456789abcdef';
+    setInterval(function () {
+      var out = '';
+      for (var g = 0; g < 4; g++) {
+        for (var c = 0; c < 4; c++) out += glyphs[Math.floor(Math.random() * glyphs.length)];
+        if (g < 3) out += 'Â·';
+      }
+      cipher.textContent = out;
+    }, 160);
+  }
+
+  /* ---- chart micro-detail: volume bars + hour ticks ---- */
+  var bars = document.getElementById('volBars');
+  if (bars) {
+    var hs = [8,11,9,14,10,12,16,13,11,15,18,14,12,17,15,20,16,14,19,22,18,25,21,28,24,31,27,35,30,26,38,33,29,36,31,27,33,29,35,30,26,32,28,24,30,27,23,26];
+    var n = hs.length, x0 = 40, span = 552;
+    for (var i = 0; i < n; i++) {
+      var bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bar.setAttribute('x', (x0 + i * (span / n)).toFixed(1));
+      bar.setAttribute('y', (158 - hs[i]).toFixed(1));
+      bar.setAttribute('width', '2.4');
+      bar.setAttribute('height', hs[i]);
+      bar.setAttribute('rx', '1');
+      var hot = i >= 28 && i <= 30;
+      bar.setAttribute('fill', hot ? 'rgba(165,28,48,0.6)' : 'rgba(242,244,236,0.15)');
+      bars.appendChild(bar);
+    }
+  }
+  var ticksGroup = document.getElementById('hourTicks');
+  if (ticksGroup) {
+    for (var t = 0; t <= 24; t++) {
+      var tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      var tx = (36 + t * (564 / 24)).toFixed(1);
+      var major = t % 6 === 0;
+      tick.setAttribute('x1', tx);
+      tick.setAttribute('x2', tx);
+      tick.setAttribute('y1', '160');
+      tick.setAttribute('y2', major ? '166' : '163.5');
+      tick.setAttribute('stroke', major ? 'rgba(242,244,236,0.4)' : 'rgba(242,244,236,0.18)');
+      tick.setAttribute('stroke-width', '1');
+      ticksGroup.appendChild(tick);
+    }
+  }
+
+  /* ---- hero image: slow fade-in once loaded ---- */
+  var heroBg = document.querySelector('.hero-media img');
+  if (heroBg) {
+    var markHeroLoaded = function () { heroBg.classList.add('loaded'); };
+    if (heroBg.complete && heroBg.naturalWidth) markHeroLoaded();
+    else heroBg.addEventListener('load', markHeroLoaded);
+  }
+
+  /* ---- glass cursor ---- */
+  var gc = document.getElementById('glassCursor');
+  if (gc && !reduceMotion && window.matchMedia('(pointer: fine)').matches) {
+    document.body.classList.add('glass-cursor-on');
+    var gcx = -100, gcy = -100, gctx = -100, gcty = -100, gcs = 1, gcsT = 1, gcRaf = null;
+
+    var trails = [];
+    for (var i = 0; i < 6; i++) {
+      var t = document.createElement('div');
+      t.className = 'cursor-trail';
+      document.body.appendChild(t);
+      trails.push({ el: t, x: -100, y: -100 });
+    }
+
+
+    document.addEventListener('mousemove', function (e) {
+      gctx = e.clientX;
+      gcty = e.clientY;
+      gc.classList.add('visible');
+      if (!gcRaf) gcRaf = requestAnimationFrame(gcFrame);
+      var hot = e.target.closest && e.target.closest('a, button, .btn');
+      gcsT = hot ? 1.55 : 1;
+    }, { passive: true });
+    document.addEventListener('mousedown', function () { gcsT = 0.85; });
+    document.addEventListener('mouseup', function (e) {
+      gcsT = (e.target.closest && e.target.closest('a, button, .btn')) ? 1.55 : 1;
+    });
+    document.documentElement.addEventListener('mouseleave', function () { gc.classList.remove('visible'); });
+    document.documentElement.addEventListener('mouseenter', function () { gc.classList.add('visible'); });
+
+    function gcFrame() {
+      gcx += (gctx - gcx) * 0.22;
+      gcy += (gcty - gcy) * 0.22;
+      gcs += (gcsT - gcs) * 0.18;
+      gc.style.transform = 'translate3d(' + gcx.toFixed(1) + 'px,' + gcy.toFixed(1) + 'px,0) scale(' + gcs.toFixed(3) + ')';
+
+      var speed = Math.sqrt(Math.pow(gctx - gcx, 2) + Math.pow(gcty - gcy, 2));
+      var trailOpacity = Math.min(0.8, speed * 0.08);
+      var tx = gctx, ty = gcty;
+      for (var i = 0; i < trails.length; i++) {
+        trails[i].x += (tx - trails[i].x) * 0.4;
+        trails[i].y += (ty - trails[i].y) * 0.4;
+        trails[i].el.style.transform = 'translate3d(' + trails[i].x.toFixed(1) + 'px,' + trails[i].y.toFixed(1) + 'px,0) scale(' + (1 - i*0.12) + ')';
+        trails[i].el.style.opacity = trailOpacity * (1 - i*0.15);
+        tx = trails[i].x;
+        ty = trails[i].y;
+      }
+
+      var settled = Math.abs(gctx - gcx) < 0.05 && Math.abs(gcty - gcy) < 0.05 && Math.abs(gcsT - gcs) < 0.002 && speed < 0.1;
+      gcRaf = settled ? null : requestAnimationFrame(gcFrame);
+    }
+  }
+
+  /* ---- hero cursor refraction (raw WebGL, no deps) ---- */
+  var glHost = document.getElementById('global-webgl-bg');
+  var glImg = glHost && glHost.querySelector('img');
+  if (glHost && glImg && !reduceMotion && window.matchMedia('(pointer: fine)').matches) {
+    (function () {
+      var canvas = document.createElement('canvas');
+      canvas.className = 'hero-gl';
+      canvas.setAttribute('aria-hidden', 'true');
+      var gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
+      if (!gl) return;
+      glHost.appendChild(canvas);
+
+      function compile(type, src) {
+        var sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
+      }
+      var vs = compile(gl.VERTEX_SHADER,
+        'attribute vec2 p;varying vec2 vUv;void main(){vUv=p*0.5+0.5;gl_Position=vec4(p,0.0,1.0);}');
+      var fs = compile(gl.FRAGMENT_SHADER, [
+        'precision mediump float;',
+        'varying vec2 vUv;',
+        'uniform sampler2D tex;',
+        'uniform vec2 res;',
+        'uniform vec2 imgRes;',
+        'uniform vec2 mouse;',
+        'uniform float time;',
+        'uniform float strength;',
+        'void main(){',
+        '  vec2 uv = vUv;',
+        '  float ra = res.x / res.y;',
+        '  float ia = imgRes.x / imgRes.y;',
+        '  vec2 s = vec2(min(1.0, ra / ia), min(1.0, ia / ra));',
+        '  vec2 cuv = (uv - 0.5) * s + vec2(0.5, 0.5 - 0.1 * (1.0 - s.y));',
+        '  vec2 asp = vec2(ra, 1.0);',
+        '  float d = distance(uv * asp, mouse * asp);',
+        '  float fall = smoothstep(0.8, 0.0, d);',
+        '  vec2 dir = normalize(uv * asp - mouse * asp + vec2(0.0001));',
+        '  float ripple = sin(d * 26.0 - time * 2.2) * 0.004;',
+        '  vec2 off = dir * (fall * fall * 0.005 + ripple * fall) * strength;',
+        '  vec3 col;',
+        '  col.r = texture2D(tex, cuv + off * 1.25).r;',
+        '  col.g = texture2D(tex, cuv + off).g;',
+        '  col.b = texture2D(tex, cuv + off * 0.78).b;',
+        '  gl_FragColor = vec4(col, 1.0);',
+        '}'
+      ].join('\n'));
+      if (!vs || !fs) { canvas.remove(); return; }
+      var prog = gl.createProgram();
+      gl.attachShader(prog, vs);
+      gl.attachShader(prog, fs);
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { canvas.remove(); return; }
+      gl.useProgram(prog);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      var locP = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(locP);
+      gl.vertexAttribPointer(locP, 2, gl.FLOAT, false, 0, 0);
+
+      var uRes = gl.getUniformLocation(prog, 'res');
+      var uImg = gl.getUniformLocation(prog, 'imgRes');
+      var uMouse = gl.getUniformLocation(prog, 'mouse');
+      var uTime = gl.getUniformLocation(prog, 'time');
+      var uStr = gl.getUniformLocation(prog, 'strength');
+
+      var dpr = Math.min(window.devicePixelRatio || 1, 1.0);
+      function resize() {
+        canvas.width = Math.round(canvas.clientWidth * dpr) || 2;
+        canvas.height = Math.round(canvas.clientHeight * dpr) || 2;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      window.addEventListener('resize', resize);
+
+      var mx = 0.5, my = 0.55, tgx = mx, tgy = my, str = 0, strTarget = 0;
+      var raf = null, t0 = null, visible = true, ready = false;
+      var heroEl = document.documentElement;
+
+      heroEl.addEventListener('mousemove', function (e) {
+        var r = canvas.getBoundingClientRect();
+        tgx = (e.clientX - r.left) / r.width;
+        tgy = 1 - (e.clientY - r.top) / r.height;
+        strTarget = 1;
+      });
+      heroEl.addEventListener('mouseleave', function () { strTarget = 0; });
+
+      function frame(ts) {
+        raf = null;
+        if (t0 === null) t0 = ts;
+        mx += (tgx - mx) * 0.07;
+        my += (tgy - my) * 0.07;
+        str += (strTarget - str) * 0.04;
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform2f(uMouse, mx, my);
+        gl.uniform1f(uTime, (ts - t0) / 1000);
+        gl.uniform1f(uStr, str);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        canvas.classList.add('on');
+        if (visible) raf = requestAnimationFrame(frame);
+      }
+
+      /* Removed IO since canvas is global */
+
+      var image = new Image();
+      image.crossOrigin = 'anonymous';
+      image.onload = function () {
+        resize();
+        gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.uniform2f(uImg, image.naturalWidth, image.naturalHeight);
+        ready = true;
+        if (visible && !raf) raf = requestAnimationFrame(frame);
+      };
+      image.onerror = function () { canvas.remove(); };
+      image.src = location.protocol === 'file:'
+        ? 'https://picsum.photos/id/11/2400/1600'
+        : (glImg.currentSrc || glImg.src);
+    })();
+  }
+
+  /* ---- smooth scroll + scroll choreography (GSAP / Lenis) ---- */
+  var hasGsap = !!(window.gsap && window.ScrollTrigger) && !reduceMotion;
+  var heroMedia = document.getElementById('heroMedia');
+
+  if (hasGsap) {
+    gsap.registerPlugin(ScrollTrigger);
+
+    if (window.Lenis) {
+      var lenis = new Lenis({ duration: 1.15 });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+      gsap.ticker.lagSmoothing(0);
+
+      document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          var id = a.getAttribute('href');
+          if (id.length > 1 && document.querySelector(id)) {
+            e.preventDefault();
+            lenis.scrollTo(id, { offset: -64, duration: 1.4 });
+          }
+        });
+      });
+    }
+
+    /* hero: slow drift, content lifts away */
+    gsap.to('#heroMedia', {
+      yPercent: 16, ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+    });
+    gsap.to('.hero-core', {
+      yPercent: -12, opacity: 0.3, ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: '80% top', scrub: true }
+    });
+
+    /* deep parallax on framed nature imagery */
+    function parallaxImg(selector, triggerSel, range) {
+      document.querySelectorAll(selector).forEach(function (img) {
+        var trig = img.closest(triggerSel) || img.parentElement;
+        gsap.fromTo(img,
+          { yPercent: -range, scale: 1.16 },
+          {
+            yPercent: range, scale: 1.16, ease: 'none',
+            scrollTrigger: { trigger: trig, start: 'top bottom', end: 'bottom top', scrub: true }
+          });
+      });
+    }
+    parallaxImg('.split-art img', '.split-art', 9);
+    parallaxImg('.cell-img img', '.cell', 6);
+    parallaxImg('.num-bg img', '.numbers', 10);
+    parallaxImg('.cta-bg img', '.cta', 9);
+    parallaxImg('.q-img img', '.quote-card', 7);
+
+    /* floating glass cards drift against their photo */
+    document.querySelectorAll('.float-card').forEach(function (card) {
+      gsap.fromTo(card, { y: 26 }, {
+        y: -26, ease: 'none',
+        scrollTrigger: { trigger: card.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+      });
+    });
+  } else if (heroMedia && !reduceMotion) {
+    /* fallback parallax without GSAP */
+    var ticking = false;
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        var y = window.scrollY;
+        if (y < window.innerHeight * 1.2) {
+          heroMedia.style.transform = 'translate3d(0,' + y * 0.22 + 'px,0)';
+        }
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+
+  /* ---- typewriter on policy card ---- */
+  var typed = document.getElementById('typedLine');
+  if (typed && !reduceMotion) {
+    var phrases = [
+      'Calibrating policies for you',
+      'Mapping cloud entitlements',
+      'Tightening identity baselines',
+      'Reviewing 1,847 new signals'
+    ];
+    var pi = 0, ci = 0, deleting = false;
+    function tick() {
+      var phrase = phrases[pi];
+      if (!deleting) {
+        ci++;
+        typed.textContent = phrase.slice(0, ci);
+        if (ci === phrase.length) { deleting = true; setTimeout(tick, 2400); return; }
+        setTimeout(tick, 42 + Math.random() * 50);
+      } else {
+        ci--;
+        typed.textContent = phrase.slice(0, ci);
+        if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; setTimeout(tick, 500); return; }
+        setTimeout(tick, 22);
+      }
+    }
+    setTimeout(tick, 2600);
+  }
+  /* ---- localStorage view counter ---- */
+  (function() {
+    var key = 'lychee_page_views';
+    var count = parseInt(localStorage.getItem(key) || '0', 10);
+    count += 1;
+    localStorage.setItem(key, count);
+    var el = document.getElementById('viewCount');
+    if (el) el.textContent = count;
+  })();
+
+  /* =========================================================
+     OAUTH 2.0 SIGN IN HANDLER
+  ========================================================= */
+  (function() {
+    var currentPage = window.location.origin + window.location.pathname;
+
+    /* ---- OAuth Provider Configs (use placeholder IDs â€” replace before prod) ---- */
+    var OAUTH_PROVIDERS = {
+      google: {
+        name: 'Google',
+        authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+        clientId: 'OAUTH_CLIENT_ID_GOOGLE.apps.googleusercontent.com',
+        scope: 'openid profile email',
+        responseType: 'token',
+        extraParams: '&nonce=' + Math.random().toString(36).substring(2)
+      },
+      microsoft: {
+        name: 'Microsoft',
+        authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+        clientId: 'OAUTH_CLIENT_ID_MICROSOFT',
+        scope: 'openid profile User.Read',
+        responseType: 'token',
+        extraParams: '&response_mode=fragment'
+      },
+      github: {
+        name: 'GitHub',
+        authUrl: 'https://github.com/login/oauth/authorize',
+        clientId: 'OAUTH_CLIENT_ID_GITHUB',
+        scope: 'read:user user:email',
+        responseType: 'token',
+        extraParams: ''
+      }
+    };
+
+    /* ---- Build full OAuth redirect URL ---- */
+    function buildOAuthUrl(provider) {
+      var p = OAUTH_PROVIDERS[provider];
+      if (!p) return '#';
+      return p.authUrl +
+        '?client_id=' + encodeURIComponent(p.clientId) +
+        '&redirect_uri=' + encodeURIComponent(currentPage) +
+        '&response_type=' + p.responseType +
+        '&scope=' + encodeURIComponent(p.scope) +
+        p.extraParams;
+    }
+
+    /* ---- Check if user data is stored in sessionStorage ---- */
+    function restoreSession() {
+      var data = sessionStorage.getItem('lychee_oauth_user');
+      if (data) {
+        try {
+          var user = JSON.parse(data);
+          showLoggedIn(user);
+          return true;
+        } catch (e) {}
+      }
+      return false;
+    }
+
+    /* ---- Parse OAuth callback from URL hash (implicit flow) ---- */
+    function handleOAuthCallback() {
+      var hash = window.location.hash;
+      if (!hash) return false;
+
+      var params = {};
+      hash.substring(1).split('&').forEach(function(pair) {
+        var parts = pair.split('=');
+        if (parts.length === 2) {
+          params[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+        }
+      });
+
+      if (params.access_token) {
+        // Real OAuth callback: extract user info from token response
+        // For demo: use a simulated user based on state/provider param
+        var provider = params.provider || 'google';
+        var providerName = OAUTH_PROVIDERS[provider] ? OAUTH_PROVIDERS[provider].name : provider;
+
+        var user = {
+          name: providerName + ' User',
+          email: 'user@' + provider + '.com',
+          provider: provider,
+          avatar: '',
+          token: params.access_token.substring(0, 16) + '...'
+        };
+
+        sessionStorage.setItem('lychee_oauth_user', JSON.stringify(user));
+        showLoggedIn(user);
+
+        // Clean URL
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, currentPage);
+        }
+        return true;
+      }
+      return false;
+    }
+
+    /* ---- Simulate OAuth login (demo mode) ---- */
+    function simulateLogin(provider) {
+      var p = OAUTH_PROVIDERS[provider];
+      if (!p) return;
+
+      var demoUsers = {
+        google:  { name: 'Alex Rivera',    email: 'alex.rivera@gmail.com',      avatar: 'https://i.pravatar.cc/96?img=3' },
+        microsoft:{ name: 'Jordan Lee',    email: 'jordan.lee@outlook.com',     avatar: 'https://i.pravatar.cc/96?img=5' },
+        github:  { name: 'Taylor Chen',    email: 'taylor@github.com',          avatar: 'https://i.pravatar.cc/96?img=8' }
+      };
+
+      var dummy = demoUsers[provider];
+      var user = {
+        name: dummy.name,
+        email: dummy.email,
+        provider: p.name,
+        avatar: dummy.avatar
+      };
+
+      sessionStorage.setItem('lychee_oauth_user', JSON.stringify(user));
+      showLoggedIn(user);
+      closeModal();
+    }
+
+    /* ---- Update nav UI for logged-in state ---- */
+    function showLoggedIn(user) {
+      var signInBtn = document.getElementById('signInBtn');
+      var signOutBtn = document.getElementById('signOutBtn');
+      var greetingEl = document.getElementById('userGreeting');
+
+      if (signInBtn) signInBtn.style.display = 'none';
+      if (greetingEl) {
+        var avatarHtml = user.avatar
+          ? '<img src="' + user.avatar + '" alt="" class="user-avatar" loading="lazy">'
+          : '';
+        greetingEl.innerHTML = avatarHtml + 'Welcome, ' + user.name.split(' ')[0] + '!';
+        greetingEl.style.display = 'inline-flex';
+        greetingEl.style.alignItems = 'center';
+      }
+      if (signOutBtn) signOutBtn.style.display = 'inline-flex';
+    }
+
+    /* ---- Sign out ---- */
+    function signOut() {
+      sessionStorage.removeItem('lychee_oauth_user');
+      var signInBtn = document.getElementById('signInBtn');
+      var signOutBtn = document.getElementById('signOutBtn');
+      var greetingEl = document.getElementById('userGreeting');
+      if (signInBtn) signInBtn.style.display = 'inline-flex';
+      if (signOutBtn) signOutBtn.style.display = 'none';
+      if (greetingEl) greetingEl.style.display = 'none';
+    }
+
+    /* ---- Modal open/close ---- */
+    var overlay = document.getElementById('oauthModalOverlay');
+    var closeBtn = document.getElementById('oauthModalClose');
+
+    function openModal() {
+      if (overlay) {
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeModal() {
+      if (overlay) {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+    }
+
+    /* ---- Wire up events ---- */
+    document.getElementById('signInBtn').addEventListener('click', openModal);
+    document.getElementById('signOutBtn').addEventListener('click', signOut);
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (overlay) {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeModal();
+      });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && overlay && overlay.classList.contains('open')) {
+        closeModal();
+      }
+    });
+
+    // Wire OAuth buttons â€” use placeholder URLs + demo fallback
+    document.querySelectorAll('.oauth-btn[data-provider]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var provider = this.getAttribute('data-provider');
+        var url = buildOAuthUrl(provider);
+
+        // Check if client ID is still a placeholder
+        var clientId = OAUTH_PROVIDERS[provider].clientId;
+        var isPlaceholder = clientId.indexOf('OAUTH_CLIENT_ID') === 0;
+
+        if (isPlaceholder) {
+          // Demo mode: simulate login
+          simulateLogin(provider);
+        } else {
+          // Real OAuth flow: redirect
+          window.location.href = url;
+        }
+      });
+    });
+
+    /* ---- Init: check for callback or restore session ---- */
+    if (!handleOAuthCallback()) {
+      restoreSession();
+    }
+  })();
+
+})();
+</script>
+
+</body>
+</html>

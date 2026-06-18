@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lychee vs Competitors — Local LLM Runtime Comparison</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d2991d;
+    --red: #f85149;
+    --brand: #00d4aa;
+    --brand-dim: rgba(0,212,170,0.1);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 80px 20px 60px;
+    background: linear-gradient(180deg, rgba(0,212,170,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--brand); }
+  .hero p {
+    color: var(--text-dim);
+    font-size: 1.15rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    padding: 32px 20px;
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat .num { font-size: 2rem; font-weight: 700; color: var(--brand); }
+  .stat .label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── Table ── */
+  .table-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  thead th {
+    background: #1c2333;
+    padding: 16px 14px;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  thead th:first-child {
+    color: var(--brand);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding-left: 20px;
+  }
+  thead th.highlight-col {
+    background: var(--brand-dim);
+  }
+  tbody td {
+    padding: 14px 14px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody td:first-child {
+    font-weight: 600;
+    color: var(--text);
+    padding-left: 20px;
+    white-space: nowrap;
+  }
+  tbody td.highlight-col {
+    background: var(--brand-dim);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td {
+    background: rgba(255,255,255,0.02);
+  }
+  tbody tr:hover td.highlight-col {
+    background: rgba(0,212,170,0.14);
+  }
+
+  /* ── Badges ── */
+  .yes { color: var(--green); font-weight: 600; }
+  .no { color: var(--red); }
+  .partial { color: var(--orange); font-weight: 600; }
+  .star-count { color: var(--text-dim); font-size: 0.75rem; margin-left: 6px; }
+  .repo-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.78rem;
+  }
+  .repo-link:hover { text-decoration: underline; }
+
+  /* ── Winner stripe ── */
+  .winner { color: var(--brand); font-weight: 700; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--accent); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .stats-bar { gap: 24px; }
+    .stat .num { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <h1>Lychee <span>vs</span> Competitors</h1>
+  <p>How Lychee stacks up against the top local LLM runtimes — open source, API compatibility, deployment, and developer experience.</p>
+</section>
+
+<!-- ── Stats ── -->
+<div class="stats-bar">
+  <div class="stat"><div class="num">6</div><div class="label">Runtimes Compared</div></div>
+  <div class="stat"><div class="num">10</div><div class="label">Criteria</div></div>
+  <div class="stat"><div class="num">5</div><div class="label">Lychee Wins</div></div>
+  <div class="stat"><div class="num">MIT</div><div class="label">Lychee License</div></div>
+  <div class="stat"><div class="num">Go</div><div class="label">Lychee Language</div></div>
+</div>
+
+<!-- ── Comparison Table ── -->
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Criteria</th>
+      <th class="highlight-col">🟢 Lychee</th>
+      <th>Ollama</th>
+      <th>LM Studio</th>
+      <th>Jan</th>
+      <th>GPT4All</th>
+      <th>LocalAI</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- ── Stars ── -->
+    <tr>
+      <td>⭐ GitHub Stars</td>
+      <td class="highlight-col">
+        14 <span class="star-count">▲ new</span><br>
+        <a class="repo-link" href="https://github.com/MD-Mushfiqur123/lychee" target="_blank">MD-Mushfiqur123/lychee</a>
+      </td>
+      <td>
+        174k<br>
+        <a class="repo-link" href="https://github.com/ollama/ollama" target="_blank">ollama/ollama</a>
+      </td>
+      <td>
+        5.0k <span class="star-count">(CLI)</span><br>
+        <a class="repo-link" href="https://github.com/lmstudio-ai/lms" target="_blank">lmstudio-ai/lms</a>
+      </td>
+      <td>
+        43k<br>
+        <a class="repo-link" href="https://github.com/janhq/jan" target="_blank">janhq/jan</a>
+      </td>
+      <td>
+        77k<br>
+        <a class="repo-link" href="https://github.com/nomic-ai/gpt4all" target="_blank">nomic-ai/gpt4all</a>
+      </td>
+      <td>
+        47k<br>
+        <a class="repo-link" href="https://github.com/mudler/LocalAI" target="_blank">mudler/LocalAI</a>
+      </td>
+    </tr>
+
+    <!-- ── Language ── -->
+    <tr>
+      <td>🔧 Primary Language</td>
+      <td class="highlight-col winner">Go</td>
+      <td>Go</td>
+      <td>TypeScript</td>
+      <td>TypeScript</td>
+      <td>C++</td>
+      <td>Go</td>
+    </tr>
+
+    <!-- ── Open Source ── -->
+    <tr>
+      <td>🔓 Open Source</td>
+      <td class="highlight-col winner"><span class="yes">✅ MIT</span></td>
+      <td><span class="yes">✅ MIT</span></td>
+      <td><span class="partial">⚠️ CLI only (MIT)</span><br><span class="star-count">Desktop app is proprietary</span></td>
+      <td><span class="partial">⚠️ AGPL-3.0</span></td>
+      <td><span class="yes">✅ MIT</span></td>
+      <td><span class="yes">✅ MIT</span></td>
+    </tr>
+
+    <!-- ── OpenAI API ── -->
+    <tr>
+      <td>🔌 OpenAI-compatible API</td>
+      <td class="highlight-col winner"><span class="yes">✅ /v1/chat</span></td>
+      <td><span class="yes">✅ /v1/chat</span></td>
+      <td><span class="yes">✅ /v1/chat</span></td>
+      <td><span class="yes">✅ /v1/chat</span></td>
+      <td><span class="partial">⚠️ Limited</span></td>
+      <td><span class="yes">✅ /v1/chat</span></td>
+    </tr>
+
+    <!-- ── Anthropic API ── -->
+    <tr>
+      <td>🔌 Anthropic Messages API</td>
+      <td class="highlight-col">
+        <span class="yes">✅ /v1/messages</span><br>
+        <span class="star-count">Exclusive feature</span>
+      </td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+    </tr>
+
+    <!-- ── OpenAI Responses API ── -->
+    <tr>
+      <td>🔌 OpenAI Responses API (structured)</td>
+      <td class="highlight-col">
+        <span class="yes">✅ /v1/responses</span><br>
+        <span class="star-count">JSON schema + auto-retry</span>
+      </td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+    </tr>
+
+    <!-- ── HuggingFace ── -->
+    <tr>
+      <td>🤗 HuggingFace Integration</td>
+      <td class="highlight-col">
+        <span class="yes">✅ Native</span><br>
+        <span class="star-count">lychee hf pull</span>
+      </td>
+      <td><span class="no">❌</span></td>
+      <td><span class="partial">⚠️ GGUF only</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="partial">⚠️ Config-based</span></td>
+    </tr>
+
+    <!-- ── CLI ── -->
+    <tr>
+      <td>⌨️ CLI Commands</td>
+      <td class="highlight-col winner"><span class="yes">✅ ~25+</span></td>
+      <td><span class="yes">✅ ~20+</span></td>
+      <td><span class="yes">✅ ~20</span></td>
+      <td><span class="partial">⚠️ Minimal</span></td>
+      <td><span class="partial">⚠️ CLI only</span></td>
+      <td><span class="yes">✅ ~30+</span></td>
+    </tr>
+
+    <!-- ── Docker ── -->
+    <tr>
+      <td>🐳 Docker Support</td>
+      <td class="highlight-col winner"><span class="yes">✅ Official image</span></td>
+      <td><span class="yes">✅ Official image</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="yes">✅ Official image</span></td>
+    </tr>
+
+    <!-- ── Desktop GUI ── -->
+    <tr>
+      <td>🖥️ Desktop GUI</td>
+      <td class="highlight-col">
+        <span class="yes">✅ Embedded Web</span><br>
+        <span class="star-count">Built-in dashboard</span>
+      </td>
+      <td><span class="yes">✅ Native app</span></td>
+      <td><span class="yes">✅ Native app</span><br><span class="star-count">Best-in-class</span></td>
+      <td><span class="yes">✅ Native app</span></td>
+      <td><span class="yes">✅ Native app</span></td>
+      <td><span class="no">❌ None</span><br><span class="star-count">Server only</span></td>
+    </tr>
+
+    <!-- ── Multi-platform ── -->
+    <tr>
+      <td>🌍 Multi-Platform</td>
+      <td class="highlight-col winner"><span class="yes">✅ macOS · Linux · Windows</span></td>
+      <td><span class="yes">✅ macOS · Linux · Windows</span></td>
+      <td><span class="yes">✅ macOS · Linux · Windows</span></td>
+      <td><span class="yes">✅ macOS · Linux · Windows</span></td>
+      <td><span class="yes">✅ macOS · Linux · Windows</span></td>
+      <td><span class="yes">✅ macOS · Linux · Windows</span></td>
+    </tr>
+
+    <!-- ── Model Library ── -->
+    <tr>
+      <td>📦 Model Library</td>
+      <td class="highlight-col">
+        <span class="partial">🟡 Growing</span><br>
+        <span class="star-count">HF pulls + Ollama library</span>
+      </td>
+      <td><span class="yes">✅ Massive</span></td>
+      <td><span class="yes">✅ Large</span></td>
+      <td><span class="yes">✅ Large</span></td>
+      <td><span class="yes">✅ Large</span></td>
+      <td><span class="yes">✅ Large</span></td>
+    </tr>
+
+    <!-- ── go install ── -->
+    <tr>
+      <td>🐹 go install</td>
+      <td class="highlight-col">
+        <span class="yes">✅ 1 command</span><br>
+        <span class="star-count">go install github.com/...</span>
+      </td>
+      <td><span class="yes">✅</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="yes">✅</span></td>
+    </tr>
+
+    <!-- ── Multi-model pipeline ── -->
+    <tr>
+      <td>🔗 Multi-Model Pipeline (DAG)</td>
+      <td class="highlight-col">
+        <span class="yes">✅ Model Composer</span><br>
+        <span class="star-count">Exclusive feature</span>
+      </td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="partial">⚠️ Backend chaining</span></td>
+    </tr>
+
+    <!-- ── Persistent Memory ── -->
+    <tr>
+      <td>🧠 Persistent Conversation Memory</td>
+      <td class="highlight-col">
+        <span class="yes">✅ SQLite + JSON</span><br>
+        <span class="star-count">Exclusive feature</span>
+      </td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+    </tr>
+
+    <!-- ── Agent Sandbox ── -->
+    <tr>
+      <td>🛡️ Agent Sandbox</td>
+      <td class="highlight-col">
+        <span class="yes">✅ Built-in</span><br>
+        <span class="star-count">Exclusive feature</span>
+      </td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+    </tr>
+
+    <!-- ── Multi-instance ── -->
+    <tr>
+      <td>⚖️ Multi-Instance Load Balancing</td>
+      <td class="highlight-col">
+        <span class="yes">✅ Built-in</span><br>
+        <span class="star-count">Exclusive feature</span>
+      </td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+      <td><span class="no">❌</span></td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+
+<!-- ── Key Takeaways ── -->
+<section style="max-width:1200px; margin:0 auto; padding:0 20px 60px;">
+  <h2 style="color:var(--brand); margin-bottom:20px; font-size:1.4rem;">🔍 Key Takeaways</h2>
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:20px;">
+
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:24px; border-left:3px solid var(--brand);">
+      <h3 style="color:var(--brand); margin-bottom:8px;">🥇 Best for Anthropic API Users</h3>
+      <p style="color:var(--text-dim); font-size:0.9rem;">Lychee is the <strong>only</strong> local runtime offering a native Anthropic Messages API (<code>/v1/messages</code>). If your toolchain uses Claude-compatible endpoints, Lychee is your only self-hosted option.</p>
+    </div>
+
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:24px; border-left:3px solid var(--accent);">
+      <h3 style="color:var(--accent); margin-bottom:8px;">🚀 Best for Ecosystem</h3>
+      <p style="color:var(--text-dim); font-size:0.9rem;"><strong>Ollama</strong> dominates with 174k stars and the largest model library. Lychee builds <em>on top of</em> Ollama, so you get Ollama's entire ecosystem plus Lychee's orchestration features.</p>
+    </div>
+
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:24px; border-left:3px solid var(--orange);">
+      <h3 style="color:var(--orange); margin-bottom:8px;">💻 Best for Desktop GUI</h3>
+      <p style="color:var(--text-dim); font-size:0.9rem;"><strong>LM Studio</strong> has the best-in-class desktop experience, but its core is proprietary. <strong>Jan</strong> and <strong>GPT4All</strong> offer open-source alternatives. Lychee provides an embedded web dashboard.</p>
+    </div>
+
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:24px; border-left:3px solid var(--green);">
+      <h3 style="color:var(--green); margin-bottom:8px;">🛠️ Best for DevOps / Server</h3>
+      <p style="color:var(--text-dim); font-size:0.9rem;"><strong>LocalAI</strong> excels as a server-side AI engine with Docker support and broad model support (vision, voice, image). Lychee matches it with Docker + <code>go install</code> + multi-instance load balancing.</p>
+    </div>
+
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:24px; border-left:3px solid var(--brand);">
+      <h3 style="color:var(--brand); margin-bottom:8px;">🧪 Best for AI Agents</h3>
+      <p style="color:var(--text-dim); font-size:0.9rem;">Lychee is the <strong>only</strong> runtime with a built-in Agent Sandbox, multi-model DAG pipelines (Model Composer), and persistent memory — purpose-built for agent frameworks and multi-step reasoning.</p>
+    </div>
+
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:24px; border-left:3px solid var(--text-dim);">
+      <h3 style="color:var(--text-dim); margin-bottom:8px;">⚡ Quick Comparison</h3>
+      <p style="color:var(--text-dim); font-size:0.9rem;">
+        <strong>Ollama:</strong> best ecosystem · <strong>LM Studio:</strong> best UX · <strong>Jan:</strong> open desktop · 
+        <strong>GPT4All:</strong> CPU-friendly · <strong>LocalAI:</strong> multi-modal server · 
+        <strong style="color:var(--brand);">Lychee:</strong> full-featured orchestrator with unique capabilities
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <p>Data collected June 2026 · GitHub star counts are approximate · 
+    <a href="https://github.com/MD-Mushfiqur123/lychee" target="_blank">Lychee on GitHub</a> · 
+    Built with ❤️</p>
+</footer>
+
+</body>
+</html>
